@@ -59,6 +59,16 @@ camera-typeとlcd-typeを指定しない場合はそのボードで一般的な�
 }
 ```
 
+***mbed CLI以外の環境で使用する場合***  
+mbed CLI以外の環境をお使いの場合、``mbed_app.json``の変更は反映されません。  
+``mbed_config.h``に以下のようにマクロを追加してください。  
+```cpp
+#define MBED_CONF_APP_CAMERA                        1    // set by application
+#define MBED_CONF_APP_CAMERA_TYPE                   CAMERA_CVBS             // set by application
+#define MBED_CONF_APP_LCD                           0    // set by application
+#define MBED_CONF_APP_LCD_TYPE                      GR_PEACH_4_3INCH_SHIELD // set by application
+```
+
 ***使い方***  
 ```cpp
 #include "EasyAttach_CameraAndLCD.h"
