@@ -200,6 +200,14 @@ public:
     JPEG_Converter::jpeg_conv_error_t encode(bitmap_buff_info_t* psInputBuff, void* pJpegBuff, size_t* pEncodeSize );
     JPEG_Converter::jpeg_conv_error_t encode(bitmap_buff_info_t* psInputBuff, void* pJpegBuff, size_t* pEncodeSize, encode_options_t* pOptions );
 
+    /** Set encode quality
+     *
+     * @param[in]   uint8_t                  qual           : Encode quality (1 <= qual <= 100)
+     * @return JPEG_CONV_OK              = success
+     *         JPEG_CONV_PARAM_RANGE_ERR = failure (input parameter range error)
+     */
+    JPEG_Converter::jpeg_conv_error_t SetQuality(const uint8_t qual);
+
 private:
 
 };

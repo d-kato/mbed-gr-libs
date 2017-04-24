@@ -174,7 +174,7 @@ errnum_t    R_wrpper_LocalEncodeCallback(const r_ospl_interrupt_t *InterruptSour
             e = E_OTHERS;
             goto fin;
         }
-        if (EncodeCount > EncodeCountMax) {
+        if (EncodeCount >= EncodeCountMax) {
             e = E_OTHERS;
             SetCallback(MBED_JCU_E_JCU_ERR);
             goto fin;

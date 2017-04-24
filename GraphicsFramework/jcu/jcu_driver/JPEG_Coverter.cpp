@@ -54,35 +54,10 @@ Macro definitions
 #define  JPEG_HEADER_LETTER_2       (0xD8u)
 #define  ALPHA_VAL_MAX              (0xFF)
 #define  LOC_KIND_COLOR_FORMAT      (3u)
+#define  QUANTIZATION_TABLE_NUM     (2)
 
 #define  ENC_SIZE_MAX               (1024 * 30)
 #define  MASK_8BYTE                 (0xFFFFFFF8)
-
-    /*[QuantizationTable_Y]*/
-    /* Quality is IJG75 */
-    static const uint8_t  csaDefaultQuantizationTable_Y[QUANTIZATION_TABLE_SIZE] = {
-        8, 6, 5, 8, 12, 20, 26, 31,
-        6, 6, 7, 10, 13, 29, 30, 28,
-        7, 7, 8, 12, 20, 29, 35, 28,
-        7, 9, 11, 15, 26, 44, 40, 31,
-        9, 11, 19, 28, 34, 55, 52, 39,
-        12, 18, 28, 32, 41, 52, 57, 46,
-        25, 32, 39, 44, 52, 61, 60, 51,
-        36, 46, 48, 49, 56, 50, 52, 50
-    };
-
-    /*[QuantizationTable_C]*/
-    /* Quality is IJG75 */
-    static const uint8_t  csaDefaultQuantizationTable_C[QUANTIZATION_TABLE_SIZE] = {
-        9, 9, 12, 24, 50, 50, 50, 50,
-        9, 11, 13, 33, 50, 50, 50, 50,
-        12, 13, 28, 50, 50, 50, 50, 50,
-        24, 33, 50, 50, 50, 50, 50, 50,
-        50, 50, 50, 50, 50, 50, 50, 50,
-        50, 50, 50, 50, 50, 50, 50, 50,
-        50, 50, 50, 50, 50, 50, 50, 50,
-        50, 50, 50, 50, 50, 50, 50, 50
-    };
 
     /*[HuffmanTable_Y_DC]*/
     /* Example written in ITU-T T81 specification */
@@ -138,6 +113,95 @@ static uint32_t             driver_ac_count = 0;
 static bool                 jcu_error_flag;
 static JPEG_CallbackFunc_t* pJPEG_ConverterCallback;
 Semaphore                   jpeg_converter_semaphore(1);
+#if defined(__ICCARM__)
+#pragma data_alignment=32
+static uint8_t QuantizationTable_Y[QUANTIZATION_TABLE_SIZE]@ ".mirrorram";
+#pragma data_alignment=32
+static uint8_t QuantizationTable_C[QUANTIZATION_TABLE_SIZE]@ ".mirrorram";
+#else
+static uint8_t QuantizationTable_Y[QUANTIZATION_TABLE_SIZE]__attribute((section("NC_BSS"),aligned(32)));
+static uint8_t QuantizationTable_C[QUANTIZATION_TABLE_SIZE]__attribute((section("NC_BSS"),aligned(32)));
+#endif
+
+/**************************************************************************//**
+ * @brief       Set encode quality
+ * @param[in]   uint8_t                 qual            : Encode quality (1 <= qual <= 100)
+ * @retval      error code
+******************************************************************************/
+JPEG_Converter::jpeg_conv_error_t
+JPEG_Converter::SetQuality(const uint8_t qual) {
+    uint8_t*            pqs[QUANTIZATION_TABLE_NUM];
+    const uint8_t*      pqb[QUANTIZATION_TABLE_NUM];
+    uint8_t*            ptqs;
+    const uint8_t*      ptqb;
+    int_t temp;
+    int_t i;
+    int_t j;
+
+    /* ITU-T Recommendation T.81 "K.1 Quantization tables for luminance and chrominance components" */
+    /* Table K.1 - Luminance quantization table */
+    const uint8_t quantization_table_y_50[QUANTIZATION_TABLE_SIZE] = {
+        16,  11,  10,  16,  24,  40,  51,  61,
+        12,  12,  14,  19,  26,  58,  60,  55,
+        14,  13,  16,  24,  40,  57,  69,  56,
+        14,  17,  22,  29,  51,  87,  80,  62,
+        18,  22,  37,  56,  68, 109, 103,  77,
+        24,  35,  55,  64,  81, 104, 113,  92,
+        49,  64,  78,  87, 103, 121, 120, 101,
+        72,  92,  95,  98, 112, 100, 103,  99
+    };
+
+    /* Table K.2 - Chrominance quantization table */
+    const uint8_t quantization_table_c_50[QUANTIZATION_TABLE_SIZE] = {
+        17,  18,  24,  47,  99,  99,  99,  99,
+        18,  21,  26,  66,  99,  99,  99,  99,
+        24,  26,  56,  99,  99,  99,  99,  99,
+        47,  66,  99,  99,  99,  99,  99,  99,
+        99,  99,  99,  99,  99,  99,  99,  99,
+        99,  99,  99,  99,  99,  99,  99,  99,
+        99,  99,  99,  99,  99,  99,  99,  99,
+        99,  99,  99,  99,  99,  99,  99,  99
+    };
+
+    if (((int_t)qual < 1) || ((int_t)qual > 100)) {
+        return JPEG_CONV_PARAM_RANGE_ERR;
+    }
+
+    pqs[0] = QuantizationTable_Y;
+    pqb[0] = quantization_table_y_50;
+    pqs[1] = QuantizationTable_C;
+    pqb[1] = quantization_table_c_50;
+
+    for (j = 0; j < QUANTIZATION_TABLE_NUM; j++) {
+        ptqs = pqs[j];
+        ptqb = pqb[j];
+        if ((int_t)qual < 50) {
+            for (i = 0; i < QUANTIZATION_TABLE_SIZE; i++) {
+                temp = (((int_t)ptqb[i] * 100) + (int_t)qual) / (2 * (int_t)qual);
+                if (temp == 0) {
+                    temp = 1;
+                }
+                if (temp > 255) {
+                    temp = 255;
+                }
+                ptqs[i] = (uint8_t)temp;
+            }
+        } else {
+            for (i = 0; i < QUANTIZATION_TABLE_SIZE; i++) {
+                temp = (((200 - (2 * (int_t)qual)) * (int_t)ptqb[i]) + 50) / 100;
+                if (temp == 0) {
+                    temp = 1;
+                }
+                if (temp > 255) {
+                    temp = 255;
+                }
+                ptqs[i] = (uint8_t)temp;
+            }
+        }
+    }
+
+    return JPEG_CONV_OK;
+}
 
 
 /**************************************************************************//**
@@ -164,6 +228,7 @@ JPEG_Converter::JPEG_Converter(void) {
     jcu_errorcode_t           jcu_error;
     
     if (driver_ac_count == 0) {
+        SetQuality(75);
         jcu_error = R_JCU_Initialize(NULL);
         if (jcu_error == JCU_ERROR_OK) {
             driver_ac_count++;
@@ -432,7 +497,7 @@ JPEG_Converter::encode(bitmap_buff_info_t* psInputBuff, void* pJpegBuff, size_t*
         if ( pOptions->quantization_table_Y != NULL ) {
             TableAddress = (uint8_t*)pOptions->quantization_table_Y;
         } else {
-            TableAddress = (uint8_t*)csaDefaultQuantizationTable_Y;
+            TableAddress = (uint8_t*)QuantizationTable_Y;
         }
         jcu_error = R_JCU_SetQuantizationTable( JCU_TABLE_NO_0, (uint8_t*)TableAddress );
         if ( jcu_error != JCU_ERROR_OK ) {
@@ -444,7 +509,7 @@ JPEG_Converter::encode(bitmap_buff_info_t* psInputBuff, void* pJpegBuff, size_t*
         if ( pOptions->quantization_table_C != NULL ) {
             TableAddress = (uint8_t*)pOptions->quantization_table_C;
         } else {
-            TableAddress = (uint8_t*)csaDefaultQuantizationTable_C;
+            TableAddress = (uint8_t*)QuantizationTable_C;
         }
         jcu_error = R_JCU_SetQuantizationTable( JCU_TABLE_NO_1, (uint8_t*)TableAddress );
         if ( jcu_error != JCU_ERROR_OK ) {
