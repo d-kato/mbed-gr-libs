@@ -151,9 +151,9 @@ void dma_recv_func() {
 //通常メモリに配置 キャッシュ制御を行うメモリは必ず32byteにアライン、32byteの倍数にする
 #if defined(__ICCARM__)
 #pragma data_alignment=32
-static uint8_t audio_write_buff[64]
+static uint8_t buf[64];
 #else
-static uint8_t audio_write_buff[64]__attribute((aligned(32)));
+static uint8_t buf[64]__attribute((aligned(32)));
 #endif
 
 void dma_send_func() {
