@@ -2,6 +2,9 @@
 * @file          SdUsbConnect.h
 * @brief         
 ******************************************************************************/
+#ifndef SD_USB_CONNECT_H
+#define SD_USB_CONNECT_H
+
 #include "mbed.h"
 #include "FATFileSystem.h"
 #include "SDBlockDevice_GRBoard.h"
@@ -69,3 +72,5 @@ private:
     USBHostMSD usb;
     storage_type_t storage_type;
 };
+
+#endif

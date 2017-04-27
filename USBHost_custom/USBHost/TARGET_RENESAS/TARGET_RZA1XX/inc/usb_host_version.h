@@ -26,7 +26,10 @@
 * $Date:: 2014-07-09 16:29:19 +0900#$
 * Description  : RZ/A1H R7S72100 USB Sample Program
 *******************************************************************************/
+#ifndef USB_HOST_VERSION_H
+#define USB_HOST_VERSION_H
 
 #define USB_HOST_LOCAL_Rev      "VER080_140709"
 
+#endif
 /* End of File */

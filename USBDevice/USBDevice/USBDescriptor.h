@@ -16,6 +16,9 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef USBDESCRIPTOR_H
+#define USBDESCRIPTOR_H
+
 /* Standard descriptor types */
 #define DEVICE_DESCRIPTOR        (1)
 #define CONFIGURATION_DESCRIPTOR (2)
@@ -72,3 +75,5 @@
 #define E_DATA                  (0x00)
 #define E_FEEDBACK              (0x10)
 #define E_IMPLICIT_FEEDBACK     (0x20)
+
+#endif
