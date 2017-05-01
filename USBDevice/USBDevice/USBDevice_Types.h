@@ -20,16 +20,36 @@
 #define USBDEVICE_TYPES_H
 
 /* Standard requests */
+#ifndef GET_STATUS
 #define GET_STATUS        (0)
+#endif
+#ifndef CLEAR_FEATURE
 #define CLEAR_FEATURE     (1)
+#endif
+#ifndef SET_FEATURE
 #define SET_FEATURE       (3)
+#endif
+#ifndef SET_ADDRESS
 #define SET_ADDRESS       (5)
+#endif
+#ifndef GET_DESCRIPTOR
 #define GET_DESCRIPTOR    (6)
+#endif
+#ifndef SET_DESCRIPTOR
 #define SET_DESCRIPTOR    (7)
+#endif
+#ifndef GET_CONFIGURATION
 #define GET_CONFIGURATION (8)
+#endif
+#ifndef SET_CONFIGURATION
 #define SET_CONFIGURATION (9)
+#endif
+#ifndef GET_INTERFACE
 #define GET_INTERFACE     (10)
+#endif
+#ifndef SET_INTERFACE
 #define SET_INTERFACE     (11)
+#endif
 
 /* bmRequestType.dataTransferDirection */
 #define HOST_TO_DEVICE (0)

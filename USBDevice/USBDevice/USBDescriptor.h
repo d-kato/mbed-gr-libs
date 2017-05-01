@@ -28,10 +28,18 @@
 #define QUALIFIER_DESCRIPTOR     (6)
 
 /* Standard descriptor lengths */
+#ifndef DEVICE_DESCRIPTOR_LENGTH
 #define DEVICE_DESCRIPTOR_LENGTH        (0x12)
+#endif
+#ifndef CONFIGURATION_DESCRIPTOR_LENGTH
 #define CONFIGURATION_DESCRIPTOR_LENGTH (0x09)
+#endif
+#ifndef INTERFACE_DESCRIPTOR_LENGTH
 #define INTERFACE_DESCRIPTOR_LENGTH     (0x09)
+#endif
+#ifndef ENDPOINT_DESCRIPTOR_LENGTH
 #define ENDPOINT_DESCRIPTOR_LENGTH      (0x07)
+#endif
 
 
 /*string offset*/

@@ -125,15 +125,29 @@ enum ENDPOINT_TYPE {
 #define  USB_RECIPIENT_ENDPOINT     0x02
 
 // -------------- USB Standard Requests  --------------
+#ifndef  SET_ADDRESS
 #define  SET_ADDRESS                0x05
+#endif
+#ifndef  GET_DESCRIPTOR
 #define  GET_DESCRIPTOR             0x06
+#endif
+#ifndef  SET_CONFIGURATION
 #define  SET_CONFIGURATION          0x09
+#endif
+#ifndef  SET_INTERFACE
 #define  SET_INTERFACE              0x0b
+#endif
+#ifndef  CLEAR_FEATURE
 #define  CLEAR_FEATURE              0x01
+#endif
 
 // -------------- USB Descriptor Length  --------------
+#ifndef DEVICE_DESCRIPTOR_LENGTH
 #define DEVICE_DESCRIPTOR_LENGTH            0x12
+#endif
+#ifndef CONFIGURATION_DESCRIPTOR_LENGTH
 #define CONFIGURATION_DESCRIPTOR_LENGTH     0x09
+#endif
 
 // ------------ HostController Transfer Descriptor ------------
 typedef struct hcTd {
