@@ -57,9 +57,15 @@ public:
     *
     */
     USBSerial(uint16_t vendor_id = 0x1f00, uint16_t product_id = 0x2012, uint16_t product_release = 0x0001, bool connect_blocking = true): USBCDC(vendor_id, product_id, product_release, connect_blocking){
+        p_circ_buf = new CircBuffer<uint8_t,(MAX_PACKET_SIZE_EPBULK * 3)>;
+        p_wk_buf = new uint8_t[MAX_PACKET_SIZE_EPBULK + 1];
         settingsChangedCallback = 0;
     };
 
+    virtual ~USBSerial() {
+        delete p_circ_buf;
+        delete [] p_wk_buf;
+    }
 
     /**
     * Send a character. You can use puts, printf.
@@ -81,7 +87,7 @@ public:
     *
     * @returns the number of bytes available
     */
-    uint8_t available();
+    uint16_t available();
 
     /** Determine if there is a character available to read
      *
@@ -154,7 +160,8 @@ protected:
 
 private:
     FunctionPointer rx;
-    CircBuffer<uint8_t,128> buf;
+    CircBuffer<uint8_t,(MAX_PACKET_SIZE_EPBULK * 3)> * p_circ_buf;
+    uint8_t * p_wk_buf;
     void (*settingsChangedCallback)(int baud, int bits, int parity, int stop);
 };
 

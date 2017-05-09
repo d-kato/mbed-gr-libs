@@ -20,40 +20,37 @@
 #include "USBSerial.h"
 
 int USBSerial::_putc(int c) {
-    if (!terminal_connected)
+    if (!terminal_connected) {
         return 0;
+    }
     send((uint8_t *)&c, 1);
     return 1;
 }
 
 int USBSerial::_getc() {
     uint8_t c = 0;
-    while (buf.isEmpty());
-    buf.dequeue(&c);
+    while (p_circ_buf->isEmpty());
+    p_circ_buf->dequeue(&c);
     return c;
 }
 
-
 bool USBSerial::writeBlock(uint8_t * buf, uint16_t size) {
-    if(size > MAX_PACKET_SIZE_EPBULK) {
+    if (size > MAX_PACKET_SIZE_EPBULK) {
         return false;
     }
-    if(!send(buf, size)) {
+    if (!send(buf, size)) {
         return false;
     }
     return true;
 }
 
-
-
 bool USBSerial::EPBULK_OUT_callback() {
-    uint8_t c[65];
     uint32_t size = 0;
 
     //we read the packet received and put it on the circular buffer
-    readEP(c, &size);
+    readEP(p_wk_buf, &size);
     for (uint32_t i = 0; i < size; i++) {
-        buf.queue(c[i]);
+        p_circ_buf->queue(p_wk_buf[i]);
     }
 
     //call a potential handler
@@ -62,6 +59,6 @@ bool USBSerial::EPBULK_OUT_callback() {
     return true;
 }
 
-uint8_t USBSerial::available() {
-    return buf.available();
+uint16_t USBSerial::available() {
+    return p_circ_buf->available();
 }
