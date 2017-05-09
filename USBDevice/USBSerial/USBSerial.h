@@ -56,8 +56,8 @@ public:
     * @param connect_blocking define if the connection must be blocked if USB not plugged in
     *
     */
-    USBSerial(uint16_t vendor_id = 0x1f00, uint16_t product_id = 0x2012, uint16_t product_release = 0x0001, bool connect_blocking = true): USBCDC(vendor_id, product_id, product_release, connect_blocking){
-        p_circ_buf = new CircBuffer<uint8_t,(MAX_PACKET_SIZE_EPBULK * 3)>;
+    USBSerial(uint16_t vendor_id = 0x1f00, uint16_t product_id = 0x2012, uint16_t product_release = 0x0001, bool connect_blocking = true, uint32_t buf_size = (MAX_PACKET_SIZE_EPBULK * 2)): USBCDC(vendor_id, product_id, product_release, connect_blocking){
+        p_circ_buf = new CircBuffer<uint8_t>(buf_size);
         p_wk_buf = new uint8_t[MAX_PACKET_SIZE_EPBULK + 1];
         settingsChangedCallback = 0;
     };
@@ -160,7 +160,7 @@ protected:
 
 private:
     FunctionPointer rx;
-    CircBuffer<uint8_t,(MAX_PACKET_SIZE_EPBULK * 3)> * p_circ_buf;
+    CircBuffer<uint8_t> * p_circ_buf;
     uint8_t * p_wk_buf;
     void (*settingsChangedCallback)(int baud, int bits, int parity, int stop);
 };

@@ -19,45 +19,52 @@
 #ifndef CIRCBUFFER_H
 #define CIRCBUFFER_H
 
-template <class T, int Size>
+template <class T>
 class CircBuffer {
 public:
-    CircBuffer():write(0), read(0){}
+    CircBuffer(uint32_t buf_size):write(0), read(0), size(buf_size + 1) {
+        _buf = new T [size];
+    }
+
+    ~CircBuffer() {
+        delete [] _buf;
+    }
+
     bool isFull() {
         return ((write + 1) % size == read);
-    };
+    }
 
     bool isEmpty() {
         return (read == write);
-    };
+    }
 
     void queue(T k) {
         if (isFull()) {
             read++;
             read %= size;
         }
-        buf[write++] = k;
+        _buf[write++] = k;
         write %= size;
     }
 
     uint16_t available() {
         return (write >= read) ? write - read : size - read + write;
-    };
+    }
 
     bool dequeue(T * c) {
         bool empty = isEmpty();
         if (!empty) {
-            *c = buf[read++];
+            *c = _buf[read++];
             read %= size;
         }
         return(!empty);
-    };
+    }
 
 private:
     volatile uint16_t write;
     volatile uint16_t read;
-    static const int size = Size+1;  //a modern optimizer should be able to remove this so it uses no ram.
-    T buf[Size+1];
+    int size;
+    T * _buf;
 };
 
 #endif
