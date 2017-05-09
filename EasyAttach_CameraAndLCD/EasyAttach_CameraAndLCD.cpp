@@ -129,6 +129,8 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     }
   #elif MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV7725
     /* OV7725 camera input config */
+    OV7725_config::Initialise();
+
     ext_in_config.inp_format     = DisplayBase::VIDEO_EXTIN_FORMAT_BT601; /* BT601 8bit YCbCr format */
     ext_in_config.inp_pxd_edge   = DisplayBase::EDGE_RISING;              /* Clock edge select for capturing data          */
     ext_in_config.inp_vs_edge    = DisplayBase::EDGE_RISING;              /* Clock edge select for capturing Vsync signals */
@@ -136,11 +138,11 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     ext_in_config.inp_endian_on  = DisplayBase::OFF;                      /* External input bit endian change on/off       */
     ext_in_config.inp_swap_on    = DisplayBase::OFF;                      /* External input B/R signal swap on/off         */
     ext_in_config.inp_vs_inv     = DisplayBase::SIG_POL_NOT_INVERTED;     /* External input DV_VSYNC inversion control     */
-    ext_in_config.inp_hs_inv     = DisplayBase::SIG_POL_INVERTED;         /* External input DV_HSYNC inversion control     */
+    ext_in_config.inp_hs_inv     = DisplayBase::SIG_POL_NOT_INVERTED;     /* External input DV_HSYNC inversion control     */
     ext_in_config.inp_f525_625   = DisplayBase::EXTIN_LINE_525;           /* Number of lines for BT.656 external input */
     ext_in_config.inp_h_pos      = DisplayBase::EXTIN_H_POS_YCBYCR;       /* Y/Cb/Y/Cr data string start timing to Hsync reference */
-    ext_in_config.cap_vs_pos     = 6;                                     /* Capture start position from Vsync */
-    ext_in_config.cap_hs_pos     = 136;                                   /* Capture start position form Hsync */
+    ext_in_config.cap_vs_pos     = 4+20;                                  /* Capture start position from Vsync */
+    ext_in_config.cap_hs_pos     = 68;                                    /* Capture start position form Hsync */
     if (cap_width != 0) {
         ext_in_config.cap_width  = cap_width;                             /* Capture width */
     } else {
@@ -149,8 +151,7 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     if (cap_height != 0) {
         ext_in_config.cap_height = cap_height;                            /* Capture heigh */
     } else {
-        ext_in_config.cap_height = 472u;                                  /* Capture height Max 472[line]
-                                                                             Due to CMOS(OV7725) output signal timing and VDC5 specification */
+        ext_in_config.cap_height = 480;                                   /* Capture height Max */
     }
   #else
     #error "No camera chosen. Please add 'config.camera-type.value' to your mbed_app.json (see README.md for more information)."

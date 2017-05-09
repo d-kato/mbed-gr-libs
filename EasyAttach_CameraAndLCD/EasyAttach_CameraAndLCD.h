@@ -22,6 +22,10 @@
   #if (MBED_CONF_APP_CAMERA_TYPE == CAMERA_CVBS) && defined(TARGET_GR_LYCHEE)
     #error "MBED_CONF_APP_CAMERA_TYPE is not supported in this target."
   #endif
+
+  #if MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV7725
+    #include "OV7725_config.h"
+  #endif
 #endif
 
 // lcd
