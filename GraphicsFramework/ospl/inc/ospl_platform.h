@@ -21,7 +21,7 @@
 * Copyright (C) 2012 - 2015 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /**
-* @file  platform.h
+* @file  ospl_platform.h
 * @brief   Header files of FIT BSP.
 *
 * $Module: OSPL $ $PublicVersion: 0.90 $ (=R_OSPL_VERSION)
@@ -29,8 +29,8 @@
 * $Date:: 2014-04-15 21:38:18 +0900#$
 */
 
-#ifndef PLATFORM_H
-#define PLATFORM_H
+#ifndef OSPL_PLATFORM_H
+#define OSPL_PLATFORM_H
 
 
 /******************************************************************************
@@ -73,5 +73,5 @@ Functions Prototypes
 }  /* extern "C" */
 #endif /* __cplusplus */
 
-#endif /* PLATFORM_H */
+#endif /* OSPL_PLATFORM_H */
 

@@ -37,7 +37,7 @@
 Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
 #include "Project_Config.h"
-#include "platform.h"
+#include "ospl_platform.h"
 #include "r_ospl_typedef.h"
 #include "r_multi_compiler_typedef.h"
 #include "locking.h"
