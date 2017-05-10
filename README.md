@@ -193,3 +193,7 @@ mbed OSではオフィシャルのUSBホスト機能はまだ実装されてい�
 
 ## USBファンクション
 詳細は[USBDevice](https://developer.mbed.org/handbook/USBDevice)を参照ください。  
+
+## ESP32 ATコマンド用ライブラリ
+``ESP32Interfaceクラス``を使うことで、WiFi通信を行うことができます。  
+詳細は[TCPSocketWiFi_Example_for_ESP32](https://github.com/d-kato/TCPSocketWiFi_Example_for_ESP32)を参照ください。  
