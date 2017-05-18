@@ -18,7 +18,7 @@ public:
      * @param debug     Enable debugging
      */
     ESP32Interface(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false) :
-      wifi_en(en), wifi_io0(io0), ESP8266Interface(tx, rx, debug), chip_reset_done(false) {}
+      ESP8266Interface(tx, rx, debug), wifi_en(en), wifi_io0(io0), chip_reset_done(false) {}
 
     /** ESP32 chip reset
      *
