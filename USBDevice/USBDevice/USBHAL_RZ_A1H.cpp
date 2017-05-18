@@ -269,6 +269,9 @@ extern "C" {
         }
         /* Three dummy reads for clearing interrupt requests */
         dumy_sts = USB20X.BRDYSTS;
+#if(1) /* mbed */
+        (void)dumy_sts;
+#endif
     }
 }
 
@@ -372,6 +375,9 @@ extern "C" {
         }
         /* Three dummy reads for clearing interrupt requests */
         dumy_sts = USB20X.BRDYSTS;
+#if(1) /* mbed */
+        (void)dumy_sts;
+#endif
     }
 }
 
@@ -398,6 +404,9 @@ extern "C" {
 
         /* Three dummy reads for clearing interrupt requests */
         dumy_sts = USB20X.NRDYSTS;
+#if(1) /* mbed */
+        (void)dumy_sts;
+#endif
     }
 }
 
@@ -525,6 +534,9 @@ extern "C" {
 
         /* Three dummy reads for clearing interrupt requests */
         dumy_sts = USB20X.NRDYSTS;
+#if(1) /* mbed */
+        (void)dumy_sts;
+#endif
     }
 }
 
@@ -556,6 +568,9 @@ extern "C" {
 
         /* Three dummy reads for clearing interrupt requests */
         dumy_sts = USB20X.BEMPSTS;
+#if(1) /* mbed */
+        (void)dumy_sts;
+#endif
     }
 }
 
@@ -643,6 +658,9 @@ extern "C" {
 
         /* Three dummy reads for clearing interrupt requests */
         dumy_sts = USB20X.BEMPSTS;
+#if(1) /* mbed */
+        (void)dumy_sts;
+#endif
     }
 }
 
@@ -754,6 +772,7 @@ USBHAL::USBHAL(void)
 #endif
     volatile uint8_t    dummy8;
     dummy8 = CPG.STBCR7;
+    (void)dummy8;
 
     {
 /******************************************************************************
@@ -1416,6 +1435,9 @@ void USBHAL::usbisr(void)
                 dumy_sts = USB20X.INTSTS0;
                 dumy_sts = USB20X.INTSTS0;
                 dumy_sts = USB20X.INTSTS0;
+#if(1) /* mbed */
+                (void)dumy_sts;
+#endif
                 return;
             }
         }
@@ -1489,6 +1511,9 @@ void USBHAL::usbisr(void)
     /* Three dummy reads for cleearing interrupt requests */
     dumy_sts = USB20X.INTSTS0;
     dumy_sts = USB20X.INTSTS1;
+#if(1) /* mbed */
+    (void)dumy_sts;
+#endif
 }
 
 /*************************************************************************/

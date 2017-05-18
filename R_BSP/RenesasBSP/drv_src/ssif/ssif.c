@@ -312,6 +312,9 @@ int_t SSIF_EnableChannel(ssif_info_ch_t* const p_info_ch)
                 CPGSTBCR11 &= (uint8_t)~((uint8_t)gb_cpg_stbcr_bit[ssif_ch]);
                 /* <-IPA R2.4.2 */
                 dummy_buf = CPGSTBCR11;
+#if(1) /* mbed */
+                (void)dummy_buf;
+#endif
 
                 if (0 == was_masked)
                 {

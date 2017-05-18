@@ -183,7 +183,11 @@ static void* R_SSIF_InitOne(const int_t channel, const void* const config_data, 
     {
         ercd = EFAULT;
     }
+#if(1) /* mbed */
+    else if ((uint32_t)channel >= SSIF_NUM_CHANS)
+#else
     else if (channel >= SSIF_NUM_CHANS)
+#endif
     {
         ercd = EFAULT;
     }
@@ -231,7 +235,11 @@ static int_t R_SSIF_UnInitOne(const int_t channel, const void* const driver_inst
     {
         ercd = EFAULT;
     }
+#if(1) /* mbed */
+    else if ((uint32_t)channel >= SSIF_NUM_CHANS)
+#else
     else if (channel >= SSIF_NUM_CHANS)
+#endif
     {
         ercd = EFAULT;
     }

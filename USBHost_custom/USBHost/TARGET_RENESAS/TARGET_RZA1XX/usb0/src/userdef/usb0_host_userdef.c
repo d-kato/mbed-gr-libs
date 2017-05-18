@@ -176,7 +176,11 @@ void Userdef_USB_usb0_host_delay_xms (uint32_t msec)
 *******************************************************************************/
 void Userdef_USB_usb0_host_delay_10us (uint32_t usec)
 {
+#if(1) /* ohci_wrapp */
+    volatile uint32_t i;
+#else
     volatile int i;
+#endif
 
     /* Wait 10us (Please change for your MCU) */
     for (i = 0; i < usec; ++i)
@@ -202,6 +206,9 @@ static void Userdef_USB_usb0_host_delay_10us_2 (void)
     {
         tmp = DUMMY_ACCESS;
     }
+#if(1) /* mbed */
+    (void)tmp;
+#endif
 }
 
 /*******************************************************************************
@@ -213,12 +220,18 @@ static void Userdef_USB_usb0_host_delay_10us_2 (void)
 *******************************************************************************/
 void Userdef_USB_usb0_host_delay_500ns (void)
 {
+#if(1) /* ohci_wrapp */
+#else
     volatile int i;
+#endif
     volatile unsigned long tmp;
 
     /* Wait 500ns (Please change for your MCU) */
     /* Wait 500ns I clock 266MHz */
     tmp = DUMMY_ACCESS;
+#if(1) /* mbed */
+    (void)tmp;
+#endif
 }
 
 /*******************************************************************************

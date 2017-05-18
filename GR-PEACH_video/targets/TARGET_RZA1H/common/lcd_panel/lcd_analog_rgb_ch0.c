@@ -112,6 +112,9 @@ void GRAPHICS_SetLcdPanel_Ch0 (void)
     GPIO.PMC10      = (uint16_t)reg_data;
     reg_data        = (uint32_t)GPIO.PMC10;
     dummy_read      = reg_data;
+#if(1) /* mbed */
+    (void)dummy_read; /* unused */
+#endif
     /* PFCAE10, PFCE10, PFC10 ... 5th alternative function
        PIPC10, PMC10
        b15:b0   : P10_15 ~ P10_0 */

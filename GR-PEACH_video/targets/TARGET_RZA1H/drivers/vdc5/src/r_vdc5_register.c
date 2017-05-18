@@ -2999,6 +2999,9 @@ static void SetRwProcAbility_Write_0 (const vdc5_channel_t ch, const vdc5_onoff_
         *(scaler->scl1_pbuf_cnt) &= (uint32_t)~VDC5_REG_BIT16;
         reg_data    = *(scaler->scl1_pbuf_cnt);
         dummy_read  = reg_data;
+#if(1) /* mbed */
+        (void)dummy_read; /* unused */
+#endif
 
         VDC5_ShrdPrmSetRwProcEnable(ch, VDC5_LAYER_ID_0_WR);
     }
@@ -3034,6 +3037,9 @@ static void SetRwProcAbility_Write_1 (const vdc5_channel_t ch, const vdc5_onoff_
         *(scaler->scl1_pbuf_cnt) &= (uint32_t)~VDC5_REG_BIT16;
         reg_data    = *(scaler->scl1_pbuf_cnt);
         dummy_read  = reg_data;
+#if(1) /* mbed */
+        (void)dummy_read; /* unused */
+#endif
 
         VDC5_ShrdPrmSetRwProcEnable(ch, VDC5_LAYER_ID_1_WR);
     }

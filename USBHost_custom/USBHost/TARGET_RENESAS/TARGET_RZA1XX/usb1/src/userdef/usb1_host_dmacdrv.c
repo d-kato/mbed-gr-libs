@@ -293,6 +293,9 @@ int32_t usb1_host_DMAC3_Open (uint32_t req)
         dummy = RZA_IO_RegRead_32(&DMAC3.CHCTRL_n,
                                 DMAC3_CHCTRL_n_SWRST_SHIFT,
                                 DMAC3_CHCTRL_n_SWRST);
+#if(1) /* mbed */
+        (void)dummy;
+#endif
         /* Enable DMA transfer */
         RZA_IO_RegWrite_32(&DMAC3.CHCTRL_n,
                             1,
@@ -593,6 +596,9 @@ int32_t usb1_host_DMAC4_Open (uint32_t req)
         dummy = RZA_IO_RegRead_32(&DMAC4.CHCTRL_n,
                                 DMAC4_CHCTRL_n_SWRST_SHIFT,
                                 DMAC4_CHCTRL_n_SWRST);
+#if(1) /* mbed */
+        (void)dummy;
+#endif
         /* Enable DMA transfer */
         RZA_IO_RegWrite_32(&DMAC4.CHCTRL_n,
                             1,

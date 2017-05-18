@@ -756,7 +756,11 @@ End of function R_SCUX_AiHandlerProcess
 static void R_SCUX_ErrHandlerProcess(scux_info_ch_t * const p_scux_info_ch, const int_t ercd)
 {
     int_t retval;
+#if(1) /* mbed */
+    int32_t dma_retval;
+#else
     int_t dma_retval;
+#endif
     scux_stat_ch_t old_stat;
     uint32_t tx_remain_size = 0;
     uint32_t rx_remain_size = 0;

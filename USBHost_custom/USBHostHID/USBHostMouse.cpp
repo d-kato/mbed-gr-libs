@@ -71,7 +71,7 @@ bool USBHostMouse::connect() {
 
                 int_in->attach(this, &USBHostMouse::rxHandler);
                 len_listen = int_in->getSize();
-                if (len_listen > sizeof(report)) {
+                if ((uint32_t)len_listen > sizeof(report)) {
                     len_listen = sizeof(report);
                 }
                 host->interruptRead(dev, int_in, report, len_listen, false);
@@ -114,7 +114,7 @@ void USBHostMouse::rxHandler() {
     y = report[2];
     z = report[3];
 
-    if (len_listen > sizeof(report)) {
+    if ((uint32_t)len_listen > sizeof(report)) {
         len_listen = sizeof(report);
     }
 

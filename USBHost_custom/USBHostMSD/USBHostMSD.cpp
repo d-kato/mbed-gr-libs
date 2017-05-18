@@ -143,7 +143,7 @@ int USBHostMSD::readCapacity() {
     if (status == 0) {
         blockCount = (result[0] << 24) | (result[1] << 16) | (result[2] << 8) | result[3];
         blockSize = (result[4] << 24) | (result[5] << 16) | (result[6] << 8) | result[7];
-        USB_INFO("MSD [dev: %p] - blockCount: %lld, blockSize: %d, Capacity: %lld\r\n", dev, blockCount, blockSize, blockCount*blockSize);
+        USB_INFO("MSD [dev: %p] - blockCount: %ld, blockSize: %d, Capacity: %ld\r\n", dev, blockCount, blockSize, blockCount*blockSize);
     }
     return status;
 }

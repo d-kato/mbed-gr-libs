@@ -77,9 +77,8 @@ extern "C" {
  * otherwise the buffered file functions fopen() etc. will not work.
  */
 #if(1) /* mbed */
-#define O_ACCMODE    7
-
 #if defined(__ARMCC_VERSION) || defined(__ICCARM__)
+#    define O_ACCMODE 7
 #    define O_RDONLY 0
 #    define O_WRONLY 1
 #    define O_RDWR   2

@@ -24,7 +24,6 @@
 #include "cmsis_os.h"
 #include "r_typedefs.h"
 #include "r_errno.h"
-#include "misratypes.h"
 #include "aioif.h"
 #include "R_BSP_Aio.h"
 

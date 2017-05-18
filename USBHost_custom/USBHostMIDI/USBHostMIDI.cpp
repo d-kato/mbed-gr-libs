@@ -291,31 +291,31 @@ bool USBHostMIDI::sendSystemExclusive(uint8_t *buffer, int length) {
 }
 
 bool USBHostMIDI::sendNoteOff(uint8_t channel, uint8_t note, uint8_t velocity) {
-    return sendMidiBuffer(8, channel & 0xf | 0x80, note & 0x7f, velocity & 0x7f);
+    return sendMidiBuffer(8, (channel & 0xf) | 0x80, note & 0x7f, velocity & 0x7f);
 }
 
 bool USBHostMIDI::sendNoteOn(uint8_t channel, uint8_t note, uint8_t velocity) {
-    return sendMidiBuffer(9, channel & 0xf | 0x90, note & 0x7f, velocity & 0x7f);
+    return sendMidiBuffer(9, (channel & 0xf) | 0x90, note & 0x7f, velocity & 0x7f);
 }
 
 bool USBHostMIDI::sendPolyKeyPress(uint8_t channel, uint8_t note, uint8_t pressure) {
-    return sendMidiBuffer(10, channel & 0xf | 0xa0, note & 0x7f, pressure & 0x7f);
+    return sendMidiBuffer(10, (channel & 0xf) | 0xa0, note & 0x7f, pressure & 0x7f);
 }
 
 bool USBHostMIDI::sendControlChange(uint8_t channel, uint8_t key, uint8_t value) {
-    return sendMidiBuffer(11, channel & 0xf | 0xb0, key & 0x7f, value & 0x7f);
+    return sendMidiBuffer(11, (channel & 0xf) | 0xb0, key & 0x7f, value & 0x7f);
 }
 
 bool USBHostMIDI::sendProgramChange(uint8_t channel, uint8_t program) {
-    return sendMidiBuffer(12, channel & 0xf | 0xc0, program & 0x7f, 0);
+    return sendMidiBuffer(12, (channel & 0xf) | 0xc0, program & 0x7f, 0);
 }
 
 bool USBHostMIDI::sendChannelPressure(uint8_t channel, uint8_t pressure) {
-    return sendMidiBuffer(13, channel & 0xf | 0xd0, pressure & 0x7f, 0);
+    return sendMidiBuffer(13, (channel & 0xf) | 0xd0, pressure & 0x7f, 0);
 }
 
 bool USBHostMIDI::sendPitchBend(uint8_t channel, uint16_t value) {
-    return sendMidiBuffer(14, channel & 0xf | 0xe0, value & 0x7f, (value >> 7) & 0x7f);
+    return sendMidiBuffer(14, (channel & 0xf) | 0xe0, value & 0x7f, (value >> 7) & 0x7f);
 }
 
 bool USBHostMIDI::sendSingleByte(uint8_t data) {

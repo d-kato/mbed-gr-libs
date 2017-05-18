@@ -17,7 +17,7 @@
 #ifndef USBENDPOINT_H
 #define USBENDPOINT_H
 
-#include "FunctionPointer.h"
+#include "Callback.h"
 #include "USBHostTypes.h"
 #include "rtos.h"
 
@@ -47,6 +47,7 @@ public:
     * @param ep_number endpoint number
     * @param td_list array of two allocated transfer descriptors
     */
+
     void init(HCED * hced, ENDPOINT_TYPE type, ENDPOINT_DIRECTION dir, uint32_t size, uint8_t ep_number, HCTD* td_list[2]);
 
     /**
@@ -67,7 +68,7 @@ public:
     /**
     * Queue a transfer on the endpoint
     */
-    void queueTransfer();
+    USB_TYPE queueTransfer();
 
     /**
     * Unqueue a transfer from the endpoint
@@ -76,33 +77,31 @@ public:
     */
     void unqueueTransfer(volatile HCTD * td);
 
-    /**
-     *  Attach a member function to call when a transfer is finished
+    /** Attach a function to call whenever a serial interrupt is generated
      *
-     *  @param tptr pointer to the object to call the member function on
-     *  @param mptr pointer to the member function to be called
+     * @param func A pointer to a void function, or 0 to set as none
      */
-    template<typename T>
-    inline void attach(T* tptr, void (T::*mptr)(void)) {
-        if((mptr != NULL) && (tptr != NULL)) {
-            rx.attach(tptr, mptr);
-        }
+    inline void attach(Callback<void()> func) {
+        rx = func;
     }
 
-    /**
-     * Attach a callback called when a transfer is finished
+    /** Attach a function to call when touch panel int
      *
-     * @param fptr function pointer
+     * @param obj pointer to the object to call the member function on
+     * @param method pointer to the member function to be called
      */
-    inline void attach(void (*fptr)(void)) {
-            rx.attach(fptr);
+    template<typename T>
+    inline void attach(T* obj, void (T::*method)()) {
+        // Underlying call thread safe
+        attach(callback(obj, method));
     }
 
     /**
     * Call the handler associted to the end of a transfer
     */
     inline void call() {
-        rx.call();
+        if (rx)
+            rx.call();
     };
 
 
@@ -120,12 +119,17 @@ public:
     const char *                getStateString();
     inline USB_TYPE             getState() { return state; }
     inline ENDPOINT_TYPE        getType() { return type; };
+#ifdef  USBHOST_OTHER
+    inline uint8_t              getDeviceAddress() { return  device_address; };
+    inline uint32_t             getSize() { return size; };
+#else
     inline uint8_t              getDeviceAddress() { return hced->control & 0x7f; };
+	inline uint32_t             getSize() { return (hced->control >> 16) & 0x3ff; };
+    inline volatile HCTD *      getHeadTD() { return (volatile HCTD*) ((uint32_t)hced->headTD & ~0xF); };
+#endif
     inline int                  getLengthTransferred() { return transferred; }
     inline uint8_t *            getBufStart() { return buf_start; }
     inline uint8_t              getAddress(){ return address; };
-    inline uint32_t             getSize() { return (hced->control >> 16) & 0x3ff; };
-    inline volatile HCTD *      getHeadTD() { return (volatile HCTD*) ((uint32_t)hced->headTD & ~0xF); };
     inline volatile HCTD**      getTDList() { return td_list; };
     inline volatile HCED *      getHCED() { return hced; };
     inline ENDPOINT_DIRECTION   getDir() { return dir; }
@@ -143,6 +147,12 @@ private:
     ENDPOINT_TYPE type;
     volatile USB_TYPE state;
     ENDPOINT_DIRECTION dir;
+#ifdef USBHOST_OTHER 
+	uint32_t size;
+	uint32_t ep_number;
+	uint32_t speed;
+    uint8_t device_address;
+#endif
     bool setup;
 
     uint8_t address;
@@ -151,7 +161,7 @@ private:
     int transferred;
     uint8_t * buf_start;
 
-    FunctionPointer rx;
+    Callback<void()> rx;
 
     USBEndpoint* nextEp;
 

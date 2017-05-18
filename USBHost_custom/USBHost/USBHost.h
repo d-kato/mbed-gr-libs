@@ -16,7 +16,9 @@
 
 #ifndef USBHOST_H
 #define USBHOST_H
-
+#ifdef TARGET_STM
+#include "mbed.h" 
+#endif
 #include "USBHALHost.h"
 #include "USBDeviceConnected.h"
 #include "IUSBEnumerator.h"
@@ -278,7 +280,6 @@ private:
 
     Thread usbThread;
     void usb_process();
-    static void usb_process_static(void const * arg);
     Mail<message_t, 10> mail_usb_event;
     Mutex usb_mutex;
     Mutex td_mutex;

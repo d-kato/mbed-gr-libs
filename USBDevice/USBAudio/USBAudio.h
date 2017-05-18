@@ -25,7 +25,7 @@
 #include "USBDevice_Types.h"
 
 #include "USBDevice.h"
-
+#include "Callback.h"
 
 /**
 * USBAudio example
@@ -108,12 +108,26 @@ public:
     bool readNB(uint8_t * buf);
 
     /**
+     * read last received packet if some.
+     * @param buf pointer on a buffer which will be filled if an audio packet is available
+     *
+     * @returns the packet length
+     */
+    uint32_t readSync(uint8_t *buf);
+
+    /**
     * Write an audio packet. During a frame, only a single writing (you can't write and read an audio packet during the same frame)can be done using this method.
     *
     * @param buf pointer on the audio packet which will be sent
     * @returns true if successful
     */
     bool write(uint8_t * buf);
+
+    /**
+     * Write packet in endpoint fifo. assuming tx fifo is empty
+     * @param buf pointer on the audio packet which will be sent
+     */
+    void writeSync(uint8_t *buf);
 
     /**
     * Write and read an audio packet at the same time (on the same frame)
@@ -130,19 +144,46 @@ public:
      * @param function Function to attach
      *
      */
-    void attach(void(*fptr)(void)) {
-        updateVol.attach(fptr);
+    void attach(Callback<void()> fptr) {
+        updateVol = fptr;
+    }
+    /** attach a handler to Tx Done
+     *
+     * @param function Function to attach
+     *
+     */
+    void attachTx(Callback<void()> fptr) {
+        txDone = fptr;
+    }
+    /** attach a handler to Rx Done
+     *
+     * @param function Function to attach
+     *
+     */
+    void attachRx(Callback<void()> fptr) {
+        rxDone = fptr;
     }
 
     /** Attach a nonstatic void/void member function to update the volume
      *
-     * @param tptr Object pointer
-     * @param mptr Member function pointer
+     * @param obj pointer to the object to call the member function on
+     * @param method pointer to the member function to be called
      *
      */
     template<typename T>
-    void attach(T *tptr, void(T::*mptr)(void)) {
-        updateVol.attach(tptr, mptr);
+    void attach(T *obj, void(T::*method)()) {
+        // Underlying call thread safe
+        attach(callback(obj, method));
+    }
+    template<typename T>
+    void attachTx(T *obj, void(T::*method)()) {
+        // Underlying call thread safe
+        attachTx(callback(obj, method));
+    }
+    template<typename T>
+    void attachRx(T *obj, void(T::*method)()) {
+        // Underlying call thread safe
+        attachRx(callback(obj, method));
     }
 
 
@@ -275,7 +316,12 @@ private:
     volatile uint8_t * buf_stream_out;
 
     // callback to update volume
-    FunctionPointer updateVol;
+    Callback<void()> updateVol;
+
+    // callback transmit Done
+    Callback<void()> txDone;
+    // callback transmit Done
+    Callback<void()> rxDone;
 
     // boolean showing that the SOF handler has been called. Useful for readNB.
     volatile bool SOF_handler;

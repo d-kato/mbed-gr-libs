@@ -169,6 +169,9 @@ void GRAPHICS_SetLcdPanel_Ch1 (void)
     GPIO.PMC2       = (uint16_t)reg_data;
     reg_data        = (uint32_t)GPIO.PMC2;
     dummy_read      = reg_data;
+#if(1) /* mbed */
+    (void)dummy_read; /* unused */
+#endif
     /* PFCAE2, PFCE2, PFC2 ... 7th alternative function
        b15:b12  : P2_15 ~ P2_12 */
     reg_data        = (uint32_t)GPIO.PFCAE2 | (uint32_t)LCD_PORT2_7TH;

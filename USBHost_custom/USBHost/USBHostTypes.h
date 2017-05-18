@@ -18,7 +18,7 @@
 #define USB_INC_H
 
 #include "mbed.h"
-#include "toolchain.h"
+#include "mbed_toolchain.h"
 
 enum USB_TYPE {
     USB_TYPE_OK = 0,
@@ -67,12 +67,16 @@ enum ENDPOINT_TYPE {
 #define HUB_CLASS       0x09
 #define SERIAL_CLASS    0x0A
 
+#if !defined(USBHOST_OTHER)
 // ------------------ HcControl Register ---------------------
 #define  OR_CONTROL_PLE                 0x00000004
 #define  OR_CONTROL_CLE                 0x00000010
 #define  OR_CONTROL_BLE                 0x00000020
 #define  OR_CONTROL_HCFS                0x000000C0
+#define  OR_CONTROL_HC_RSET             0x00000000
+#define  OR_CONTROL_HC_RES              0x00000040
 #define  OR_CONTROL_HC_OPER             0x00000080
+#define  OR_CONTROL_HC_SUSP             0x000000C0
 // ----------------- HcCommandStatus Register -----------------
 #define  OR_CMD_STATUS_HCR              0x00000001
 #define  OR_CMD_STATUS_CLF              0x00000002
@@ -94,6 +98,8 @@ enum ENDPOINT_TYPE {
 #define  OR_RH_PORT_CSC                 0x00010000
 #define  OR_RH_PORT_PRSC                0x00100000
 #define  OR_RH_PORT_LSDA                0x00000200
+#define  OR_RH_PORT_PESC                0x00020000
+#define  OR_RH_PORT_OCIC                0x00080000
 
 #define  FI                     0x2EDF           // 12000 bits per frame (-1)
 #define  DEFAULT_FMINTERVAL     ((((6 * (FI - 210)) / 7) << 16) | FI)
@@ -109,6 +115,13 @@ enum ENDPOINT_TYPE {
 #define  TD_TOGGLE_1        (uint32_t)(0x03000000)         // Toggle 1
 #define  TD_CC              (uint32_t)(0xF0000000)         // Completion Code
 
+#else
+
+#define  TD_SETUP           (uint32_t)(0)                  // Direction of Setup Packet
+#define  TD_IN              (uint32_t)(0x00100000)         // Direction In
+#define  TD_OUT             (uint32_t)(0x00080000)         // Direction Out
+
+#endif
 #define  DEVICE_DESCRIPTOR                     (1)
 #define  CONFIGURATION_DESCRIPTOR              (2)
 #define  INTERFACE_DESCRIPTOR                  (4)
@@ -150,6 +163,27 @@ enum ENDPOINT_TYPE {
 #endif
 
 // ------------ HostController Transfer Descriptor ------------
+#if defined(USBHOST_OTHER)
+
+typedef struct hcTd {
+	__IO uint32_t state;
+	__IO  uint8_t *  currBufPtr;    // Physical address of current buffer pointer
+	__IO  hcTd *     nextTD;         // Physical pointer to next Transfer Descriptor
+	__IO  uint32_t   size;        // size of buffer
+	void * ep;                      // ep address where a td is linked in
+} PACKED HCTD;
+// ----------- HostController EndPoint Descriptor -------------
+typedef struct hcEd {
+  uint8_t ch_num;
+  void *hhcd;
+} PACKED HCED;
+// ----------- Host Controller Communication Area ------------
+#define HCCA   void
+
+
+#else 
+// -------------OHCI register --------------------------------
+// ------------ HostController Transfer Descriptor ------------
 typedef struct hcTd {
     __IO  uint32_t   control;        // Transfer descriptor control
     __IO  uint8_t *  currBufPtr;    // Physical address of current buffer pointer
@@ -158,7 +192,6 @@ typedef struct hcTd {
     void * ep;                      // ep address where a td is linked in
     uint32_t dummy[3];              // padding
 } PACKED HCTD;
-
 // ----------- HostController EndPoint Descriptor -------------
 typedef struct hcEd {
     __IO  uint32_t  control;        // Endpoint descriptor control
@@ -166,8 +199,6 @@ typedef struct hcEd {
     __IO  HCTD *  headTD;           // Physcial address of head in Transfer descriptor list
     __IO  hcEd *  nextED;         // Physical address of next Endpoint descriptor
 } PACKED HCED;
-
-
 // ----------- Host Controller Communication Area ------------
 typedef struct hcca {
     __IO  uint32_t  IntTable[32];   // Interrupt Table
@@ -176,6 +207,7 @@ typedef struct hcca {
     volatile  uint8_t   Reserved[116];  // Reserved for future use
     volatile  uint8_t   Unknown[4];     // Unused
 } PACKED HCCA;
+#endif
 
 typedef struct {
     uint8_t bLength;

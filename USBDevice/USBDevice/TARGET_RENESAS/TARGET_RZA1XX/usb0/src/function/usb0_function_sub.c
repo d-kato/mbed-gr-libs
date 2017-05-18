@@ -424,7 +424,11 @@ void usb0_function_clear_alt (void)
 *******************************************************************************/
 void usb0_function_clear_pipe_tbl (void)
 {
+#if(1) /* mbed */
+    uint32_t pipe;
+#else
     int pipe;
+#endif
 
     for (pipe = 0; pipe < (USB_FUNCTION_MAX_PIPE_NO + 1); ++pipe)
     {

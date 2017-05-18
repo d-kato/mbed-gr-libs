@@ -250,6 +250,7 @@ static void init_func (const uint32_t user_num)
         CPG.STBCR9  = (uint8_t)reg_data;
         /* In order to reflect the change, a dummy read should be done. */
         dummy_read = CPG.STBCR9;
+        (void)dummy_read; /* unused */
 
         /* Standby Request Register 2 (STBREQ2)
             b4      ---0----;  STBRQ24 : The standby request to VDC5 channel 1 is invalid. */

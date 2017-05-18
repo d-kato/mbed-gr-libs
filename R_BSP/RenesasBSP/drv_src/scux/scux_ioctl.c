@@ -1213,7 +1213,11 @@ End of function SCUX_IoctlFlushStop
 int_t SCUX_IoctlClearStop(const int_t channel, const int_t was_masked)
 {
     int_t retval = ESUCCESS;
+#if(1) /* mbed */
+    int32_t dma_ercd;
+#else
     int_t dma_ercd;
+#endif
     int_t dma_retval;
     scux_stat_ch_t old_stat;
     uint32_t rx_remain_size = 0;
@@ -1846,7 +1850,11 @@ int_t SCUX_IoctlSetDvuDigiVol(const int_t channel, const scux_dvu_digi_vol_t * c
         }
 
         /* check digital volume */
+#if(1) /* mbed */
+        for (audio_ch = SCUX_AUDIO_CH_0; ((ESUCCESS == retval) && ((int)audio_ch < (int)p_info_ch->src_cfg.use_ch)); audio_ch++)
+#else
         for (audio_ch = SCUX_AUDIO_CH_0; ((ESUCCESS == retval) && (audio_ch < p_info_ch->src_cfg.use_ch)); audio_ch++)
+#endif
         {
             if (SCUX_MAX_DIGITAL_VOLUME < p_info_ch->dvu_cfg.dvu_digi_vol.digi_vol[audio_ch])
             {

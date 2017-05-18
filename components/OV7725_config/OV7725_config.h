@@ -2,6 +2,8 @@
 #ifndef OV7725_CONFIG_H
 #define OV7725_CONFIG_H
 
+#include "mbed.h"
+
 class OV7725_config {
 
 public:
@@ -90,7 +92,7 @@ public:
         mI2c_.write(0x42, sw_reset_cmd, 2);
         Thread::wait(1);
 
-        for (int i = 0; i < (sizeof(OV7725_InitRegTable) / 2) ; i++) {
+        for (uint32_t i = 0; i < (sizeof(OV7725_InitRegTable) / 2) ; i++) {
             ret = mI2c_.write(0x42, OV7725_InitRegTable[i], 2);
             if (ret != 0) {
                 return false;

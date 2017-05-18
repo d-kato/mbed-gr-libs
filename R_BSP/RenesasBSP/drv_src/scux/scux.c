@@ -514,6 +514,9 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                     cpg_value = (uint32_t)CPG.STBCR8 & ~(CPG_STBCR8_BIT_MSTP81);
                     CPG.STBCR8 = (uint8_t)cpg_value;
                     dummy_buf = CPG.STBCR8;
+#if(1) /* mbed */
+                    (void)dummy_buf;
+#endif
                     
                     if (0 == was_masked)
                     {
@@ -998,6 +1001,9 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                     cpg_value = (uint32_t)CPG.STBCR8 & ~(CPG_STBCR8_BIT_MSTP81);
                     CPG.STBCR8 = (uint8_t)cpg_value;
                     dummy_buf = CPG.STBCR8;
+#if(1) /* mbed */
+                    (void)dummy_buf;
+#endif
 
                     if (0 == was_masked)
                     {
@@ -2877,6 +2883,9 @@ static int_t SCUX_CmnUnInitialize(void)
     cpg_value = ((uint32_t)CPG.STBCR8 | CPG_STBCR8_BIT_MSTP81);
     CPG.STBCR8 = (uint8_t)cpg_value;
     dummy_buf = CPG.STBCR8;
+#if(1) /* mbed */
+    (void)dummy_buf;
+#endif
 
     if (0U == was_masked)
     {

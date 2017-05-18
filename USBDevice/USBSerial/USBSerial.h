@@ -22,7 +22,7 @@
 #include "USBCDC.h"
 #include "Stream.h"
 #include "CircBuffer.h"
-
+#include "Callback.h"
 
 /**
 * USBSerial example
@@ -117,28 +117,37 @@ public:
     */
     bool writeBlock(uint8_t * buf, uint16_t size);
 
-    /**
+    /** 
      *  Attach a member function to call when a packet is received.
      *
-     *  @param tptr pointer to the object to call the member function on
-     *  @param mptr pointer to the member function to be called
+     *  @param func A pointer to a void function, or 0 to set as none
      */
-    template<typename T>
-    void attach(T* tptr, void (T::*mptr)(void)) {
-        if((mptr != NULL) && (tptr != NULL)) {
-            rx.attach(tptr, mptr);
-        }
+    void attach(Callback<void()> func) {
+        rx = func;
     }
 
-    /**
-     * Attach a callback called when a packet is received
-     *
-     * @param fptr function pointer
-     */
-    void attach(void (*fptr)(void)) {
-        if(fptr != NULL) {
-            rx.attach(fptr);
-        }
+   /**
+    *  Attach a member function to call when a packet is received.
+    *
+    *  @param obj pointer to the object to call the member function on
+    *  @param method pointer to the member function to be called
+    */
+    template<typename T>
+    void attach(T* obj, void (T::*method)()) {
+        // Underlying call thread safe
+        attach(Callback<void()>(obj, method));
+    }
+
+   /**
+    *  Attach a member function to call when a packet is received.
+    *
+    *  @param obj pointer to the object to call the member function on
+    *  @param method pointer to the member function to be called
+    */
+    template<typename T>
+    void attach(T* obj, void (*method)(T*)) {
+        // Underlying call thread safe
+        attach(Callback<void()>(obj, method));
     }
 
     /**
@@ -159,7 +168,7 @@ protected:
     }
 
 private:
-    FunctionPointer rx;
+    Callback<void()> rx;
     CircBuffer<uint8_t> * p_circ_buf;
     uint8_t * p_wk_buf;
     void (*settingsChangedCallback)(int baud, int bits, int parity, int stop);

@@ -60,6 +60,14 @@ public:
         return ESP8266Interface::connect(ssid, pass, security, channel);
     }
 
+    /** Stop the interface
+     *  @return             0 on success, negative on failure
+     */
+    virtual int disconnect() {
+        chip_reset_check();
+        return ESP8266Interface::disconnect();
+    }
+
     /** Scan for available networks
      *
      * This function will block.

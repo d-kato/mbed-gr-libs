@@ -21,6 +21,7 @@
 #include "USBEndpoint.h"
 #include "USBHostConf.h"
 #include "rtos.h"
+#include "Callback.h"
 
 class USBHostHub;
 
@@ -31,7 +32,7 @@ typedef struct {
     uint8_t intf_subclass;
     uint8_t intf_protocol;
     USBEndpoint * ep[MAX_ENDPOINT_PER_INTERFACE];
-    FunctionPointer detach;
+    Callback<void()> detach;
     char name[10];
 } INTERFACE;
 
@@ -105,7 +106,7 @@ public:
     template<typename T>
     inline void onDisconnect(uint8_t intf_nb, T* tptr, void (T::*mptr)(void)) {
         if ((mptr != NULL) && (tptr != NULL)) {
-            intf[intf_nb].detach.attach(tptr, mptr);
+            onDisconnect(intf_nb, callback(tptr, mptr));
         }
     }
 
@@ -115,9 +116,9 @@ public:
      *  @param intf_nb interface number
      *  @param fn function pointer
      */
-    inline void onDisconnect(uint8_t intf_nb, void (*fn)(void)) {
-        if (fn != NULL) {
-            intf[intf_nb].detach.attach(fn);
+    inline void onDisconnect(uint8_t intf_nb, Callback<void()> fn) {
+        if (fn) {
+            intf[intf_nb].detach = fn;
         }
     }
 

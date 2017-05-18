@@ -135,8 +135,8 @@ JPEG_Converter::SetQuality(const uint8_t qual) {
     uint8_t*            ptqs;
     const uint8_t*      ptqb;
     int_t temp;
-    int_t i;
-    int_t j;
+    uint32_t i;
+    uint32_t j;
 
     /* ITU-T Recommendation T.81 "K.1 Quantization tables for luminance and chrominance components" */
     /* Table K.1 - Luminance quantization table */

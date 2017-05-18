@@ -87,6 +87,9 @@ uint16_t usb0_api_host_init (uint8_t int_level, uint16_t mode, uint16_t clockmod
 
     CPG.STBCR7 &= 0xfd;                         /*The clock of USB0 modules is permitted */
     dummy_buf   = CPG.STBCR7;                   /* (Dummy read) */
+#if(1) /* mbed */
+    (void)dummy_buf;
+#endif
 
     g_usb0_host_SupportUsbDeviceSpeed = mode;
 

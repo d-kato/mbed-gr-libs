@@ -110,6 +110,16 @@ USBHostMultiSerial::~USBHostMultiSerial()
     disconnect();
 }
 
+bool USBHostMultiSerial::connected()
+{
+    for (int port = 0; port < USBHOST_SERIAL; port++) {
+        if (ports[port]->connected()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void USBHostMultiSerial::disconnect(void)
 {
     for (int port = 0; port < USBHOST_SERIAL; port ++)
@@ -256,7 +266,9 @@ void USBHostSerialPort::rxHandler() {
                 }
                 p_circ_buf->queue(buf[i]);
             }
-            rx.call();
+            if (_irq[RxIrq]) {
+                _irq[RxIrq].call();
+            }
             host->bulkRead(dev, bulk_in, buf, size_bulk_in, false);
         }
     }
@@ -265,7 +277,9 @@ void USBHostSerialPort::rxHandler() {
 void USBHostSerialPort::txHandler() {
     if (bulk_out) {
         if (bulk_out->getState() == USB_TYPE_IDLE) {
-            tx.call();
+            if (_irq[TxIrq]) {
+                _irq[TxIrq].call();
+            }
         }
     }
 }
@@ -320,7 +334,7 @@ int USBHostSerialPort::writeBuf(const char* b, int s) {
             if (dev_connected == false) {
                 break;
             }
-            i = (s < size_bulk_out) ? s : size_bulk_out;
+            i = ((uint32_t)s < size_bulk_out) ? s : size_bulk_out;
             if (host->bulkWrite(dev, bulk_out, (uint8_t *)(b+c), i) == USB_TYPE_OK) {
                 c += i;
                 s -= i;

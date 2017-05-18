@@ -124,7 +124,11 @@ int_t SCUX_CopyWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p
     int_t    dma_retval;
     dma_trans_data_t dma_address_param;
     uint32_t         dma_src_addr;
+#if(1) /* mbed */
+    int32_t          ret;
+#else
     int_t            ret;
+#endif
 
     if ((NULL == p_scux_info_ch) || (NULL == p_write_aio))
     {
@@ -248,7 +252,11 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
     dma_trans_data_t dma_address_param;
     dma_trans_data_t next_dma_address_param;
     uint32_t         dma_src_addr;
+#if(1) /* mbed */
+    int32_t          ret;
+#else
     int_t            ret;
+#endif
     uint32_t         ramp_wait_cnt = 0;
 
     if ((NULL == p_scux_info_ch) || (NULL == p_write_aio))
@@ -768,7 +776,11 @@ End of function SCUX_DirectCancelSpecific
 int_t SCUX_CopyCancelAll(scux_info_ch_t * const p_scux_info_ch)
 {
     int_t    retval = ESUCCESS;
+#if(1) /* mbed */
+    int32_t  dma_ercd;
+#else
     int_t    dma_ercd;
+#endif
     int_t    dma_retval;
     int_t    was_masked;
     uint32_t tx_remain_size = 0;
@@ -886,7 +898,11 @@ End of function SCUX_CopyCancelAll
 int_t SCUX_DirectCancelAll(scux_info_ch_t * const p_scux_info_ch)
 {
     int_t    retval = ESUCCESS;
+#if(1) /* mbed */
+    int32_t  dma_ercd;
+#else
     int_t    dma_ercd;
+#endif
     int_t    dma_retval;
     int_t    was_masked;
     uint32_t tx_remain_size = 0;
@@ -2733,6 +2749,9 @@ void SCUX_SetupSsif(const scux_info_ch_t * const p_scux_info_ch)
 
                     CPGSWRSTCR1 &= (uint8_t)~((uint8_t)gb_cpg_scux_ssif_swrst_bit[p_set_ssif->ssif_cfg.ssif_ch_num]);
                     dummy_buf = CPGSWRSTCR1;
+#if(1) /* mbed */
+                    (void)dummy_buf;
+#endif
 
                     if (0 == was_masked)
                     {
@@ -4406,7 +4425,11 @@ End of function SCUX_DMA_CommonTxNextDummyData
 static void SCUX_DMA_CopyTxEndFlush(scux_info_ch_t * const p_info_ch)
 {
     int_t retval;
+#if(1) /* mbed */
+    int32_t  dma_ercd;
+#else
     int_t dma_ercd;
+#endif
     uint32_t tx_remain_size = 0;
     uint32_t rx_remain_size = 0;
 
@@ -4692,7 +4715,11 @@ End of function SCUX_DMA_CopyTxCallBack
 static void SCUX_DMA_DirectTxEndFlush(scux_info_ch_t * const p_info_ch)
 {
     int_t retval;
+#if(1) /* mbed */
+    int32_t  dma_ercd;
+#else
     int_t dma_ercd;
+#endif
     uint32_t tx_remain_size = 0;
 
     if (NULL == p_info_ch)

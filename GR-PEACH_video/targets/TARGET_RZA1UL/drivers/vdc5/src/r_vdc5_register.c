@@ -2557,6 +2557,9 @@ static void SetRwProcAbility_Write_0 (const vdc5_onoff_t ability)
         *(scaler->scl1_pbuf_cnt) &= (uint32_t)~VDC5_REG_BIT16;
         reg_data    = *(scaler->scl1_pbuf_cnt);
         dummy_read  = reg_data;
+#if(1) /* mbed */
+        (void)dummy_read; /* unused */
+#endif
 
         VDC5_ShrdPrmSetRwProcEnable(VDC5_LAYER_ID_0_WR);
     }

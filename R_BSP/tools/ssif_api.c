@@ -155,6 +155,7 @@ static void ssif_power_enable(uint32_t ssif_ch) {
 #endif
     }
     dummy = CPGSTBCR11;
+    (void)dummy;
 }
 
 int32_t ssif_init(PinName sck, PinName ws, PinName tx, PinName rx) {

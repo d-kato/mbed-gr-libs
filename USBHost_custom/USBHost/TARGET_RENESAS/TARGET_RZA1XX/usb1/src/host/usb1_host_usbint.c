@@ -219,6 +219,9 @@ void usb1_host_interrupt1 (void)
     /* Three dummy read for clearing interrupt requests */
     dumy_sts = USB201.INTSTS0;
     dumy_sts = USB201.INTSTS1;
+#if(1) /* mbed */
+    (void)dumy_sts;
+#endif
 
 }
 
@@ -332,6 +335,9 @@ void usb1_host_BRDYInterrupt (uint16_t Status, uint16_t Int_enbl)
 
     /* Three dummy reads for clearing interrupt requests */
     dumy_sts = USB201.BRDYSTS;
+#if(1) /* mbed */
+    (void)dumy_sts;
+#endif
 }
 
 /*******************************************************************************
@@ -382,6 +388,9 @@ void usb1_host_NRDYInterrupt (uint16_t Status, uint16_t Int_enbl)
 
     /* Three dummy reads for clearing interrupt requests */
     dumy_sts = USB201.NRDYSTS;
+#if(1) /* mbed */
+    (void)dumy_sts;
+#endif
 }
 
 /*******************************************************************************
@@ -492,6 +501,9 @@ void usb1_host_BEMPInterrupt (uint16_t Status, uint16_t Int_enbl)
 
     /* Three dummy reads for clearing interrupt requests */
     dumy_sts = USB201.BEMPSTS;
+#if(1) /* mbed */
+    (void)dumy_sts;
+#endif
 }
 
 /* End of File */

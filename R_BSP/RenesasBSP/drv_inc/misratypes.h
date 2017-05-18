@@ -110,7 +110,7 @@ Return value:   Passed in argument.
 #elif defined (__ICCARM__)
 #pragma inline =forced
 #endif
-static const void* unused_arg(const void* const var)
+static inline const void* unused_arg(const void* const var)
 {
     return var;
 }
@@ -132,7 +132,7 @@ Return value:   Non-zero if the value is an error code
 #elif defined (__ICCARM__)
 #pragma inline =forced
 #endif
-static bool_t iserror(const int32_t ser)
+static inline bool_t iserror(const int32_t ser)
 {
     uint32_t er = (uint32_t) ser;
     return er >= 0xffffff80u;
@@ -154,7 +154,7 @@ Return value:   Error code converted to a pointer
 #elif defined (__ICCARM__)
 #pragma inline =forced
 #endif
-static void *error_to_ptr(const int32_t er)
+static inline void *error_to_ptr(const int32_t er)
 {
     return (void*) er;
 }
@@ -174,7 +174,7 @@ Return value:   Functino pointer as a FP
 #elif defined (__ICCARM__)
 #pragma inline =forced
 #endif
-static funcptr_t to_fp_function(void (*val)(int32_t))
+static inline funcptr_t to_fp_function(void (*val)(int32_t))
 {
     /* QA-C will generate an error for this line as we are casting
      * between different function pointer types.

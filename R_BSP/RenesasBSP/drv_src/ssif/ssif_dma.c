@@ -645,7 +645,11 @@ static void SSIF_DMA_TxCallback(const union sigval param)
     ssif_info_ch_t* const p_info_ch = param.sival_ptr;
     uint32_t ssif_ch;
     dma_trans_data_t dma_data_next;
+#if(1) /* mbed */
+    int32_t ercd = ESUCCESS;
+#else
     int_t ercd = ESUCCESS;
+#endif
     int_t ret;
 
 
@@ -717,7 +721,11 @@ static void SSIF_DMA_RxCallback(const union sigval param)
     ssif_info_ch_t* const p_info_ch = param.sival_ptr;
     uint32_t ssif_ch;
     dma_trans_data_t dma_data_next;
+#if(1) /* mbed */
+    int32_t ercd = ESUCCESS;
+#else
     int_t ercd = ESUCCESS;
+#endif
     int_t ret;
 
     if (NULL == p_info_ch)

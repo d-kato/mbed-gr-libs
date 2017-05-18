@@ -651,6 +651,9 @@ static void init_func (const uint32_t user_num)
     CPG.STBCR7 = (uint8_t)reg_data;
     /* In order to reflect the change, a dummy read should be done. */
     dummy_read = CPG.STBCR7;
+#if(1) /* mbed */
+    (void)dummy_read; /* unused */
+#endif
 }   /* End of function init_func() */
 
 /**************************************************************************//**

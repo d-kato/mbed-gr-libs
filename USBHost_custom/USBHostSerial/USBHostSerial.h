@@ -24,6 +24,7 @@
 #include "USBHost.h"
 #include "Stream.h"
 #include "CircBufferHostSerial.h"
+#include "Callback.h"
 
 /**
  * A class to communicate a USB virtual serial port
@@ -42,7 +43,9 @@ public:
 
     enum IrqType {
         RxIrq,
-        TxIrq
+        TxIrq,
+
+        IrqCnt
     };
 
     enum Parity {
@@ -68,33 +71,23 @@ public:
     /**
      *  Attach a member function to call when a packet is received.
      *
-     *  @param tptr pointer to the object to call the member function on
-     *  @param mptr pointer to the member function to be called
-     *  @param irq irq type
+     *  @param obj pointer to the object to call the member function on
+     *  @param method pointer to the member function to be called
+     *  @param type Which serial interrupt to attach the member function to (Seriall::RxIrq for receive, TxIrq for transmit buffer empty)
      */
     template<typename T>
-    inline void attach(T* tptr, void (T::*mptr)(void), IrqType irq = RxIrq) {
-        if ((mptr != NULL) && (tptr != NULL)) {
-            if (irq == RxIrq) {
-                rx.attach(tptr, mptr);
-            } else {
-                tx.attach(tptr, mptr);
-            }
-        }
+    void attach(T *obj, void (T::*method)(), IrqType type=RxIrq) {
+        attach(callback(obj, method), type);
     }
 
-    /**
-     * Attach a callback called when a packet is received
+    /** Attach a function to call whenever a serial interrupt is generated
      *
-     * @param ptr function pointer
+     *  @param func A pointer to a void function, or 0 to set as none
+     *  @param type Which serial interrupt to attach the member function to (Seriall::RxIrq for receive, TxIrq for transmit buffer empty)
      */
-    inline void attach(void (*fn)(void), IrqType irq = RxIrq) {
-        if (fn != NULL) {
-            if (irq == RxIrq) {
-                rx.attach(fn);
-            } else {
-                tx.attach(fn);
-            }
+    void attach(Callback<void()> func, IrqType type=RxIrq) {
+        if (func) {
+            _irq[type] = func;
         }
     }
 
@@ -144,8 +137,7 @@ private:
 
     void rxHandler();
     void txHandler();
-    FunctionPointer rx;
-    FunctionPointer tx;
+    Callback<void()> _irq[IrqCnt];
 
     uint8_t serial_intf;
     bool dev_connected;
@@ -166,13 +158,6 @@ public:
     bool connect();
 
     void disconnect();
-
-    /**
-    * Check if a any serial port is connected
-    *
-    * @returns true if a serial device is connected
-    */
-//    bool connected();
 
 protected:
     USBHost* host;
@@ -227,6 +212,8 @@ protected:
     virtual bool parseInterface(uint8_t intf_nb, uint8_t intf_class, uint8_t intf_subclass, uint8_t intf_protocol); //Must return true if the interface should be parsed
     virtual bool useEndpoint(uint8_t intf_nb, ENDPOINT_TYPE type, ENDPOINT_DIRECTION dir); //Must return true if the endpoint will be used
 
+private:
+    bool dev_connected;
 };
 #endif // (USBHOST_SERIAL <= 1)
 
