@@ -51,6 +51,7 @@ int ESP32Interface::connect()
         return NSAPI_ERROR_DHCP_FAILURE;
     }
 
+    _esp.disconnect();
     if (!_esp.connect(ap_ssid, ap_pass)) {
         if (!_esp.startup_retry(3)) {
             return NSAPI_ERROR_DEVICE_ERROR;
@@ -195,10 +196,8 @@ int ESP32Interface::socket_close(void *handle)
     struct esp32_socket *socket = (struct esp32_socket *)handle;
     int err = 0;
 
-    if (!socket->accept_id) {
-        if (!_esp.close(socket->id)) {
-            err = NSAPI_ERROR_DEVICE_ERROR;
-        }
+    if (!_esp.close(socket->id, socket->accept_id)) {
+        err = NSAPI_ERROR_DEVICE_ERROR;
     }
 
     if (socket->tcp_server) {
@@ -310,7 +309,7 @@ int ESP32Interface::socket_sendto(void *handle, const SocketAddress &addr, const
     struct esp32_socket *socket = (struct esp32_socket *)handle;
 
     if (socket->connected && socket->addr != addr) {
-        if (!_esp.close(socket->id)) {
+        if (!_esp.close(socket->id, socket->accept_id)) {
             return NSAPI_ERROR_DEVICE_ERROR;
         }
         socket->connected = false;

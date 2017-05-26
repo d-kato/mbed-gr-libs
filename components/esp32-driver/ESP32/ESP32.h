@@ -152,9 +152,10 @@ public:
     * Closes a socket
     *
     * @param id id of socket to close, valid only 0-4
+    * @param wait_close 
     * @return true only if socket is closed successfully
     */
-    bool close(int id);
+    bool close(int id, bool wait_close);
 
     /**
     * Allows timeout to be changed between commands
@@ -210,6 +211,7 @@ private:
 
     std::vector<int> _accept_id;
     uint32_t _id_bits;
+    uint32_t _id_bits_close;
     bool _server_act;
     Mutex _lock;
 

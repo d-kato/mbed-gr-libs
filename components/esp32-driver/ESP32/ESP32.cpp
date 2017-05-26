@@ -19,7 +19,7 @@
 ESP32::ESP32(PinName tx, PinName rx, bool debug)
     : _serial(tx, rx, 1024), _parser(_serial)
     , _packets(0), _packets_end(&_packets)
-    , _id_bits(0), _server_act(false)
+    , _id_bits(0), _id_bits_close(0),_server_act(false)
 {
     _serial.baud(115200);
     _parser.debugOn(debug);
@@ -128,6 +128,7 @@ void ESP32::socket_handler(bool connect, int id)
         }
     } else {
         _id_bits &= ~(1 << id);
+        _id_bits_close |= (1 << id);
         if (_server_act) {
             for (size_t i = 0; i < _accept_id.size(); i++) {
                 if (id == _accept_id[i]) {
@@ -176,6 +177,15 @@ bool ESP32::accept(int * p_id)
         Thread::wait(1);
     }
 
+    if (ret) {
+        for (int i = 0; i < 50; i++) {
+            if ((_id_bits_close & (1 << *p_id)) == 0) {
+                break;
+            }
+            Thread::wait(10);
+        }
+    }
+
     return ret;
 }
 
@@ -213,7 +223,7 @@ bool ESP32::dhcp(bool enabled, int mode)
     }
 
     _lock.lock();
-    _parser.setTimeout(10000);
+    _parser.setTimeout(3000);
     ret = _parser.send("AT+CWDHCP=%d,%d", enabled?1:0, mode)
        && _parser.recv("OK");
     _lock.unlock();
@@ -418,7 +428,8 @@ bool ESP32::send(int id, const void *data, uint32_t amount)
 
     //May take a second try if device is busy
     while (error_cnt < 2) {
-        if ((_id_bits & (1 << id)) == 0) {
+        if (((_id_bits & (1 << id)) == 0)
+         || ((_id_bits_close & (1 << id)) != 0)) {
             return false;
         }
         send_size = amount;
@@ -426,7 +437,7 @@ bool ESP32::send(int id, const void *data, uint32_t amount)
             send_size = 2048;
         }
         _lock.lock();
-        _parser.setTimeout(5000);
+        _parser.setTimeout(1500);
         ret = _parser.send("AT+CIPSEND=%d,%d", id, send_size)
            && _parser.recv(">")
            && (_parser.write((char*)data + index, (int)send_size) >= 0)
@@ -435,6 +446,7 @@ bool ESP32::send(int id, const void *data, uint32_t amount)
         if (ret) {
             amount -= send_size;
             index += send_size;
+            error_cnt = 0;
             if (amount == 0) {
                 return true;
             }
@@ -469,7 +481,7 @@ void ESP32::_packet_handler()
     packet->index = 0;
 
     tmp_timeout = _parser.getTimeout();
-    _parser.setTimeout(100);
+    _parser.setTimeout(500);
     if (!(_parser.read((char*)(packet + 1), amount))) {
         free(packet);
         _parser.setTimeout(tmp_timeout);
@@ -520,7 +532,8 @@ int32_t ESP32::recv(int id, void *data, uint32_t amount)
         if (!_parser.recv("OK")) {
             _lock.unlock();
             if (retry) {
-                if ((_id_bits & (1 << id)) == 0) {
+                if (((_id_bits & (1 << id)) == 0)
+                 || ((_id_bits_close & (1 << id)) != 0)) {
                     return -2;
                 } else {
                     return -1;
@@ -532,18 +545,32 @@ int32_t ESP32::recv(int id, void *data, uint32_t amount)
     }
 }
 
-bool ESP32::close(int id)
+bool ESP32::close(int id, bool wait_close)
 {
+    if (wait_close) {
+        for (int j = 0; j < 50; j++) {
+            _lock.lock();
+            _parser.setTimeout(5);
+            _parser.recv("%*,CLOSED");
+            if (((_id_bits & (1 << id)) == 0)
+             || ((_id_bits_close & (1 << id)) != 0)) {
+                _lock.unlock();
+                _id_bits_close &= ~(1 << id);
+                return true;
+            }
+            _lock.unlock();
+            Thread::wait(10);
+        }
+    }
+
     //May take a second try if device is busy
     for (unsigned i = 0; i < 2; i++) {
-        if ((_id_bits & (1 << id)) == 0) {
-            return true;
-        }
         _lock.lock();
         _parser.setTimeout(500);
         if (_parser.send("AT+CIPCLOSE=%d", id)
             && _parser.recv("OK")) {
             _lock.unlock();
+            _id_bits_close &= ~(1 << id);
             return true;
         }
         _lock.unlock();
