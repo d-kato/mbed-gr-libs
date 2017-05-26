@@ -61,7 +61,7 @@ int ESP32Interface::connect()
             return NSAPI_ERROR_DHCP_FAILURE;
         }
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             if (_esp.get_ssid(wk_ssid)) {
                 len = strlen(wk_ssid);
                 if ((strlen(ap_ssid) == len) && (memcmp(ap_ssid, wk_ssid, len) == 0)) {
