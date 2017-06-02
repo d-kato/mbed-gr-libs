@@ -1,22 +1,23 @@
 
-#ifndef ESP32_INTERFACE_H
-#define ESP32_INTERFACE_H
+#ifndef ESP32_INTERFACE_AP_H
+#define ESP32_INTERFACE_AP_H
 
 #include "mbed.h"
 #include "ESP32Stack.h"
 
+
 /** ESP32Interface class
  *  Implementation of the NetworkStack for the ESP32
  */
-class ESP32Interface : public ESP32Stack, public WiFiInterface
+class ESP32InterfaceAP : public ESP32Stack, public WiFiInterface
 {
 public:
-    /** ESP32Interface lifetime
+    /** ESP32InterfaceAP lifetime
      * @param tx        TX pin
      * @param rx        RX pin
      * @param debug     Enable debugging
      */
-    ESP32Interface(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false);
+    ESP32InterfaceAP(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false);
 
     /** Start the interface
      *
@@ -138,11 +139,11 @@ public:
         return this;
     }
 
-protected:
-    char ap_ssid[33]; /* 32 is what 802.11 defines as longest possible name; +1 for the \0 */
-    nsapi_security_t ap_sec;
-    uint8_t ap_ch;
-    char ap_pass[64]; /* The longest allowed passphrase */
+private:
+    char own_ssid[33]; /* 32 is what 802.11 defines as longest possible name; +1 for the \0 */
+    nsapi_security_t own_sec;
+    char own_pass[64]; /* The longest allowed passphrase */
+    uint8_t own_ch;
 };
 
 #endif

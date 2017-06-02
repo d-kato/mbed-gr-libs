@@ -29,7 +29,7 @@ int ATParser_os::putc(char c)
 
     while (true) {
         if (_serial->writeable()) {
-            return _serial->putc(c);
+            return _serial->putc((uint8_t)c);
         }
         if (wait_cnt > _timeout) {
             return -1;
@@ -45,7 +45,7 @@ int ATParser_os::getc()
 
     while (true) {
         if (_serial->readable()) {
-            return _serial->getc();
+            return (uint8_t)_serial->getc();
         }
         if (wait_cnt > _timeout) {
             return -1;

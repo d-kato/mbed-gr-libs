@@ -16,83 +16,119 @@
 
 #include "ESP32.h"
 
-ESP32::ESP32(PinName tx, PinName rx, bool debug)
-    : _serial(tx, rx, 1024), _parser(_serial)
+ESP32 * ESP32::instESP32 = NULL;
+
+ESP32 * ESP32::getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug)
+{
+    if (instESP32 == NULL) {
+        instESP32 = new ESP32(en, io0, tx, rx, debug);
+    } else {
+        if (debug) {
+            instESP32->debugOn(debug);
+        }
+    }
+    return instESP32;
+}
+
+ESP32::ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug)
+    : wifi_en(en), wifi_io0(io0), init_end(false)
+    , _serial(tx, rx, 1024), _parser(_serial)
     , _packets(0), _packets_end(&_packets)
     , _id_bits(0), _id_bits_close(0),_server_act(false)
 {
+    _wifi_mode = 1;
+    recv_waiting = false;
+    memset(_ids, 0, sizeof(_ids));
+    memset(_cbs, 0, sizeof(_cbs));
     _serial.baud(115200);
+    _parser.debugOn(debug);
+    _serial.attach(Callback<void()>(this, &ESP32::event));
+}
+
+void ESP32::debugOn(bool debug)
+{
     _parser.debugOn(debug);
 }
 
-bool ESP32::startup(int mode)
+bool ESP32::startup()
 {
-    //only 3 valid modes
-    if (mode < 1 || mode > 3) {
-        return false;
+    if (init_end) {
+        return true;
     }
-    _lock.lock();
+
+    wifi_io0 = 1;
+    wifi_en = 0;
+    Thread::wait(10);
+    wifi_en = 1;
+
     _parser.setTimeout(1500);
     _parser.recv("ready");
     reset();
-
     _parser.setTimeout(5000);
-    bool success = _parser.send("AT+CWMODE=%d", mode)
+    bool success = _parser.send("AT+CWMODE=%d", _wifi_mode)
                 && _parser.recv("OK")
                 && _parser.send("AT+CIPMUX=1")
+                && _parser.recv("OK")
+                && _parser.send("AT+CWAUTOCONN=0")
+                && _parser.recv("OK")
+                && _parser.send("AT+CWQAP")
                 && _parser.recv("OK");
 
-    _parser.oob("+IPD", this, &ESP32::_packet_handler);
+    if (success) {
+        _parser.oob("+IPD", this, &ESP32::_packet_handler);
+        _parser.oob("0,CONNECT", this, &ESP32::_connect_handler_0);
+        _parser.oob("1,CONNECT", this, &ESP32::_connect_handler_1);
+        _parser.oob("2,CONNECT", this, &ESP32::_connect_handler_2);
+        _parser.oob("3,CONNECT", this, &ESP32::_connect_handler_3);
+        _parser.oob("4,CONNECT", this, &ESP32::_connect_handler_4);
+        _parser.oob("0,CLOSED", this, &ESP32::_closed_handler_0);
+        _parser.oob("1,CLOSED", this, &ESP32::_closed_handler_1);
+        _parser.oob("2,CLOSED", this, &ESP32::_closed_handler_2);
+        _parser.oob("3,CLOSED", this, &ESP32::_closed_handler_3);
+        _parser.oob("4,CLOSED", this, &ESP32::_closed_handler_4);
+        init_end = true;
+    }
 
-    _parser.oob("0,CONNECT", this, &ESP32::_connect_handler_0);
-    _parser.oob("1,CONNECT", this, &ESP32::_connect_handler_1);
-    _parser.oob("2,CONNECT", this, &ESP32::_connect_handler_2);
-    _parser.oob("3,CONNECT", this, &ESP32::_connect_handler_3);
-    _parser.oob("4,CONNECT", this, &ESP32::_connect_handler_4);
+    return success;
+}
 
-    _parser.oob("0,CLOSED", this, &ESP32::_closed_handler_0);
-    _parser.oob("1,CLOSED", this, &ESP32::_closed_handler_1);
-    _parser.oob("2,CLOSED", this, &ESP32::_closed_handler_2);
-    _parser.oob("3,CLOSED", this, &ESP32::_closed_handler_3);
-    _parser.oob("4,CLOSED", this, &ESP32::_closed_handler_4);
+bool ESP32::restart()
+{
+    bool success;
+
+    _lock.lock();
+    if (!init_end) {
+        success = startup();
+    } else {
+        reset();
+        _parser.setTimeout(5000);
+        success = _parser.send("AT+CWMODE=%d", _wifi_mode)
+               && _parser.recv("OK")
+               && _parser.send("AT+CIPMUX=1")
+               && _parser.recv("OK");
+    }
     _lock.unlock();
 
     return success;
 }
 
-bool ESP32::startup_retry(int mode)
+bool ESP32::set_mode(int mode)
 {
-    bool success;
-
     //only 3 valid modes
     if (mode < 1 || mode > 3) {
         return false;
     }
-
-    int wk_mode;
-
-    _lock.lock();
-    reset();
-    _parser.setTimeout(5000);
-    success = _parser.send("AT+CWMODE?")
-           && _parser.recv("+CWMODE:%d", &wk_mode)
-           && _parser.recv("OK");
-    if (success && (wk_mode != mode)) {
-        success = _parser.send("AT+CWMODE=%d", mode)
-               && _parser.recv("OK");
-    }
-    if (success) {
-        success = _parser.send("AT+CIPMUX=1")
-               && _parser.recv("OK");
-    }
-    _lock.unlock();
-
-    return success;
+    _wifi_mode = mode;
+    return restart();
 }
 
 bool ESP32::cre_server(int port)
 {
+    if (_server_act) {
+        return false;
+    }
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     if (!(_parser.send("AT+CIPSERVER=1,%d", port)
         && _parser.recv("OK"))) {
@@ -107,6 +143,7 @@ bool ESP32::cre_server(int port)
 bool ESP32::del_server()
 {
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     if (!(_parser.send("AT+CIPSERVER=0")
         && _parser.recv("OK"))) {
@@ -121,6 +158,7 @@ bool ESP32::del_server()
 void ESP32::socket_handler(bool connect, int id)
 {
     _lock.lock();
+    startup();
     if (connect) {
         _id_bits |= (1 << id);
         if (_server_act) {
@@ -160,6 +198,7 @@ bool ESP32::accept(int * p_id)
             break;
         }
         _lock.lock();
+        startup();
         if (!_accept_id.empty()) {
             ret = true;
         } else {
@@ -192,7 +231,6 @@ bool ESP32::accept(int * p_id)
 bool ESP32::reset(void)
 {
     for (int i = 0; i < 2; i++) {
-        _lock.lock();
         _parser.setTimeout(1500);
         if (_parser.send("AT+RST")
             && _parser.recv("OK")) {
@@ -204,10 +242,8 @@ bool ESP32::reset(void)
                 _serial.baud(230400);
             }
 
-            _lock.unlock();
             return true;
         }
-        _lock.unlock();
     }
 
     return false;
@@ -223,6 +259,7 @@ bool ESP32::dhcp(bool enabled, int mode)
     }
 
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     ret = _parser.send("AT+CWDHCP=%d,%d", enabled?1:0, mode)
        && _parser.recv("OK");
@@ -235,8 +272,25 @@ bool ESP32::connect(const char *ap, const char *passPhrase)
     bool ret;
 
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
-    ret = _parser.send("AT+CWJAP=\"%s\",\"%s\"", ap, passPhrase)
+
+    ret = _parser.send("AT+CWAUTOCONN=1")
+       && _parser.recv("OK")
+       && _parser.send("AT+CWJAP=\"%s\",\"%s\"", ap, passPhrase)
+       && _parser.recv("OK");
+    _lock.unlock();
+    return ret;
+}
+
+bool ESP32::config_soft_ap(const char *ap, const char *passPhrase, uint8_t chl, uint8_t ecn)
+{
+    bool ret;
+
+    _lock.lock();
+    startup();
+    _parser.setTimeout(3000);
+    ret = _parser.send("AT+CWSAP=\"%s\",\"%s\",%hhu,%hhu", ap, passPhrase, chl, ecn)
        && _parser.recv("OK");
     _lock.unlock();
     return ret;
@@ -247,6 +301,7 @@ bool ESP32::get_ssid(const char *ap)
     bool ret;
 
     _lock.lock();
+    startup();
     _parser.setTimeout(500);
     ret = _parser.send("AT+CWJAP?")
        && _parser.recv("+CWJAP:\"%33[^\"]\",", ap)
@@ -260,6 +315,7 @@ bool ESP32::disconnect(void)
     bool ret;
 
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     ret = _parser.send("AT+CWQAP") && _parser.recv("OK");
     _lock.unlock();
@@ -271,6 +327,7 @@ const char *ESP32::getIPAddress(void)
     bool ret;
 
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     ret = _parser.send("AT+CIFSR")
        && _parser.recv("+CIFSR:STAIP,\"%15[^\"]\"", _ip_buffer)
@@ -282,11 +339,29 @@ const char *ESP32::getIPAddress(void)
     return _ip_buffer;
 }
 
+const char *ESP32::getIPAddress_ap(void)
+{
+    bool ret;
+
+    _lock.lock();
+    startup();
+    _parser.setTimeout(3000);
+    ret = _parser.send("AT+CIFSR")
+       && _parser.recv("+CIFSR:APIP,\"%15[^\"]\"", _ip_buffer_ap)
+       && _parser.recv("OK");
+    _lock.unlock();
+    if (!ret) {
+        return 0;
+    }
+    return _ip_buffer_ap;
+}
+
 const char *ESP32::getMACAddress(void)
 {
     bool ret;
 
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     ret = _parser.send("AT+CIFSR")
        && _parser.recv("+CIFSR:STAMAC,\"%17[^\"]\"", _mac_buffer)
@@ -299,11 +374,30 @@ const char *ESP32::getMACAddress(void)
     return _mac_buffer;
 }
 
+const char *ESP32::getMACAddress_ap(void)
+{
+    bool ret;
+
+    _lock.lock();
+    startup();
+    _parser.setTimeout(3000);
+    ret = _parser.send("AT+CIFSR")
+       && _parser.recv("+CIFSR:APMAC,\"%17[^\"]\"", _mac_buffer_ap)
+       && _parser.recv("OK");
+    _lock.unlock();
+
+    if (!ret) {
+        return 0;
+    }
+    return _mac_buffer_ap;
+}
+
 const char *ESP32::getGateway()
 {
     bool ret;
 
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     ret = _parser.send("AT+CIPSTA?")
        && _parser.recv("+CIPSTA:gateway:\"%15[^\"]\"", _gateway_buffer)
@@ -316,11 +410,30 @@ const char *ESP32::getGateway()
     return _gateway_buffer;
 }
 
+const char *ESP32::getGateway_ap()
+{
+    bool ret;
+
+    _lock.lock();
+    startup();
+    _parser.setTimeout(3000);
+    ret = _parser.send("AT+CIPAP?")
+       && _parser.recv("+CIPAP:gateway:\"%15[^\"]\"", _gateway_buffer_ap)
+       && _parser.recv("OK");
+    _lock.unlock();
+
+    if (!ret) {
+        return 0;
+    }
+    return _gateway_buffer_ap;
+}
+
 const char *ESP32::getNetmask()
 {
     bool ret;
 
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     ret = _parser.send("AT+CIPSTA?")
        && _parser.recv("+CIPSTA:netmask:\"%15[^\"]\"", _netmask_buffer)
@@ -333,6 +446,24 @@ const char *ESP32::getNetmask()
     return _netmask_buffer;
 }
 
+const char *ESP32::getNetmask_ap()
+{
+    bool ret;
+
+    _lock.lock();
+    startup();
+    _parser.setTimeout(3000);
+    ret = _parser.send("AT+CIPAP?")
+       && _parser.recv("+CIPAP:netmask:\"%15[^\"]\"", _netmask_buffer_ap)
+       && _parser.recv("OK");
+    _lock.unlock();
+
+    if (!ret) {
+        return 0;
+    }
+    return _netmask_buffer_ap;
+}
+
 int8_t ESP32::getRSSI()
 {
     bool ret;
@@ -341,6 +472,7 @@ int8_t ESP32::getRSSI()
     char bssid[18];
 
     _lock.lock();
+    startup();
     _parser.setTimeout(3000);
     ret = _parser.send("AT+CWJAP?")
        && _parser.recv("+CWJAP:\"%32[^\"]\",\"%17[^\"]\"", ssid, bssid)
@@ -371,6 +503,13 @@ int ESP32::scan(WiFiAccessPoint *res, unsigned limit)
 {
     unsigned cnt = 0;
     nsapi_wifi_ap_t ap;
+
+    if (!init_end) {
+        _lock.lock();
+        startup();
+        _lock.unlock();
+        Thread::wait(1500);
+    }
 
     _lock.lock();
     _parser.setTimeout(5000);
@@ -407,6 +546,7 @@ bool ESP32::open(const char *type, int id, const char* addr, int port)
     }
 
     _lock.lock();
+    startup();
     _parser.setTimeout(500);
     ret = _parser.send("AT+CIPSTART=%d,\"%s\",\"%s\",%d", id, type, addr, port)
        && _parser.recv("OK");
@@ -437,6 +577,7 @@ bool ESP32::send(int id, const void *data, uint32_t amount)
             send_size = 2048;
         }
         _lock.lock();
+        startup();
         _parser.setTimeout(1500);
         ret = _parser.send("AT+CIPSEND=%d,%d", id, send_size)
            && _parser.recv(">")
@@ -464,6 +605,7 @@ void ESP32::_packet_handler()
     uint32_t amount;
     int tmp_timeout;
 
+    startup();
     // parse out the packet
     if (!_parser.recv(",%d,%d:", &id, &amount)) {
         return;
@@ -528,6 +670,7 @@ int32_t ESP32::recv(int id, void *data, uint32_t amount)
 
         // Wait for inbound packet
         _lock.lock();
+        startup();
         _parser.setTimeout(2);
         if (!_parser.recv("OK")) {
             _lock.unlock();
@@ -536,6 +679,7 @@ int32_t ESP32::recv(int id, void *data, uint32_t amount)
                  || ((_id_bits_close & (1 << id)) != 0)) {
                     return -2;
                 } else {
+                    recv_waiting = true;
                     return -1;
                 }
             }
@@ -550,12 +694,14 @@ bool ESP32::close(int id, bool wait_close)
     if (wait_close) {
         for (int j = 0; j < 50; j++) {
             _lock.lock();
+            startup();
             _parser.setTimeout(5);
             _parser.recv("%*,CLOSED");
             if (((_id_bits & (1 << id)) == 0)
              || ((_id_bits_close & (1 << id)) != 0)) {
                 _lock.unlock();
                 _id_bits_close &= ~(1 << id);
+                _ids[id] = false;
                 return true;
             }
             _lock.unlock();
@@ -566,16 +712,19 @@ bool ESP32::close(int id, bool wait_close)
     //May take a second try if device is busy
     for (unsigned i = 0; i < 2; i++) {
         _lock.lock();
+        startup();
         _parser.setTimeout(500);
         if (_parser.send("AT+CIPCLOSE=%d", id)
             && _parser.recv("OK")) {
             _lock.unlock();
             _id_bits_close &= ~(1 << id);
+            _ids[id] = false;
             return true;
         }
         _lock.unlock();
     }
 
+    _ids[id] = false;
     return false;
 }
 
@@ -594,9 +743,39 @@ bool ESP32::writeable()
     return _serial.writeable();
 }
 
-void ESP32::attach(Callback<void()> func)
+void ESP32::attach(int id, void (*callback)(void *), void *data)
 {
-    _serial.attach(func);
+    _cbs[id].callback = callback;
+    _cbs[id].data = data;
+}
+
+int ESP32::get_free_id()
+{
+    // Look for an unused socket
+    int id = -1;
+
+    for (int i = 0; i < ESP32_SOCKET_COUNT; i++) {
+        if ((!_ids[i]) && ((_id_bits & (1 << i)) == 0)) {
+            id = i;
+            _ids[i] = true;
+            break;
+        }
+    }
+
+    return id;
+}
+
+void ESP32::event() {
+    if (!recv_waiting) {
+        return;
+    }
+    recv_waiting = false;
+
+    for (int i = 0; i < ESP32_SOCKET_COUNT; i++) {
+        if (_cbs[i].callback) {
+            _cbs[i].callback(_cbs[i].data);
+        }
+    }
 }
 
 bool ESP32::recv_ap(nsapi_wifi_ap_t *ap)

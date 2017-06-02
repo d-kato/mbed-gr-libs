@@ -19,28 +19,28 @@
 
 #include "ATParser_os.h"
 
+#define ESP32_SOCKET_COUNT 5
+
 /** ESP32Interface class.
     This is an interface to a ESP32 radio.
  */
 class ESP32
 {
 public:
-    ESP32(PinName tx, PinName rx, bool debug=false);
+    /**
+    * Static method to create or retrieve the single ESP32 instance
+    */
+    static ESP32 * getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug=false);
+
+    ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug=false);
 
     /**
-    * Startup the ESP32
+    * Sets the Wi-Fi Mode
     *
     * @param mode mode of WIFI 1-client, 2-host, 3-both
     * @return true only if ESP32 was setup correctly
     */
-    bool startup(int mode);
-
-    /**
-    * Reset ESP32
-    *
-    * @return true only if ESP32 resets successfully
-    */
-    bool reset(void);
+    bool set_mode(int mode);
 
     /**
     * Enable/Disable DHCP
@@ -73,6 +73,7 @@ public:
     * @return null-teriminated IP address or null if no IP address is assigned
     */
     const char *getIPAddress(void);
+    const char *getIPAddress_ap(void);
 
     /**
     * Get the MAC address of ESP32
@@ -80,6 +81,7 @@ public:
     * @return null-terminated MAC address or null if no MAC address is assigned
     */
     const char *getMACAddress(void);
+    const char *getMACAddress_ap(void);
 
      /** Get the local gateway
      *
@@ -87,6 +89,7 @@ public:
      *                  or null if no network mask has been recieved
      */
     const char *getGateway();
+    const char *getGateway_ap();
 
     /** Get the local network mask
      *
@@ -94,6 +97,7 @@ public:
      *                  or null if no network mask has been recieved
      */
     const char *getNetmask();
+    const char *getNetmask_ap();
 
     /* Return RSSI for active connection
      *
@@ -174,31 +178,21 @@ public:
     */
     bool writeable();
 
-    /**
-    * Attach a function to call whenever network state has changed
-    *
-    * @param func A pointer to a void function, or 0 to set as none
-    */
-    void attach(Callback<void()> func);
+    void attach(int id, void (*callback)(void *), void *data);
+    int get_free_id();
 
-    /**
-    * Attach a function to call whenever network state has changed
-    *
-    * @param obj pointer to the object to call the member function on
-    * @param method pointer to the member function to call
-    */
-    template <typename T, typename M>
-    void attach(T *obj, M method) {
-        attach(Callback<void()>(obj, method));
-    }
+    bool config_soft_ap(const char *ap, const char *passPhrase, uint8_t chl, uint8_t ecn);
 
-    bool startup_retry(int mode);
+    bool restart();
     bool get_ssid(const char *ap);
     bool cre_server(int port);
     bool del_server();
     bool accept(int * p_id);
 
 private:
+    DigitalOut wifi_en;
+    DigitalOut wifi_io0;
+    bool init_end;
     BufferedSerial _serial;
     ATParser_os _parser;
     struct packet {
@@ -208,13 +202,25 @@ private:
         uint32_t index;
         // data follows
     } *_packets, **_packets_end;
+    int _wifi_mode;
 
     std::vector<int> _accept_id;
     uint32_t _id_bits;
     uint32_t _id_bits_close;
     bool _server_act;
     Mutex _lock;
+    static ESP32 * instESP32;
 
+    bool _ids[ESP32_SOCKET_COUNT];
+    struct {
+        void (*callback)(void *);
+        void *data;
+    } _cbs[ESP32_SOCKET_COUNT];
+    bool recv_waiting;
+
+    bool startup();
+    bool reset(void);
+    void debugOn(bool debug);
     void socket_handler(bool connect, int id);
     void _connect_handler_0();
     void _connect_handler_1();
@@ -227,12 +233,18 @@ private:
     void _closed_handler_3();
     void _closed_handler_4();
     void _packet_handler();
+    void event();
     bool recv_ap(nsapi_wifi_ap_t *ap);
 
     char _ip_buffer[16];
     char _gateway_buffer[16];
     char _netmask_buffer[16];
     char _mac_buffer[18];
+
+    char _ip_buffer_ap[16];
+    char _gateway_buffer_ap[16];
+    char _netmask_buffer_ap[16];
+    char _mac_buffer_ap[18];
 };
 
 #endif
