@@ -18,10 +18,11 @@
 
 ESP32 * ESP32::instESP32 = NULL;
 
-ESP32 * ESP32::getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug)
+ESP32 * ESP32::getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
+                            PinName rts, PinName cts, int baudrate)
 {
     if (instESP32 == NULL) {
-        instESP32 = new ESP32(en, io0, tx, rx, debug);
+        instESP32 = new ESP32(en, io0, tx, rx, debug, rts, cts, baudrate);
     } else {
         if (debug) {
             instESP32->debugOn(debug);
@@ -30,16 +31,29 @@ ESP32 * ESP32::getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, boo
     return instESP32;
 }
 
-ESP32::ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug)
+ESP32::ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
+    PinName rts, PinName cts, int baudrate)
     : wifi_en(en), wifi_io0(io0), init_end(false)
     , _serial(tx, rx, 1024), _parser(_serial)
     , _packets(0), _packets_end(&_packets)
     , _id_bits(0), _id_bits_close(0),_server_act(false)
 {
     _wifi_mode = 1;
+    _baudrate = baudrate;
     recv_waiting = false;
     memset(_ids, 0, sizeof(_ids));
     memset(_cbs, 0, sizeof(_cbs));
+
+    if ((rts != NC) && (cts != NC)) {
+        _serial.set_flow_control(SerialBase::RTSCTS, rts, cts);
+    } else if (rts != NC) {
+        _serial.set_flow_control(SerialBase::RTS, rts);
+    } else if (cts != NC) {
+        _serial.set_flow_control(SerialBase::CTS, cts);
+    } else {
+        // do nothing
+    }
+
     _serial.baud(115200);
     _parser.debugOn(debug);
     _serial.attach(Callback<void()>(this, &ESP32::event));
@@ -237,9 +251,9 @@ bool ESP32::reset(void)
             _serial.baud(115200);
             _parser.recv("ready");
 
-            if (_parser.send("AT+UART=230400,8,1,0,0")
+            if (_parser.send("AT+UART=%d,8,1,0,0", _baudrate)
                 && _parser.recv("OK")) {
-                _serial.baud(230400);
+                _serial.baud(_baudrate);
             }
 
             return true;

@@ -18,9 +18,10 @@
 #include "ESP32Stack.h"
 
 // ESP32Stack implementation
-ESP32Stack::ESP32Stack(PinName en, PinName io0, PinName tx, PinName rx, bool debug)
+ESP32Stack::ESP32Stack(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
+    PinName rts, PinName cts, int baudrate)
 {
-    _esp = ESP32::getESP32Inst(en, io0, tx, rx, debug);
+    _esp = ESP32::getESP32Inst(en, io0, tx, rx, debug, rts, cts, baudrate);
 }
 
 struct esp32_socket {

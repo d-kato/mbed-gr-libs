@@ -108,7 +108,7 @@ protected:
     volatile bool lock_tx;
     volatile bool cb_tx_en;
     volatile bool cb_tx_pending;
-    Mutex tx_mtx;
+    rtos::Mutex tx_mtx;
 
     uint8_t buf_in[WANDONGLE_MAX_INEP_SIZE];
     volatile uint32_t buf_in_len;
@@ -116,7 +116,7 @@ protected:
     volatile bool lock_rx;
     volatile bool cb_rx_en;
     volatile bool cb_rx_pending;
-    Mutex rx_mtx;
+    rtos::Mutex rx_mtx;
 
     IUSBHostSerialListener* listener;
 

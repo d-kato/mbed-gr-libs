@@ -30,9 +30,11 @@ public:
     /**
     * Static method to create or retrieve the single ESP32 instance
     */
-    static ESP32 * getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug=false);
+    static ESP32 * getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false,
+                                PinName rts = NC, PinName cts = NC, int baudrate = 230400);
 
-    ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug=false);
+    ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false,
+          PinName rts = NC, PinName cts = NC, int baudrate = 230400);
 
     /**
     * Sets the Wi-Fi Mode
@@ -203,12 +205,13 @@ private:
         // data follows
     } *_packets, **_packets_end;
     int _wifi_mode;
+    int _baudrate;
 
     std::vector<int> _accept_id;
     uint32_t _id_bits;
     uint32_t _id_bits_close;
     bool _server_act;
-    Mutex _lock;
+    rtos::Mutex _lock;
     static ESP32 * instESP32;
 
     bool _ids[ESP32_SOCKET_COUNT];

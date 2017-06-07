@@ -3,8 +3,9 @@
 #include "ESP32InterfaceAP.h"
 
 // ESP32InterfaceAP implementation
-ESP32InterfaceAP::ESP32InterfaceAP(PinName en, PinName io0, PinName tx, PinName rx, bool debug)
-    : ESP32Stack(en, io0, tx, rx, debug)
+ESP32InterfaceAP::ESP32InterfaceAP(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
+    PinName rts, PinName cts, int baudrate)
+    : ESP32Stack(en, io0, tx, rx, debug, rts, cts, baudrate)
 {
     own_ch = 1;
 }

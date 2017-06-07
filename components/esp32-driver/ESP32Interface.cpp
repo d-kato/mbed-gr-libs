@@ -3,8 +3,9 @@
 #include "ESP32Interface.h"
 
 // ESP32Interface implementation
-ESP32Interface::ESP32Interface(PinName en, PinName io0, PinName tx, PinName rx, bool debug)
-    : ESP32Stack(en, io0, tx, rx, debug)
+ESP32Interface::ESP32Interface(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
+    PinName rts, PinName cts, int baudrate)
+    : ESP32Stack(en, io0, tx, rx, debug, rts, cts, baudrate)
 {
 }
 

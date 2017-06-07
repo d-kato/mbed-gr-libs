@@ -160,7 +160,7 @@ private:
 
     CBW cbw;
     CSW csw;
-    Mutex _lock;
+    rtos::Mutex _lock;
 
     int SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t * data, uint32_t transfer_len);
     int testUnitReady();

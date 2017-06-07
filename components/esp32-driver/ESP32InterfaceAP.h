@@ -16,8 +16,12 @@ public:
      * @param tx        TX pin
      * @param rx        RX pin
      * @param debug     Enable debugging
+     * @param rts       RTS pin
+     * @param cts       CTS pin
+     * @param baudrate  The baudrate of the serial port (default = 230400).
      */
-    ESP32InterfaceAP(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false);
+    ESP32InterfaceAP(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false,
+                     PinName rts = NC, PinName cts = NC, int baudrate = 230400);
 
     /** Start the interface
      *

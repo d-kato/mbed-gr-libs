@@ -166,7 +166,7 @@ protected:
     unsigned _block_size;
     bool _is_initialized;
     bool _dbg;
-    Mutex _lock;
+    rtos::Mutex _lock;
 };
 
 

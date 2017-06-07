@@ -281,8 +281,8 @@ private:
     Thread usbThread;
     void usb_process();
     Mail<message_t, 10> mail_usb_event;
-    Mutex usb_mutex;
-    Mutex td_mutex;
+    rtos::Mutex usb_mutex;
+    rtos::Mutex td_mutex;
 
     // buffer for conf descriptor
     uint8_t data[415];
