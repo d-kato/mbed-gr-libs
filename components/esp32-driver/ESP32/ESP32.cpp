@@ -44,14 +44,17 @@ ESP32::ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
     memset(_ids, 0, sizeof(_ids));
     memset(_cbs, 0, sizeof(_cbs));
 
-    if ((rts != NC) && (cts != NC)) {
-        _serial.set_flow_control(SerialBase::RTSCTS, rts, cts);
-    } else if (rts != NC) {
-        _serial.set_flow_control(SerialBase::RTS, rts);
-    } else if (cts != NC) {
-        _serial.set_flow_control(SerialBase::CTS, cts);
+    _rts = rts;
+    _cts = cts;
+
+    if ((_rts != NC) && (_cts != NC)) {
+        _flow_control = 3;
+    } else if (_rts != NC) {
+        _flow_control = 1;
+    } else if (_cts != NC) {
+        _flow_control = 2;
     } else {
-        // do nothing
+        _flow_control = 0;
     }
 
     _serial.baud(115200);
@@ -249,11 +252,27 @@ bool ESP32::reset(void)
         if (_parser.send("AT+RST")
             && _parser.recv("OK")) {
             _serial.baud(115200);
+            _serial.set_flow_control(SerialBase::Disabled);
             _parser.recv("ready");
 
-            if (_parser.send("AT+UART=%d,8,1,0,0", _baudrate)
+            if (_parser.send("AT+UART=%d,8,1,0,%d", _baudrate, _flow_control)
                 && _parser.recv("OK")) {
                 _serial.baud(_baudrate);
+                switch (_flow_control) {
+                    case 1:
+                        _serial.set_flow_control(SerialBase::RTS, _rts);
+                        break;
+                    case 2:
+                        _serial.set_flow_control(SerialBase::CTS, _cts);
+                        break;
+                    case 3:
+                        _serial.set_flow_control(SerialBase::RTSCTS, _rts, _cts);
+                        break;
+                    case 0:
+                    default:
+                        // do nothing
+                        break;
+                }
             }
 
             return true;

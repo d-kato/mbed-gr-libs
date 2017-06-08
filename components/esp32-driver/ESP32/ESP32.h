@@ -30,11 +30,11 @@ public:
     /**
     * Static method to create or retrieve the single ESP32 instance
     */
-    static ESP32 * getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false,
-                                PinName rts = NC, PinName cts = NC, int baudrate = 230400);
+    static ESP32 * getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
+                                PinName rts, PinName cts, int baudrate);
 
-    ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false,
-          PinName rts = NC, PinName cts = NC, int baudrate = 230400);
+    ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
+          PinName rts, PinName cts, int baudrate);
 
     /**
     * Sets the Wi-Fi Mode
@@ -206,6 +206,9 @@ private:
     } *_packets, **_packets_end;
     int _wifi_mode;
     int _baudrate;
+    PinName _rts;
+    PinName _cts;
+    int _flow_control;
 
     std::vector<int> _accept_id;
     uint32_t _id_bits;
