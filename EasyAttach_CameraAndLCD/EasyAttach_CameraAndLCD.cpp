@@ -3,6 +3,21 @@
 #include "rtos.h"
 #include "EasyAttach_CameraAndLCD.h"
 
+#if MBED_CONF_APP_LCD
+#if (MBED_CONF_APP_LCD_TYPE == GR_PEACH_4_3INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_7_1INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_RSK_TFT)
+static DigitalOut lcd_pwon(P7_15);
+static DigitalOut lcd_blon(P8_1);
+static DigitalOut lcd_cntrst(P8_15);
+#elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
+static DigitalOut lcd_pwon(P3_8);
+static DigitalOut lcd_sd(P7_5);
+static PwmOut lcd_cntrst(P3_12);
+#endif
+#ifndef VOLTAGE_ADJUSTMENT
+  #define VOLTAGE_ADJUSTMENT   (1.00f)
+#endif
+#endif
+
 static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
 #if MBED_CONF_APP_LCD
   #if (MBED_CONF_APP_LCD_TYPE == GR_PEACH_4_3INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_7_1INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_RSK_TFT)
@@ -10,8 +25,6 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
         /* data pin */
         P5_7, P5_6, P5_5, P5_4, P5_3, P5_2, P5_1, P5_0
     };
-    DigitalOut  lcd_pwon(P7_15);
-    DigitalOut  lcd_blon(P8_1);
 
     lcd_pwon = 0;
     lcd_blon = 0;
@@ -39,11 +52,10 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
         P6_3, P6_2, P6_1, P6_0, P3_7, P3_6, P3_5, P3_4, P3_3, P3_2, P3_1, P3_0, P5_2,
         P5_1, P5_0, P7_4, 
     };
-    DigitalOut  lcd_pwon(P3_8);
-    DigitalOut  lcd_sd(P7_5);
 
     lcd_pwon = 0;
     lcd_sd = 1;
+    lcd_cntrst.period_us(500);
     Thread::wait(100);
     lcd_pwon = 1;
     Thread::wait(1);
@@ -189,25 +201,15 @@ DisplayBase::graphics_error_t EasyAttach_Init(DisplayBase& Display, uint16_t cap
 }
 
 void EasyAttach_LcdBacklight(bool type) {
-#if MBED_CONF_APP_LCD
-#if (MBED_CONF_APP_LCD_TYPE == GR_PEACH_4_3INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_7_1INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_RSK_TFT)
-    DigitalOut lcd_cntrst(P8_15);
-
     if (type) {
-        lcd_cntrst = 1;
+        EasyAttach_LcdBacklight(1.0f);
     } else {
-        lcd_cntrst = 0;
+        EasyAttach_LcdBacklight(0.0f);
     }
-#elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
-    DigitalOut lcd_cntrst(P3_12);
+}
 
-    if (type) {
-        lcd_cntrst = 1;
-    } else {
-        lcd_cntrst = 0;
-    }
-#endif
-#endif
+void EasyAttach_LcdBacklight(float value) {
+    lcd_cntrst = (value * VOLTAGE_ADJUSTMENT);
 }
 
 DisplayBase::graphics_error_t EasyAttach_CameraStart(DisplayBase& Display, DisplayBase::video_input_channel_t channel) {

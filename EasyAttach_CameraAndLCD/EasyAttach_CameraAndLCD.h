@@ -78,8 +78,8 @@ extern DisplayBase::graphics_error_t EasyAttach_CameraStart(
     DisplayBase::video_input_channel_t channel = DisplayBase::VIDEO_INPUT_CHANNEL_0
 );
 
-extern void EasyAttach_LcdBacklight(
-    bool type = true
-);
+extern void EasyAttach_LcdBacklight(bool type = true);
+
+extern void EasyAttach_LcdBacklight(float value);
 
 #endif
