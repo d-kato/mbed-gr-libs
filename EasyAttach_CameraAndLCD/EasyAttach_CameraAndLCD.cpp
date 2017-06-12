@@ -201,15 +201,19 @@ DisplayBase::graphics_error_t EasyAttach_Init(DisplayBase& Display, uint16_t cap
 }
 
 void EasyAttach_LcdBacklight(bool type) {
+#if MBED_CONF_APP_LCD
     if (type) {
         EasyAttach_LcdBacklight(1.0f);
     } else {
         EasyAttach_LcdBacklight(0.0f);
     }
+#endif
 }
 
 void EasyAttach_LcdBacklight(float value) {
+#if MBED_CONF_APP_LCD
     lcd_cntrst = (value * VOLTAGE_ADJUSTMENT);
+#endif
 }
 
 DisplayBase::graphics_error_t EasyAttach_CameraStart(DisplayBase& Display, DisplayBase::video_input_channel_t channel) {
