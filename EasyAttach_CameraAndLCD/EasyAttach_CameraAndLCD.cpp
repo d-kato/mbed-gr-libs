@@ -8,7 +8,7 @@
 static DigitalOut lcd_pwon(P7_15);
 static DigitalOut lcd_blon(P8_1);
 static DigitalOut lcd_cntrst(P8_15);
-#elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
+#elif (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD) || (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0)
 static DigitalOut lcd_pwon(P3_8);
 static DigitalOut lcd_sd(P7_5);
 static PwmOut lcd_cntrst(P3_12);
@@ -45,7 +45,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
 
     return &LcdCfgTbl_LCD_shield;
-  #elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
+  #elif (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD) || (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0)
     PinName lcd_pin[28] = {
         /* data pin */
         P6_15, P6_14, P6_13, P6_12, P6_11, P6_10, P6_9, P6_8, P6_7, P6_6, P6_5, P6_4,
@@ -54,12 +54,20 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     };
 
     lcd_pwon = 0;
+    #if MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0
+    lcd_sd = 0;
+    #else
     lcd_sd = 1;
+    #endif
     lcd_cntrst.period_us(500);
     Thread::wait(100);
     lcd_pwon = 1;
     Thread::wait(1);
+    #if MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0
+    lcd_sd = 1;
+    #else
     lcd_sd = 0;
+    #endif
 
     Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
 
