@@ -193,14 +193,23 @@ static void* R_SSIF_InitOne(const int_t channel, const void* const config_data, 
     }
     else
     {
+#if(1) /* mbed */
+        ssif_info_drv_t* const p_info_drv = SSIF_GetDrvInstanc();
+        p_info_drv->drv_stat = SSIF_DRVSTS_INIT;
+#else
         g_ssif_info_drv.drv_stat = SSIF_DRVSTS_INIT;
+#endif /* end mbed */
         ch_drv_stat[channel] = SSIF_DRVSTS_INIT;
 
         ercd = SSIF_InitialiseOne(channel, (const ssif_channel_cfg_t*)config_data);
 
         if (ESUCCESS == ercd)
         {
+#if(1) /* mbed */
+            p_ret = (void*)p_info_drv;
+#else
             p_ret = (void*)&g_ssif_info_drv;
+#endif /* end mbed */
         }
         else
         {

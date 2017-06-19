@@ -34,7 +34,7 @@ R_BSP_Ssif::R_BSP_Ssif(PinName sck, PinName ws, PinName tx, PinName rx, uint8_t 
         ssif_ch      = wk_channel;
 
         ssif_cfg.enabled                = true;
-        ssif_cfg.int_level              = 0x78;
+        ssif_cfg.int_level              = int_level;
         ssif_cfg.slave_mode             = true;
         ssif_cfg.sample_freq            = 44100u;
         ssif_cfg.clk_select             = SSIF_CFG_CKS_AUDIO_X1;

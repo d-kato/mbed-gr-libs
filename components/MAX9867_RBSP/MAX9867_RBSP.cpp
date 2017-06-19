@@ -31,7 +31,7 @@ MAX9867_RBSP::MAX9867_RBSP(PinName sda, PinName scl, PinName sck, PinName ws, Pi
 
     // I2S Mode
     ssif_cfg.enabled                = true;
-    ssif_cfg.int_level              = 0x78;
+    ssif_cfg.int_level              = int_level;
     ssif_cfg.slave_mode             = true;
     ssif_cfg.sample_freq            = 44100u;
     ssif_cfg.clk_select             = SSIF_CFG_CKS_AUDIO_X1;
@@ -95,7 +95,7 @@ bool MAX9867_RBSP::micVolume(float VolumeIn) {
     } else {
         cmd[1] = 0x60 + 50 - vol;  // PAREN=11,PGAMR=50-vol
     }
-    cmd[2] = 0x00;  // PAREN=00,PGAMR=0x00
+    cmd[2] = 0x00;  // Right Microphone Gain PAREN=00,PGAMR=0x00
     mI2c_.write(mAddr, cmd, 3);
 
     return true;
@@ -171,6 +171,11 @@ void MAX9867_RBSP::activateDigitalInterface_(void) {
     cmd[0] = 0x0E;  // Line Input Registers
     cmd[1] = 0x40;  // LILM=1,LIGL=0x00
     cmd[2] = 0x40;  // LIRM=1,LIGR=0x00
+    mI2c_.write(mAddr, cmd, 3);
+
+    cmd[0] = 0x12;  // Microphone Input Registers
+    cmd[1] = 0x00;  // Left Microphone Gain PAREN=00,PGAMR=0x00
+    cmd[2] = 0x00;  // Right Microphone Gain PAREN=00,PGAMR=0x00
     mI2c_.write(mAddr, cmd, 3);
 
     cmd[0] = 0x14;  // CONFIGURATION

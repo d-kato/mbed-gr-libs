@@ -350,7 +350,12 @@ static void SSIF_ERI5_Handler(void)
 
 static void SSIF_ERI_Handler(const uint32_t ssif_ch)
 {
+#if(1) /* mbed */
+    ssif_info_drv_t* const p_info_drv = SSIF_GetDrvInstanc();
+    ssif_info_ch_t* const p_info_ch = &p_info_drv->info_ch[ssif_ch];
+#else
     ssif_info_ch_t* const p_info_ch = &g_ssif_info_drv.info_ch[ssif_ch];
+#endif /* end mbed */
 
     if (0u != (g_ssireg[ssif_ch]->SSISR & SSIF_SR_INT_ERR_MASK))
     {

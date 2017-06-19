@@ -58,7 +58,15 @@ osSemaphoreDef(ssif_ch5_access);
 #endif /* mbed */
 /* <-MISRA 8.8, MISRA 8.10, IPA M2.2.2 */
 
+#if(1) /* mbed */
+static ssif_info_drv_t g_ssif_info_drv;
+
+ssif_info_drv_t * SSIF_GetDrvInstanc(void) {
+    return &g_ssif_info_drv;
+}
+#else
 ssif_info_drv_t g_ssif_info_drv;
+#endif
 
 volatile struct st_ssif* const g_ssireg[SSIF_NUM_CHANS] = SSIF_ADDRESS_LIST;
 

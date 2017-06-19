@@ -266,6 +266,10 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch);
 int_t SSIF_SWLtoLen(const ssif_chcfg_system_word_t ssicr_swl);
 int_t SSIF_DWLtoLen(const ssif_chcfg_data_word_t ssicr_dwl);
 
+#if(1) /* mbed */
+extern ssif_info_drv_t * SSIF_GetDrvInstanc(void);
+#else
 extern ssif_info_drv_t g_ssif_info_drv;
+#endif /* end mbed */
 
 #endif /* SSIF_H */

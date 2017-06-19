@@ -65,6 +65,7 @@ public:
         } else {
             TLV320_RBSP::micVolume(true, false);
         }
+        return true;
     }
 };
 

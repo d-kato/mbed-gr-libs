@@ -36,7 +36,7 @@ TLV320_RBSP::TLV320_RBSP(PinName cs, PinName sda, PinName scl, PinName sck, PinN
 
     // I2S Mode
     ssif_cfg.enabled                = true;
-    ssif_cfg.int_level              = 0x78;
+    ssif_cfg.int_level              = int_level;
     ssif_cfg.slave_mode             = true;
     ssif_cfg.sample_freq            = 44100u;
     ssif_cfg.clk_select             = SSIF_CFG_CKS_AUDIO_X1;
