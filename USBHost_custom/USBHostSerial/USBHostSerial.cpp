@@ -203,15 +203,18 @@ bool USBHostMultiSerial::connect() {
 //------------------------------------------------------------------------------
 
 #define SET_LINE_CODING 0x20
+#define SET_CONTROL_LINE_STATE 0x22
 
 USBHostSerialPort::USBHostSerialPort()
 {
     p_circ_buf = new CircBufferHostSerial<uint8_t, (1024 * 32)>;
+    p_buf = new uint8_t[512];
     init();
 }
 
 USBHostSerialPort::~USBHostSerialPort() {
     delete p_circ_buf;
+    delete [] p_buf;
 }
 
 void USBHostSerialPort::init(void)
@@ -248,7 +251,13 @@ void USBHostSerialPort::connect(USBHost* _host, USBDeviceConnected * _dev,
     size_bulk_out = bulk_out->getSize();
     bulk_in->attach(this, &USBHostSerialPort::rxHandler);
     bulk_out->attach(this, &USBHostSerialPort::txHandler);
-    host->bulkRead(dev, bulk_in, buf, size_bulk_in, false);
+    host->bulkRead(dev, bulk_in, p_buf, size_bulk_in, false);
+    if ((dev->getVid() == 0x1f00) && (dev->getPid() == 0x2012)) {
+        host->controlWrite( dev,
+                            USB_RECIPIENT_INTERFACE | USB_HOST_TO_DEVICE | USB_REQUEST_TYPE_CLASS,
+                            SET_CONTROL_LINE_STATE,
+                            1, serial_intf, NULL, 0);
+    }
     dev_connected = true;
 }
 
@@ -264,12 +273,12 @@ void USBHostSerialPort::rxHandler() {
                 while (p_circ_buf->isFull()) {
                     Thread::wait(1);
                 }
-                p_circ_buf->queue(buf[i]);
+                p_circ_buf->queue(p_buf[i]);
             }
             if (_irq[RxIrq]) {
                 _irq[RxIrq].call();
             }
-            host->bulkRead(dev, bulk_in, buf, size_bulk_in, false);
+            host->bulkRead(dev, bulk_in, p_buf, size_bulk_in, false);
         }
     }
 }

@@ -124,7 +124,7 @@ private:
 
     CircBufferHostSerial<uint8_t, (1024 * 32)> * p_circ_buf;
 
-    uint8_t buf[64];
+    uint8_t * p_buf;
 
     typedef struct {
         uint32_t baudrate;

@@ -154,6 +154,8 @@ const struct PIPECFGREC {
 /*************************************************************************/
 /* workareas */
 USBHAL * USBHAL::instance;
+static int write_wait = 0;
+static Semaphore write_sem;
 
 static IRQn_Type    int_id;         /* interrupt ID          */
 static uint16_t     int_level;      /* initerrupt level      */
@@ -1159,6 +1161,7 @@ EP_STATUS USBHAL::endpointWrite(uint8_t endpoint, uint8_t *data, uint32_t size)
 
     switch (pipe_status) {
         case DEVDRV_USBF_PIPE_IDLE:
+            write_wait = 1;
             err = usbx_api_function_start_send_transfer(pipe, size, data);
 
             switch (err) {
@@ -1201,6 +1204,7 @@ EP_STATUS USBHAL::endpointWriteResult(uint8_t endpoint)
     uint16_t    pipe_status;
     EP_STATUS status = EP_PENDING;
 
+    write_sem.wait(write_wait);
     pipe_status = usbx_api_function_check_pipe_status(pipe, &pipe_size);
 
     switch (pipe_status) {
@@ -1227,6 +1231,9 @@ EP_STATUS USBHAL::endpointWriteResult(uint8_t endpoint)
 
         default:
             status = EP_PENDING;
+    }
+    if (pipe_status != EP_PENDING) {
+        write_wait = 0;
     }
 
     return status;
@@ -1492,6 +1499,7 @@ void USBHAL::usbisr(void)
         (int_sts3 & int_enb4) ) {
         /* ==== BEMP PIPEx ==== */
         usbx_function_BEMPInterrupt(int_sts3, int_enb4, this, epCallback);
+        write_sem.release();
     } else if (
         (int_sts0 & USB_FUNCTION_BITBRDY) &&
         (int_enb0 & USB_FUNCTION_BITBRDY) &&
