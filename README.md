@@ -34,7 +34,7 @@ GR-LYCHEEの開発環境については、[GR-LYCHEE用オフライン開発環�
 ```
 
 ***カメラとLCDの指定***  
-カメラとLCDの指定を行う場合は``mbed_app.json``に以下を追加してください。
+カメラとLCDの指定を行う場合は``mbed_app.json``に``camera-type``と``lcd-type``を追加してください。
 ```json
 {
     "config": {
@@ -43,7 +43,7 @@ GR-LYCHEEの開発環境については、[GR-LYCHEE用オフライン開発環�
             "value": "1"
         },
         "camera-type":{
-            "help": "See mbed-gr-libs/README.md",
+            "help": "Please see mbed-gr-libs/README.md",
             "value": "CAMERA_CVBS"
         },
         "lcd":{
@@ -51,7 +51,7 @@ GR-LYCHEEの開発環境については、[GR-LYCHEE用オフライン開発環�
             "value": "1"
         },
         "lcd-type":{
-            "help": "See mbed-gr-libs/README.md",
+            "help": "Please see mbed-gr-libs/README.md",
             "value": "GR_PEACH_4_3INCH_SHIELD"
         }
     }
