@@ -310,8 +310,6 @@ static void NCGVG_RGPVG_ISR(void)
 static void NCGVG_RGPVG_ISR_0(void)
 {
     NCGVG_RGPVG_ISR();
-
-    GIC_EndInterrupt( BSP_INT_SRC_INT0 );
 }
 
 /*-----------------------------------------------------------------------------
@@ -323,8 +321,6 @@ static void NCGVG_RGPVG_ISR_0(void)
 static void NCGVG_RGPVG_ISR_1(void)
 {
     NCGVG_RGPVG_ISR();
-
-    GIC_EndInterrupt( BSP_INT_SRC_INT1 );
 }
 
 /*-----------------------------------------------------------------------------
@@ -336,8 +332,6 @@ static void NCGVG_RGPVG_ISR_1(void)
 static void NCGVG_RGPVG_ISR_2(void)
 {
     NCGVG_RGPVG_ISR();
-
-    GIC_EndInterrupt( BSP_INT_SRC_INT2 );
 }
 
 /*-----------------------------------------------------------------------------
@@ -349,8 +343,6 @@ static void NCGVG_RGPVG_ISR_2(void)
 static void NCGVG_RGPVG_ISR_3(void)
 {
     NCGVG_RGPVG_ISR();
-
-    GIC_EndInterrupt( BSP_INT_SRC_INT3 );
 }
 
 #endif

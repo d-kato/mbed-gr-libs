@@ -695,7 +695,6 @@ static void  R_VIDEO_INPUT_OnVideoInVSync_Ch1( vdc5_int_type_t int_type )
 static void  InterruptCallbackVector_S0_VI_VSYNC0(void)
 {
     gs_VDC5_ISR_S0_VI_VSYNC0(0);
-    GIC_EndInterrupt( BSP_INT_SRC_S0_VI_VSYNC0 );
 }
 #endif
 
@@ -711,7 +710,6 @@ static void  InterruptCallbackVector_S0_VI_VSYNC0(void)
 static void  InterruptCallbackVector_S0_VI_VSYNC1(void)
 {
     gs_VDC5_ISR_S0_VI_VSYNC1(0);
-    GIC_EndInterrupt( BSP_INT_SRC_S0_VI_VSYNC1 );
 }
 #endif
 
@@ -727,7 +725,6 @@ static void  InterruptCallbackVector_S0_VI_VSYNC1(void)
 static void  InterruptCallbackVector_S1_VI_VSYNC0(void)
 {
     gs_VDC5_ISR_S1_VI_VSYNC0(0);
-    GIC_EndInterrupt( BSP_INT_SRC_S1_VI_VSYNC0 );
 }
 #endif
 
@@ -743,7 +740,6 @@ static void  InterruptCallbackVector_S1_VI_VSYNC0(void)
 static void  InterruptCallbackVector_S1_VI_VSYNC1(void)
 {
     gs_VDC5_ISR_S1_VI_VSYNC1(0);
-    GIC_EndInterrupt( BSP_INT_SRC_S1_VI_VSYNC1 );
 }
 #endif
 

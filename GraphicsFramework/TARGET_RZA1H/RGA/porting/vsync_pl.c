@@ -390,7 +390,6 @@ static void  R_V_SYNC_IRQ_Handler1( vdc5_int_type_t const  int_type )
 static void  R_V_SYNC_IRQ_HandlerRoot0(void)
 {
     gs_cint_vdc5_interrupt_handler[0]( 0 );
-    GIC_EndInterrupt( BSP_INT_SRC_GR3_VLINE0 );
 }
 #endif
 
@@ -406,7 +405,6 @@ static void  R_V_SYNC_IRQ_HandlerRoot0(void)
 static void  R_V_SYNC_IRQ_HandlerRoot1(void)
 {
     gs_cint_vdc5_interrupt_handler[1]( 0 );
-    GIC_EndInterrupt( BSP_INT_SRC_GR3_VLINE0 );
 }
 #endif
 
