@@ -29,14 +29,22 @@
 
 #include  "r_typedefs.h"
 #include  "RGA_Port_typedef.h"
+#if MBED_CONF_APP_EASY_ATTACH_LINK
+#include  "EasyAttach_CameraAndLCD.h"
+#endif
 
 #ifdef  RZ_A1L  /* Reduce working buffer size for LibPNG */
 #define  WORK_SIZE_FOR_LIB_PNG   0x10000
 #endif
 
 enum {
+#if MBED_CONF_APP_EASY_ATTACH_LINK
+    MAX_WIDTH_OF_FRAME_BUFFER  = LCD_PIXEL_WIDTH,
+    MAX_HEIGHT_OF_FRAME_BUFFER = LCD_PIXEL_HEIGHT,
+#else
     MAX_WIDTH_OF_FRAME_BUFFER  = 1280,
-    MAX_HEIGHT_OF_FRAME_BUFFER = 800,
+    MAX_HEIGHT_OF_FRAME_BUFFER = 720,
+#endif
 
     WORK_BUFFER_SIZE = R_RGA_CalcWorkBufferSize2(
                            MAX_WIDTH_OF_FRAME_BUFFER, MAX_HEIGHT_OF_FRAME_BUFFER ),
