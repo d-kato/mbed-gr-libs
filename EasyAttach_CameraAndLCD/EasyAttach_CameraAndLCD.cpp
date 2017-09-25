@@ -8,8 +8,8 @@
 static DigitalOut lcd_pwon(P7_15);
 static DigitalOut lcd_blon(P8_1);
 static DigitalOut lcd_cntrst(P8_15);
-#elif (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD) || (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0)
-static DigitalOut lcd_pwon(P3_8);
+#elif (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD)
+static DigitalOut lcd_pwon(P5_12);
 static DigitalOut lcd_sd(P7_5);
 static PwmOut lcd_cntrst(P3_12);
 #endif
@@ -45,7 +45,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
 
     return &LcdCfgTbl_LCD_shield;
-  #elif (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD) || (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0)
+  #elif (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD)
     PinName lcd_pin[28] = {
         /* data pin */
         P6_15, P6_14, P6_13, P6_12, P6_11, P6_10, P6_9, P6_8, P6_7, P6_6, P6_5, P6_4,
@@ -54,7 +54,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     };
 
     lcd_pwon = 0;
-    #if MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0
+    #if MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
     lcd_sd = 0;
     #else
     lcd_sd = 1;
@@ -63,7 +63,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     Thread::wait(100);
     lcd_pwon = 1;
     Thread::wait(1);
-    #if MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0
+    #if MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
     lcd_sd = 1;
     #else
     lcd_sd = 0;
@@ -112,7 +112,7 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
         P7_9,       /* DV0_Vsync */
         P7_10       /* DV0_Hsync */
     };
-    DigitalOut pwdn(P2_5);
+    DigitalOut pwdn(P7_11);
     DigitalOut rstb(P2_3);
 
     pwdn = 0;
@@ -219,7 +219,7 @@ void EasyAttach_LcdBacklight(bool type) {
 }
 
 void EasyAttach_LcdBacklight(float value) {
-#if MBED_CONF_APP_LCD
+#if (MBED_CONF_APP_LCD_TYPE == GR_PEACH_4_3INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_7_1INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_RSK_TFT) || (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD)
     lcd_cntrst = (value * VOLTAGE_ADJUSTMENT);
 #endif
 }

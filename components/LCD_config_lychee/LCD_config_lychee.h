@@ -7,5 +7,7 @@
 #define LcdCfgTbl_LCD_shield  LcdCfgTbl_lychee
 #undef TouckKey_LCD_shield
 
+#define VOLTAGE_ADJUSTMENT   (0.78f)
+
 #endif
 

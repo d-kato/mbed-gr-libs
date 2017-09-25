@@ -341,10 +341,10 @@ void ohciwrapp_init(usbisr_fnc_t *p_usbisr_fnc) {
     GIC_DisableIRQ(USBIXUSBIX);
 
 #if defined(TARGET_GR_LYCHEE) /* mbed */
-    /* P5_12(USB1_EN) */
-    GPIOP5      &= ~0x1000;         /* Outputs low level */
-    GPIOPMC5    &= ~0x1000;         /* Port mode */
-    GPIOPM5     &= ~0x1000;         /* Output mode */
+    /* P7_5(USB1_EN) */
+    GPIOP7      &= ~0x0020;         /* Outputs low level */
+    GPIOPMC7    &= ~0x0020;         /* Port mode */
+    GPIOPM7     &= ~0x0020;         /* Output mode */
 #else
 #if (USB_HOST_CH == 0)
     /* P4_1(USB0_EN) */

@@ -12,13 +12,13 @@ const DisplayBase::lcd_config_t LcdCfgTbl_lychee = {
     , LCD_PIXEL_HEIGHT                                                              /* v_disp_widht         */
     , LCD_H_BACK_PORCH                                                              /* h_back_porch         */
     , LCD_V_BACK_PORCH                                                              /* v_back_porch         */
-    , DisplayBase::LCD_TCON_PIN_NON                                                 /* h_sync_port          */
+    , DisplayBase::LCD_TCON_PIN_0                                                   /* h_sync_port          */
     , DisplayBase::SIG_POL_NOT_INVERTED                                             /* h_sync_port_polarity */
     , 0                                                                             /* h_sync_width         */
-    , DisplayBase::LCD_TCON_PIN_NON                                                 /* v_sync_port          */
+    , DisplayBase::LCD_TCON_PIN_1                                                   /* v_sync_port          */
     , DisplayBase::SIG_POL_NOT_INVERTED                                             /* v_sync_port_polarity */
     , 0                                                                             /* v_sync_width         */
     , DisplayBase::LCD_TCON_PIN_2                                                   /* de_port              */
-    , DisplayBase::SIG_POL_INVERTED                                                 /* de_port_polarity     */
+    , DisplayBase::SIG_POL_NOT_INVERTED                                             /* de_port_polarity     */
 };
 

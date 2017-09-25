@@ -459,8 +459,8 @@ drv_graphics_error_t DRV_Graphics_Init( drv_lcd_config_t * drv_lcd_config )
         output.outctrl[VDC5_LCD_TCONSIG_POLB]      = NULL;
 
         output.outcnt_lcd_edge  = (vdc5_edge_t)drv_lcd_config->lcd_edge;  /* Output phase control of LCD_DATA23 to LCD_DATA0 pin */
-        output.out_endian_on    = VDC5_ON;                                /* Bit endian change on/off control */
-        output.out_swap_on      = VDC5_OFF;                               /* B/R signal swap on/off control */
+        output.out_endian_on    = VDC5_OFF;                               /* Bit endian change on/off control */
+        output.out_swap_on      = VDC5_ON;                                /* B/R signal swap on/off control */
         output.out_format       = (vdc5_lcd_outformat_t)drv_lcd_config->lcd_outformat;    /* Output format select */
         output.out_frq_sel      = VDC5_LCD_PARALLEL_CLKFRQ_1;             /* Clock frequency control */
         output.out_dir_sel      = VDC5_LCD_SERIAL_SCAN_FORWARD;           /* Scan direction select */

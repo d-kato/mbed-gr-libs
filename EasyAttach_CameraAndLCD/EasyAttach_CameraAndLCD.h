@@ -36,7 +36,6 @@
   #define GR_PEACH_RSK_TFT            3
   #define GR_PEACH_DISPLAY_SHIELD     4
   #define GR_LYCHEE_LCD               5
-  #define GR_LYCHEE_TF043HV001A0      6
 
   #ifndef MBED_CONF_APP_LCD_TYPE
     #if defined(TARGET_RZ_A1H)
@@ -63,8 +62,6 @@
     #include "Display_shield_config.h"
   #elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
     #include "LCD_config_lychee.h"
-  #elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0
-    #include "LCD_config_TF043HV001A0.h"
   #else
     #error "No lcd chosen. Please add 'config.lcd-type.value' to your mbed_app.json (see README.md for more information)."
   #endif

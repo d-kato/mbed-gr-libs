@@ -17,7 +17,7 @@ public:
 #if defined(TARGET_RZ_A1H)
       SDBlockDevice(P8_5, P8_6, P8_3, P8_4), _sd_cd(P7_8),
 #elif defined(TARGET_GR_LYCHEE)
-      SDBlockDevice(P5_6, P5_7, P5_4, P5_5), _sd_cd(P7_0),
+      SDBlockDevice(P5_6, P5_7, P5_4, P5_5), _sd_cd(P3_8),
 #endif
       _connect(false) {
         // Set SPI clock rate to 20MHz for data transfer

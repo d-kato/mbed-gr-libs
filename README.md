@@ -70,13 +70,12 @@ GR-LYCHEEの開発環境については、[GR-LYCHEE用オフライン開発環�
 | GR_PEACH_7_1INCH_SHIELD | GR-PEACH 7.1インチLCDシールド      |
 | GR_PEACH_RSK_TFT        | GR-PEACH RSKボード用LCD            |
 | GR_PEACH_DISPLAY_SHIELD | GR-PEACH Display Shield            |
-| GR_LYCHEE_LCD           | GR-LYHCEE AM-320240LKTMQW-51H      |
-| GR_LYCHEE_TF043HV001A0  | GR-LYHCEE TF043HV001A0             |
+| GR_LYCHEE_LCD           | GR-LYHCEE TF043HV001A0など(40pin)  |
+
 
 camera-typeとlcd-typeを指定しない場合は以下の設定となります。  
 * GR-PEACH、カメラ：CAMERA_MT9V111、LCD：GR_PEACH_4_3INCH_SHIELD  
 * GR-LYCHEE、カメラ：CAMERA_OV7725、LCD：GR_LYCHEE_LCD  
-
 
 ***mbed CLI以外の環境で使用する場合***  
 mbed CLI以外の環境をお使いの場合、``mbed_app.json``の変更は反映されません。  
