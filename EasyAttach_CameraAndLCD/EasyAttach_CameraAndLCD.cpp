@@ -219,8 +219,10 @@ void EasyAttach_LcdBacklight(bool type) {
 }
 
 void EasyAttach_LcdBacklight(float value) {
+#if MBED_CONF_APP_LCD
 #if (MBED_CONF_APP_LCD_TYPE == GR_PEACH_4_3INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_7_1INCH_SHIELD) || (MBED_CONF_APP_LCD_TYPE == GR_PEACH_RSK_TFT) || (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD)
     lcd_cntrst = (value * VOLTAGE_ADJUSTMENT);
+#endif
 #endif
 }
 
