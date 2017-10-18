@@ -391,9 +391,9 @@ void ohciwrapp_init(usbisr_fnc_t *p_usbisr_fnc) {
     p_usb_reg->HcRhPortStatus1    = 0x00000000;
 
 #if defined(TARGET_GR_LYCHEE) /* mbed */
-    GPIOP5      |=  0x1000;         /* P5_12 Outputs high level */
+    GPIOP7      |=  0x0020;         /* P7_5 Outputs high level */
     osDelay(5);
-    GPIOP5      &= ~0x1000;         /* P5_12 Outputs low level */
+    GPIOP7      &= ~0x0020;         /* P7_5 Outputs low level */
     osDelay(10);
 #else
 #if (USB_HOST_CH == 0)
