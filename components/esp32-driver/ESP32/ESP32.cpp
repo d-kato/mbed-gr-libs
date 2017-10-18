@@ -40,7 +40,6 @@ ESP32::ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
 {
     _wifi_mode = 1;
     _baudrate = baudrate;
-    recv_waiting = false;
     memset(_ids, 0, sizeof(_ids));
     memset(_cbs, 0, sizeof(_cbs));
 
@@ -176,6 +175,7 @@ void ESP32::socket_handler(bool connect, int id)
 {
     _lock.lock();
     startup();
+    _cbs[id].Notified = 0;
     if (connect) {
         _id_bits |= (1 << id);
         if (_server_act) {
@@ -577,6 +577,7 @@ bool ESP32::open(const char *type, int id, const char* addr, int port)
     if (id > 4) {
         return false;
     }
+    _cbs[id].Notified = 0;
 
     _lock.lock();
     startup();
@@ -595,6 +596,7 @@ bool ESP32::send(int id, const void *data, uint32_t amount)
     int error_cnt = 0;
     int index = 0;
 
+    _cbs[id].Notified = 0;
     if (amount == 0) {
         return true;
     }
@@ -672,6 +674,7 @@ void ESP32::_packet_handler()
 int32_t ESP32::recv(int id, void *data, uint32_t amount)
 {
     bool retry = false;
+    _cbs[id].Notified = 0;
 
     while (true) {
         // check if any packets are ready for us
@@ -712,7 +715,6 @@ int32_t ESP32::recv(int id, void *data, uint32_t amount)
                  || ((_id_bits_close & (1 << id)) != 0)) {
                     return -2;
                 } else {
-                    recv_waiting = true;
                     return -1;
                 }
             }
@@ -780,6 +782,7 @@ void ESP32::attach(int id, void (*callback)(void *), void *data)
 {
     _cbs[id].callback = callback;
     _cbs[id].data = data;
+    _cbs[id].Notified = 0;
 }
 
 int ESP32::get_free_id()
@@ -799,14 +802,10 @@ int ESP32::get_free_id()
 }
 
 void ESP32::event() {
-    if (!recv_waiting) {
-        return;
-    }
-    recv_waiting = false;
-
     for (int i = 0; i < ESP32_SOCKET_COUNT; i++) {
-        if (_cbs[i].callback) {
+        if ((_cbs[i].callback) && (_cbs[i].Notified == 0)) {
             _cbs[i].callback(_cbs[i].data);
+            _cbs[i].Notified = 1;
         }
     }
 }

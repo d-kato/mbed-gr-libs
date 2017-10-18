@@ -221,8 +221,8 @@ private:
     struct {
         void (*callback)(void *);
         void *data;
+        int  Notified;
     } _cbs[ESP32_SOCKET_COUNT];
-    bool recv_waiting;
 
     bool startup();
     bool reset(void);
