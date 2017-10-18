@@ -65,7 +65,7 @@ public:
      * @param frequency Sample frequency of data in Hz
      * @return true = success, false = failure
      * 
-     * The TLV320 supports the following frequencies: 8kHz, 8.021kHz, 32kHz, 44.1kHz, 48kHz, 88.2kHz, 96kHz
+     * The TLV320 supports the following frequencies: 8kHz, 8.021kHz, 32kHz, 44.1kHz, 48kHz
      * Default is 44.1kHz
      */
     bool frequency(int hz);
