@@ -256,7 +256,7 @@ bool ESP32::reset(void)
             _serial.set_flow_control(SerialBase::Disabled);
             _parser.recv("ready");
 
-            if (_parser.send("AT+UART=%d,8,1,0,%d", _baudrate, _flow_control)
+            if (_parser.send("AT+UART_CUR=%d,8,1,0,%d", _baudrate, _flow_control)
                 && _parser.recv("OK")) {
                 _serial.baud(_baudrate);
                 switch (_flow_control) {
@@ -750,6 +750,12 @@ bool ESP32::close(int id, bool wait_close)
         _lock.lock();
         startup();
         _parser.setTimeout(500);
+        if ((_id_bits & (1 << id)) == 0) {
+            _lock.unlock();
+            _id_bits_close &= ~(1 << id);
+            _ids[id] = false;
+            return true;
+        }
         if (_parser.send("AT+CIPCLOSE=%d", id)
             && _parser.recv("OK")) {
             _lock.unlock();
