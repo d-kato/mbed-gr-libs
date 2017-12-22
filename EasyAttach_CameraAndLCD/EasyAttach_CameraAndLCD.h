@@ -10,6 +10,7 @@
   #define CAMERA_CVBS                 1
   #define CAMERA_MT9V111              2
   #define CAMERA_OV7725               3
+  #define CAMERA_OV5642               4
 
   #ifndef MBED_CONF_APP_CAMERA_TYPE
     #if defined(TARGET_RZ_A1H)
@@ -25,6 +26,9 @@
 
   #if MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV7725
     #include "OV7725_config.h"
+  #endif
+  #if MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV5642
+    #include "OV5642_config.h"
   #endif
 #endif
 

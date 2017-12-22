@@ -82,11 +82,7 @@ public:
         };
         const char sw_reset_cmd[2] = {0x12, 0x80};
         int ret;
-    #if defined(TARGET_GR_LYCHEE)
-        I2C mI2c_(P1_7, P1_6);
-    #else
         I2C mI2c_(I2C_SDA, I2C_SCL);
-    #endif
         mI2c_.frequency(150000);
 
         mI2c_.write(0x42, sw_reset_cmd, 2);
@@ -112,11 +108,7 @@ public:
     static bool SetExposure(bool bAuto, uint16_t usManualExposure, uint8_t usManualGain) {
         int ret;
         char cmd[2];
-    #if defined(TARGET_GR_LYCHEE)
-        I2C mI2c_(P1_7, P1_6);
-    #else
         I2C mI2c_(I2C_SDA, I2C_SCL);
-    #endif
         mI2c_.frequency(150000);
 
         /* COM8(AGC Enable/AEC Enable) */
