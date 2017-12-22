@@ -20,8 +20,8 @@ public:
       SDBlockDevice(P5_6, P5_7, P5_4, P5_5), _sd_cd(P3_8),
 #endif
       _connect(false) {
-        // Set SPI clock rate to 20MHz for data transfer
-        _transfer_sck = 20000000;
+        // Set SPI clock rate to 15MHz for data transfer
+        _transfer_sck = 15000000;
     }
 
     /**
