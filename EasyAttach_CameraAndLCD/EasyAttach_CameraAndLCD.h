@@ -11,6 +11,24 @@
   #define CAMERA_MT9V111              2
   #define CAMERA_OV7725               3
   #define CAMERA_OV5642               4
+  #define CAMERA_WIRELESS_CAMERA      0x83
+
+  // shield-type
+  #define SHIELD_AUDIO_CAMERA         1
+  #define SHIELD_WIRELESS_CAMERA      2
+
+
+  #ifndef MBED_CONF_APP_SHIELD_TYPE
+    #if defined(TARGET_RZ_A1H)
+      #if (MBED_CONF_APP_CAMERA_TYPE == CAMERA_WIRELESS_CAMERA)
+        #define MBED_CONF_APP_SHIELD_TYPE  SHIELD_WIRELESS_CAMERA
+        #undef  MBED_CONF_APP_CAMERA_TYPE
+        #define MBED_CONF_APP_CAMERA_TYPE  CAMERA_OV7725
+      #else
+        #define MBED_CONF_APP_SHIELD_TYPE  SHIELD_AUDIO_CAMERA
+      #endif
+    #endif
+  #endif
 
   #ifndef MBED_CONF_APP_CAMERA_TYPE
     #if defined(TARGET_RZ_A1H)

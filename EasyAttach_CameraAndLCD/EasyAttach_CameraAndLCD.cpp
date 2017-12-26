@@ -103,9 +103,21 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
         P1_0,       /* DV0_Vsync */
         P1_1        /* DV0_Hsync */
     };
+  #if MBED_CONF_APP_SHIELD_TYPE == SHIELD_AUDIO_CAMERA
     DigitalOut pwdn(P3_12);
     pwdn = 0;
     Thread::wait(1 + 1);
+  #elif MBED_CONF_APP_SHIELD_TYPE == SHIELD_WIRELESS_CAMERA
+    DigitalOut pwdn(P3_15);
+    DigitalOut rstb(P3_14);
+
+    pwdn = 0;
+    rstb = 0;
+    Thread::wait(10 + 1);
+    rstb = 1;
+    Thread::wait(1 + 1);
+  #endif
+
   #elif defined(TARGET_GR_LYCHEE)
     PinName cmos_camera_pin[11] = {
         /* data pin */

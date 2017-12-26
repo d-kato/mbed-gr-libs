@@ -64,6 +64,7 @@ GR-LYCHEEの開発環境については、[GR-LYCHEE用オフライン開発環�
 | CAMERA_MT9V111          | GR-PEACH MT9V111                   |
 | CAMERA_OV7725           | GR-LYHCEE 付属カメラ               |
 | CAMERA_OV5642           | GR-PEACH OV5642                    |
+| CAMERA_WIRELESS_CAMERA  | GR-PEACH Wireless/Cameraシールド (MT9V111) |
 
 | lcd-type "value"        | 説明                               |
 |:------------------------|:-----------------------------------|

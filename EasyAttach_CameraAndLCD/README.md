@@ -33,7 +33,7 @@ Add the following to your ``mbed_app.json`` file:
             "value": "1"
         },
         "camera-type":{
-            "help": "Options are CAMERA_CVBS, CAMERA_MT9V111, CAMERA_OV7725",
+            "help": "Please see README.md",
             "value": "CAMERA_CVBS"
         },
         "lcd":{
@@ -41,14 +41,33 @@ Add the following to your ``mbed_app.json`` file:
             "value": "1"
         },
         "lcd-type":{
-            "help": "Options are GR_PEACH_4_3INCH_SHIELD, GR_PEACH_7_1INCH_SHIELD, GR_PEACH_RSK_TFT, GR_PEACH_DISPLAY_SHIELD, GR_LYCHEE_LCD",
+            "help": "Please see README.md",
             "value": "GR_PEACH_4_3INCH_SHIELD"
         }
     }
 }
 ```
 
-If camera-type and lcd-type are not specified, the general one that operates on that board will be specified.
+| camera-type "value"     | Description                        |
+|:------------------------|:-----------------------------------|
+| CAMERA_CVBS             | GR-PEACH NTSC signal               |
+| CAMERA_MT9V111          | GR-PEACH MT9V111                   |
+| CAMERA_OV7725           | GR-LYHCEE included camera          |
+| CAMERA_OV5642           | GR-PEACH OV5642                    |
+| CAMERA_WIRELESS_CAMERA  | GR-PEACH Wireless/Camera shield (MT9V111) |
+
+| lcd-type "value"        | Description                        |
+|:------------------------|:-----------------------------------|
+| GR_PEACH_4_3INCH_SHIELD | GR-PEACH 4.3 inch LCD shield       |
+| GR_PEACH_7_1INCH_SHIELD | GR-PEACH 7.1 inch LCD shield       |
+| GR_PEACH_RSK_TFT        | GR-PEACH RSK board LCD             |
+| GR_PEACH_DISPLAY_SHIELD | GR-PEACH Display Shield            |
+| GR_LYCHEE_LCD           | GR-LYHCEE TF043HV001A0..etc(40pin) |
+
+
+If camera-type and lcd-type are not specified, the following are specified.
+* GR-PEACH   camera：CAMERA_MT9V111, LCD：GR_PEACH_4_3INCH_SHIELD  
+* GR-LYCHEE  camera：CAMERA_OV7725,  LCD：GR_LYCHEE_LCD  
 
 
 ## Using Easy Connect Camera from your application
