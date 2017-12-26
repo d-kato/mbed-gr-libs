@@ -176,7 +176,7 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     ext_in_config.inp_hs_inv     = DisplayBase::SIG_POL_NOT_INVERTED;     /* External input DV_HSYNC inversion control     */
     ext_in_config.inp_f525_625   = DisplayBase::EXTIN_LINE_525;           /* Number of lines for BT.656 external input */
     ext_in_config.inp_h_pos      = DisplayBase::EXTIN_H_POS_YCBYCR;       /* Y/Cb/Y/Cr data string start timing to Hsync reference */
-    ext_in_config.cap_vs_pos     = 4+20;                                  /* Capture start position from Vsync */
+    ext_in_config.cap_vs_pos     = 4+21;                                  /* Capture start position from Vsync */
     ext_in_config.cap_hs_pos     = 68;                                    /* Capture start position form Hsync */
     if (cap_width != 0) {
         ext_in_config.cap_width  = cap_width;                             /* Capture width */
