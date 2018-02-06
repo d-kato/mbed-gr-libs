@@ -24,7 +24,13 @@ public:
 
     SdUsbConnect(const char *name) : fs(name), storage_type(STORAGE_NON) {}
 
-    bool connected(void) {
+    bool connected(storage_type_t type = STORAGE_NON) {
+        if (type == STORAGE_SD) {
+            return sd.connected();
+        }
+        if (type == STORAGE_USB) {
+            return usb.connected();
+        }
         if (storage_type == STORAGE_SD) {
             return sd.connected();
         }
@@ -35,7 +41,7 @@ public:
         return false;
     }
 
-    storage_type_t connect(void) {
+    storage_type_t connect(storage_type_t type = STORAGE_NON) {
         if ((storage_type == STORAGE_SD) && (!sd.connected())) {
             fs.unmount();
             storage_type = STORAGE_NON;
@@ -44,7 +50,23 @@ public:
             fs.unmount();
             storage_type = STORAGE_NON;
         }
-        if (storage_type == STORAGE_NON) {
+        if ((type == STORAGE_SD) && (storage_type != STORAGE_SD)) {
+            if (sd.connect()) {
+                if (storage_type != STORAGE_NON) {
+                    fs.unmount();
+                }
+                fs.mount(&sd);
+                storage_type = STORAGE_SD;
+            }
+        } else if ((type == STORAGE_USB) && (storage_type != STORAGE_USB)) {
+            if (usb.connect()) {
+                if (storage_type != STORAGE_NON) {
+                    fs.unmount();
+                }
+                fs.mount(&usb);
+                storage_type = STORAGE_USB;
+            }
+        } else if (storage_type == STORAGE_NON) {
             if (sd.connect()) {
                 fs.mount(&sd);
                 storage_type = STORAGE_SD;
@@ -54,18 +76,35 @@ public:
             } else {
                 // do nothing
             }
+        } else {
+            // do nothing
         }
 
         return storage_type;
     }
 
-    storage_type_t wait_connect(void) {
-        while (connect() == STORAGE_NON) {
+    storage_type_t wait_connect(storage_type_t type = STORAGE_NON) {
+        while (connect(type) == STORAGE_NON) {
             Thread::wait(100);
         }
         return storage_type;
     }
 
+    bool format(storage_type_t type = STORAGE_NON, int allocation_unit = 0) {
+        if ((storage_type == STORAGE_SD) && (sd.connected())) {
+            fs.unmount();
+            fs.format(&sd, allocation_unit);
+            fs.mount(&sd);
+            return true;
+        }
+        if ((storage_type == STORAGE_USB) && (usb.connected())) {
+            fs.unmount();
+            fs.format(&usb, allocation_unit);
+            fs.mount(&usb);
+            return true;
+        }
+        return false;
+    }
 private:
     FATFileSystem fs;
     SDBlockDevice_GRBoard sd;
