@@ -34,7 +34,7 @@ public:
     /**
     * Constructor
     */
-    USBHostSerialPort();
+    USBHostSerialPort(uint32_t buf_size);
 
     /**
      * Destructor
@@ -122,7 +122,7 @@ private:
 
     void init();
 
-    CircBufferHostSerial<uint8_t, (1024 * 32)> * p_circ_buf;
+    CircBufferHostSerial<uint8_t> * p_circ_buf;
 
     uint8_t * p_buf;
 
@@ -148,7 +148,7 @@ private:
 class USBHostSerial : public IUSBEnumerator, public USBHostSerialPort
 {
 public:
-    USBHostSerial();
+    USBHostSerial(uint32_t buf_size = (1024 * 32));
 
     /**
      * Try to connect a serial device
@@ -176,7 +176,7 @@ protected:
 
 class USBHostMultiSerial : public IUSBEnumerator {
 public:
-    USBHostMultiSerial();
+    USBHostMultiSerial(uint32_t buf_size = (1024 * 32));
     virtual ~USBHostMultiSerial();
 
     USBHostSerialPort* getPort(int port)
@@ -206,6 +206,7 @@ protected:
     USBHostSerialPort* ports[USBHOST_SERIAL];
     uint8_t port_intf[USBHOST_SERIAL];
     int ports_found;
+    uint32_t _buf_size;
 
     //From IUSBEnumerator
     virtual void setVidPid(uint16_t vid, uint16_t pid);

@@ -26,7 +26,7 @@
 
 #if (USBHOST_SERIAL <= 1)
 
-USBHostSerial::USBHostSerial()
+USBHostSerial::USBHostSerial(uint32_t buf_size) : USBHostSerialPort(buf_size)
 {
     host = USBHost::getHostInst();
     ports_found = 0;
@@ -97,12 +97,13 @@ bool USBHostSerial::connect() {
 
 //------------------------------------------------------------------------------
 
-USBHostMultiSerial::USBHostMultiSerial()
+USBHostMultiSerial::USBHostMultiSerial(uint32_t buf_size)
 {
     host = USBHost::getHostInst();
     dev = NULL;
     memset(ports, NULL, sizeof(ports));
     ports_found = 0;
+    _buf_size = buf_size;
 }
 
 USBHostMultiSerial::~USBHostMultiSerial()
@@ -161,7 +162,7 @@ bool USBHostMultiSerial::connect() {
                 USBEndpoint* bulk_out = d->getEndpoint(port_intf[port], BULK_ENDPOINT, OUT);
                 if (bulk_in && bulk_out)
                 {
-                    ports[port] = new USBHostSerialPort();
+                    ports[port] = new USBHostSerialPort(_buf_size);
                     if (ports[port])
                     {
                         ports[port]->connect(host,d,port_intf[port],bulk_in, bulk_out);
@@ -205,9 +206,9 @@ bool USBHostMultiSerial::connect() {
 #define SET_LINE_CODING 0x20
 #define SET_CONTROL_LINE_STATE 0x22
 
-USBHostSerialPort::USBHostSerialPort()
+USBHostSerialPort::USBHostSerialPort(uint32_t buf_size)
 {
-    p_circ_buf = new CircBufferHostSerial<uint8_t, (1024 * 32)>;
+    p_circ_buf = new CircBufferHostSerial<uint8_t>(buf_size);
     p_buf = new uint8_t[512];
     init();
 }
@@ -347,6 +348,8 @@ int USBHostSerialPort::writeBuf(const char* b, int s) {
             if (host->bulkWrite(dev, bulk_out, (uint8_t *)(b+c), i) == USB_TYPE_OK) {
                 c += i;
                 s -= i;
+            } else {
+                break;
             }
         }
     }

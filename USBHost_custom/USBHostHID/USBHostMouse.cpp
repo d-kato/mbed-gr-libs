@@ -88,31 +88,87 @@ bool USBHostMouse::connect() {
 void USBHostMouse::rxHandler() {
     int len_listen = int_in->getSize();
 
-    if (onUpdate) {
-        (*onUpdate)(report[0] & 0x07, report[1], report[2], report[3]);
-    }
+    if ((dev->getVid() == 0x046d) && (dev->getPid() == 0xc52b)) {
+        int wk_x;
+        int wk_y;
 
-    if (onButtonUpdate && (buttons != (report[0] & 0x07))) {
-        (*onButtonUpdate)(report[0] & 0x07);
-    }
+        wk_x = ((report[4] & 0x0F) << 8) | report[3];
+        if (wk_x <= 0x7ff) {
+            if (wk_x > 0x7f) {
+                wk_x = 0x7f;
+            }
+        } else {
+            wk_x = -(0xfff - wk_x);
+            if (wk_x < -128) {
+                wk_x = -128;
+            }
+        }
 
-    if (onXUpdate && (x != report[1])) {
-        (*onXUpdate)(report[1]);
-    }
+        wk_y = (report[5] << 4) | ((report[4] & 0xF0) >> 4);
+        if (wk_y <= 0x7ff) {
+            if (wk_y > 0x7f) {
+                wk_y = 0x7f;
+            }
+        } else {
+            wk_y = -(0xfff - wk_y);
+            if (wk_y < -128) {
+                wk_y = -128;
+            }
+        }
 
-    if (onYUpdate && (y != report[2])) {
-        (*onYUpdate)(report[2]);
-    }
+        if (onUpdate) {
+            (*onUpdate)(report[1] & 0x07, (int8_t)wk_x, (int8_t)wk_y, report[6]);
+        }
 
-    if (onZUpdate && (z != report[3])) {
-        (*onZUpdate)(report[3]);
-    }
+        if (onButtonUpdate && (buttons != (report[1] & 0x07))) {
+            (*onButtonUpdate)(report[1] & 0x07);
+        }
 
-    // update mouse state
-    buttons = report[0] & 0x07;
-    x = report[1];
-    y = report[2];
-    z = report[3];
+        if (onXUpdate && (x != (int8_t)wk_x)) {
+            (*onXUpdate)((int8_t)wk_x);
+        }
+
+        if (onYUpdate && (y != (int8_t)wk_y)) {
+            (*onYUpdate)((int8_t)wk_y);
+        }
+
+        if (onZUpdate && (z != report[6])) {
+            (*onZUpdate)(report[6]);
+        }
+
+        // update mouse state
+        buttons = report[1] & 0x07;
+
+        x = (int8_t)wk_x;
+        y = (int8_t)wk_y;
+        z = report[6];
+    } else {
+        if (onUpdate) {
+            (*onUpdate)(report[0] & 0x07, report[1], report[2], report[3]);
+        }
+
+        if (onButtonUpdate && (buttons != (report[0] & 0x07))) {
+            (*onButtonUpdate)(report[0] & 0x07);
+        }
+
+        if (onXUpdate && (x != report[1])) {
+            (*onXUpdate)(report[1]);
+        }
+
+        if (onYUpdate && (y != report[2])) {
+            (*onYUpdate)(report[2]);
+        }
+
+        if (onZUpdate && (z != report[3])) {
+            (*onZUpdate)(report[3]);
+        }
+
+        // update mouse state
+        buttons = report[0] & 0x07;
+        x = report[1];
+        y = report[2];
+        z = report[3];
+    }
 
     if ((uint32_t)len_listen > sizeof(report)) {
         len_listen = sizeof(report);

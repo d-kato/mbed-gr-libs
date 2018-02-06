@@ -113,7 +113,7 @@ private:
     USBHost * host;
     USBDeviceConnected * dev;
     USBEndpoint * int_in;
-    uint8_t report[4];
+    uint8_t report[8];
 
     bool dev_connected;
     bool mouse_device_found;

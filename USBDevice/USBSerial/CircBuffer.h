@@ -47,7 +47,7 @@ public:
         write %= size;
     }
 
-    uint16_t available() {
+    uint32_t available() {
         return (write >= read) ? write - read : size - read + write;
     }
 
@@ -61,8 +61,8 @@ public:
     }
 
 private:
-    volatile uint16_t write;
-    volatile uint16_t read;
+    volatile uint32_t write;
+    volatile uint32_t read;
     int size;
     T * _buf;
 };

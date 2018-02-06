@@ -17,19 +17,19 @@
 #ifndef CIRCBUFFERHOSTSERIAL_H
 #define CIRCBUFFERHOSTSERIAL_H
 
-#include "stdint.h"
-
-template<typename T, int size>
+template <class T>
 class CircBufferHostSerial {
 public:
+    CircBufferHostSerial(uint32_t buf_size):write(0), read(0), size(buf_size + 1) {
+        _buf = new T [size];
+    }
 
-    CircBufferHostSerial() {
-        write = 0;
-        read = 0;
+    ~CircBufferHostSerial() {
+        delete [] _buf;
     }
 
     bool isFull() {
-        return (((write + 1) % size) == read);
+        return ((write + 1) % size == read);
     }
 
     bool isEmpty() {
@@ -41,34 +41,33 @@ public:
         read = 0;
     }
 
-    bool queue(T k) {
+    void queue(T k) {
         if (isFull()) {
-            return false;
+            read++;
+            read %= size;
         }
-        buf[write] = k;
-        write = (write + 1) % size;
-        return true;
+        _buf[write++] = k;
+        write %= size;
     }
 
     uint32_t available() {
-        uint32_t a = (write >= read) ? (write - read) : (size - read + write);
-        return a;
+        return (write >= read) ? write - read : size - read + write;
     }
 
     bool dequeue(T * c) {
-        if (isEmpty()) {
-            return false;
+        bool empty = isEmpty();
+        if (!empty) {
+            *c = _buf[read++];
+            read %= size;
         }
-        *c = buf[read];
-        read = (read + 1) % size;
-        return true;
+        return(!empty);
     }
 
 private:
     volatile uint32_t write;
     volatile uint32_t read;
-    volatile T buf[size];
+    int size;
+    T * _buf;
 };
-
 #endif
 

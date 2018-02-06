@@ -87,7 +87,7 @@ public:
     *
     * @returns the number of bytes available
     */
-    uint16_t available();
+    uint32_t available();
 
     /** Determine if there is a character available to read
      *

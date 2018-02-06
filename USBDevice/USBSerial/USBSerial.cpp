@@ -60,6 +60,6 @@ bool USBSerial::EPBULK_OUT_callback() {
     return true;
 }
 
-uint16_t USBSerial::available() {
+uint32_t USBSerial::available() {
     return p_circ_buf->available();
 }
