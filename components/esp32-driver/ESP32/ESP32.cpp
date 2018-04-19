@@ -253,12 +253,15 @@ bool ESP32::reset(void)
         if (_parser.send("AT+RST")
             && _parser.recv("OK")) {
             _serial.baud(115200);
+#if DEVICE_SERIAL_FC
             _serial.set_flow_control(SerialBase::Disabled);
+#endif
             _parser.recv("ready");
 
             if (_parser.send("AT+UART_CUR=%d,8,1,0,%d", _baudrate, _flow_control)
                 && _parser.recv("OK")) {
                 _serial.baud(_baudrate);
+#if DEVICE_SERIAL_FC
                 switch (_flow_control) {
                     case 1:
                         _serial.set_flow_control(SerialBase::RTS, _rts);
@@ -274,6 +277,7 @@ bool ESP32::reset(void)
                         // do nothing
                         break;
                 }
+#endif
             }
 
             return true;
@@ -720,8 +724,9 @@ int32_t ESP32::recv(int id, void *data, uint32_t amount)
                 }
             }
             retry = true;
+        } else {
+            _lock.unlock();
         }
-        _lock.unlock();
     }
 }
 

@@ -28,6 +28,8 @@ class ESP32InterfaceAP : public ESP32Stack, public WiFiInterface
 {
 public:
     /** ESP32InterfaceAP lifetime
+     * @param en        EN pin
+     * @param io0       IO0 pin
      * @param tx        TX pin
      * @param rx        RX pin
      * @param debug     Enable debugging
