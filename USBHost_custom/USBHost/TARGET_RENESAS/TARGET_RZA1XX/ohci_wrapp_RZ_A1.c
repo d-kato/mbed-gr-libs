@@ -253,43 +253,43 @@ osSemaphoreDef(ohciwrapp_sem_16);
 osSemaphoreDef(ohciwrapp_sem_17);
 #endif
 
-osThreadDef(callback_task,   osPriorityHigh,        512);
-osThreadDef(control_ed_task, osPriorityNormal,      512);
-osThreadDef(bulk_ed_task,    osPriorityNormal,      512);
+osThreadDef(callback_task,   osPriorityHigh,        576);
+osThreadDef(control_ed_task, osPriorityNormal,      576);
+osThreadDef(bulk_ed_task,    osPriorityNormal,      576);
 static void int_ed_task_1(void const * argument) {
     int_ed_task(argument);
 }
-osThreadDef(int_ed_task_1,   osPriorityNormal,      512);
+osThreadDef(int_ed_task_1,   osPriorityNormal,      576);
 #if (INT_TRANS_MAX_NUM >= 2)
 static void int_ed_task_2(void const * argument) {
     int_ed_task(argument);
 }
-osThreadDef(int_ed_task_2,   osPriorityNormal,      512);
+osThreadDef(int_ed_task_2,   osPriorityNormal,      576);
 #endif
 #if (INT_TRANS_MAX_NUM >= 3)
 static void int_ed_task_3(void const * argument) {
     int_ed_task(argument);
 }
-osThreadDef(int_ed_task_3,   osPriorityNormal,      512);
+osThreadDef(int_ed_task_3,   osPriorityNormal,      576);
 #endif
 #if (INT_TRANS_MAX_NUM >= 4)
 static void int_ed_task_4(void const * argument) {
     int_ed_task(argument);
 }
-osThreadDef(int_ed_task_4,   osPriorityNormal,      512);
+osThreadDef(int_ed_task_4,   osPriorityNormal,      576);
 #endif
 
 #if (ISO_TRANS_MAX_NUM >= 1)
 static void iso_ed_task_1(void const * argument) {
     iso_ed_task(argument);
 }
-osThreadDef(iso_ed_task_1,   osPriorityAboveNormal, 512);
+osThreadDef(iso_ed_task_1,   osPriorityAboveNormal, 576);
 #endif
 #if (ISO_TRANS_MAX_NUM >= 2)
 static void iso_ed_task_2(void const * argument) {
     iso_ed_task(argument);
 }
-osThreadDef(iso_ed_task_2,   osPriorityAboveNormal, 512);
+osThreadDef(iso_ed_task_2,   osPriorityAboveNormal, 576);
 #endif
 
 void ohciwrapp_init(usbisr_fnc_t *p_usbisr_fnc) {
