@@ -70,7 +70,8 @@ bool USBHostSerial::connect() {
 
 /*virtual*/ void USBHostSerial::setVidPid(uint16_t vid, uint16_t pid)
 {
-    // we don't check VID/PID for MSD driver
+    _vid = vid;
+    _pid = pid;
 }
 
 /*virtual*/ bool USBHostSerial::parseInterface(uint8_t intf_nb, uint8_t intf_class, uint8_t intf_subclass, uint8_t intf_protocol) //Must return true if the interface should be parsed
@@ -345,12 +346,9 @@ int USBHostSerialPort::writeBuf(const char* b, int s) {
                 break;
             }
             i = ((uint32_t)s < size_bulk_out) ? s : size_bulk_out;
-            if (host->bulkWrite(dev, bulk_out, (uint8_t *)(b+c), i) == USB_TYPE_OK) {
-                c += i;
-                s -= i;
-            } else {
-                break;
-            }
+            host->bulkWrite(dev, bulk_out, (uint8_t *)(b+c), i);
+            c += i;
+            s -= i;
         }
     }
     return c;

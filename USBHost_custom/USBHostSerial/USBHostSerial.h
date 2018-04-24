@@ -107,7 +107,7 @@ public:
     virtual int writeBuf(const char* b, int s);
     virtual int readBuf(char* b, int s, int timeout = -1);
 
-protected:
+//protected:
     virtual int _getc();
     virtual int _putc(int c);
 
@@ -159,11 +159,21 @@ public:
 
     void disconnect();
 
+    uint16_t get_vid() {
+        return _vid;
+    }
+
+    uint16_t get_pid() {
+        return _pid;
+    }
+
 protected:
     USBHost* host;
     USBDeviceConnected* dev;
     uint8_t port_intf;
     int ports_found;
+    uint16_t _vid;
+    uint16_t _pid;
 
     //From IUSBEnumerator
     virtual void setVidPid(uint16_t vid, uint16_t pid);
