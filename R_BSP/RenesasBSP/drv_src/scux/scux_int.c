@@ -140,10 +140,7 @@ void SCUX_InterruptInit(const int_t channel)
             }
 
             /* set interrupt level (1-N model) */
-            GIC_SetLevelModel(scux_int_info[channel][int_type].int_num,
-                              (int8_t)scux_int_info[channel][int_type].info_level,
-                              1
-                              );
+            GIC_SetConfiguration(scux_int_info[channel][int_type].int_num, 1);
 
             /* set interrupt priority */
             GIC_SetPriority(scux_int_info[channel][int_type].int_num, p_scux_info_ch->int_level);

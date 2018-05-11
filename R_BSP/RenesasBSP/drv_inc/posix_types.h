@@ -77,23 +77,8 @@ extern "C" {
  * otherwise the buffered file functions fopen() etc. will not work.
  */
 #if(1) /* mbed */
-#if defined(__ARMCC_VERSION) || defined(__ICCARM__)
 #    define O_ACCMODE 7
-#    define O_RDONLY 0
-#    define O_WRONLY 1
-#    define O_RDWR   2
-#    define O_CREAT  0x0200
-#    define O_EXCL   0x0300
-#    define O_TRUNC  0x0400
-#    define O_APPEND 0x0008
-#    define O_NONBLOCK 0x4000
-#    define O_SYNC     0x8000
-
-#else
-#    include <sys/fcntl.h>
-#    include <sys/types.h>
-#    include <sys/syslimits.h>
-#endif
+#include "mbed_retarget.h"
 
 #else  /* not mbed */
 #define O_ACCMODE       00000007

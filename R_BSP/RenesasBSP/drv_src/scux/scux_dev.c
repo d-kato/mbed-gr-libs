@@ -33,6 +33,7 @@ Includes <System Includes>, "Project Includes"
 *******************************************************************************/
 
 #include "scux.h"
+#include  "mbed_critical.h"
 
 /******************************************************************************
 Exported global variables (to be accessed by other files)
@@ -646,7 +647,6 @@ int_t SCUX_CopyCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * con
 {
     int_t    retval = ESUCCESS;
     int_t    dummy_retval;
-    int_t    was_masked;
 
     if (NULL == p_scux_info_ch)
     {
@@ -654,11 +654,7 @@ int_t SCUX_CopyCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * con
     }
     else
     {
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         /* check cancel request */
         if ((p_scux_info_ch->p_tx_aio == p_cancel_aio) || (p_scux_info_ch->p_rx_aio == p_cancel_aio))
@@ -680,10 +676,7 @@ int_t SCUX_CopyCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * con
             }
         }
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return retval;
@@ -715,7 +708,6 @@ int_t SCUX_DirectCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * c
 {
     int_t    retval = ESUCCESS;
     int_t    dummy_retval;
-    int_t    was_masked;
 
     if (NULL == p_scux_info_ch)
     {
@@ -723,11 +715,7 @@ int_t SCUX_DirectCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * c
     }
     else
     {
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         /* check cancel request */
         if ((p_scux_info_ch->p_tx_aio == p_cancel_aio) || (p_scux_info_ch->p_tx_next_aio == p_cancel_aio))
@@ -744,10 +732,7 @@ int_t SCUX_DirectCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * c
             }
         }
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return retval;
@@ -782,7 +767,6 @@ int_t SCUX_CopyCancelAll(scux_info_ch_t * const p_scux_info_ch)
     int_t    dma_ercd;
 #endif
     int_t    dma_retval;
-    int_t    was_masked;
     uint32_t tx_remain_size = 0;
     uint32_t rx_remain_size = 0;
 
@@ -792,11 +776,7 @@ int_t SCUX_CopyCancelAll(scux_info_ch_t * const p_scux_info_ch)
     }
     else
     {
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         dma_retval = R_DMA_Cancel(p_scux_info_ch->dma_tx_ch, &tx_remain_size, &dma_ercd);
         /* DMA stop check, (when dma_ercd is EBADF, DMA stopped already) */
@@ -871,10 +851,7 @@ int_t SCUX_CopyCancelAll(scux_info_ch_t * const p_scux_info_ch)
             p_scux_info_ch->cancel_operate_flag = false;
         }
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return retval;
@@ -904,7 +881,6 @@ int_t SCUX_DirectCancelAll(scux_info_ch_t * const p_scux_info_ch)
     int_t    dma_ercd;
 #endif
     int_t    dma_retval;
-    int_t    was_masked;
     uint32_t tx_remain_size = 0;
 
     if (NULL == p_scux_info_ch)
@@ -913,11 +889,7 @@ int_t SCUX_DirectCancelAll(scux_info_ch_t * const p_scux_info_ch)
     }
     else
     {
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         dma_retval = R_DMA_Cancel(p_scux_info_ch->dma_tx_ch, &tx_remain_size, &dma_ercd);
         /* DMA stop check, (when dma_ercd is EBADF, DMA stopped already) */
@@ -968,10 +940,7 @@ int_t SCUX_DirectCancelAll(scux_info_ch_t * const p_scux_info_ch)
             p_scux_info_ch->cancel_operate_flag = false;
         }
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return retval;
@@ -2691,7 +2660,6 @@ void SCUX_SetupSsif(const scux_info_ch_t * const p_scux_info_ch)
     uint32_t ssif_arrange_num;
     uint32_t ssicr_value = 0;
     scux_info_drv_t * const p_info_drv = SCUX_GetDrvInstance();
-    int_t    was_masked;
 
     if ((NULL == p_info_drv) || (NULL == p_scux_info_ch))
     {
@@ -2733,11 +2701,7 @@ void SCUX_SetupSsif(const scux_info_ch_t * const p_scux_info_ch)
                         p_info_drv->shared_info.mix_ssif_ch |= (1U << p_set_ssif->ssif_cfg.ssif_ch_num);
                     }
 
-#if defined (__ICCARM__)
-                    was_masked = __disable_irq_iar();
-#else
-                    was_masked = __disable_irq();
-#endif
+                    core_util_critical_section_enter();
 
                     /* input clock */
                     CPGSTBCR11 &= (uint8_t)~((uint8_t)gb_cpg_scux_ssif_stbcr_bit[p_set_ssif->ssif_cfg.ssif_ch_num]);
@@ -2753,10 +2717,7 @@ void SCUX_SetupSsif(const scux_info_ch_t * const p_scux_info_ch)
                     (void)dummy_buf;
 #endif
 
-                    if (0 == was_masked)
-                    {
-                        __enable_irq();
-                    }
+                    core_util_critical_section_exit();
 
                     SCUX_SetupSsifGpio(p_set_ssif->ssif_cfg.ssif_ch_num);
 
@@ -3455,7 +3416,6 @@ void SCUX_AsyncStopHw(scux_info_ch_t * const p_scux_info_ch)
     uint32_t  ssipmd_shift_ssif3 = 0;
     uint32_t  ssipmd_reg;
     scux_info_ch_t *p_pair_scux_ch;
-    int_t    was_masked;
 
     if ((NULL == p_info_drv) || (NULL == p_scux_info_ch))
     {
@@ -3873,19 +3833,12 @@ void SCUX_AsyncStopHw(scux_info_ch_t * const p_scux_info_ch)
             p_scux_info_ch->p_ssif_info1->scux_channel = (int_t)scux_check_ch;
             if (0 == p_scux_info_ch->p_ssif_info1->scux_channel)
             {
-#if defined (__ICCARM__)
-                was_masked = __disable_irq_iar();
-#else
-                was_masked = __disable_irq();
-#endif
+                core_util_critical_section_enter();
 
                 /* clock mask on all used SSIF channel shutdown */
                 CPGSTBCR11 |= ((uint8_t)gb_cpg_scux_ssif_stbcr_bit[p_scux_info_ch->p_ssif_info1->ssif_cfg.ssif_ch_num]);
 
-                if (0 == was_masked)
-                {
-                    __enable_irq();
-                }
+                core_util_critical_section_exit();
             }
 
             if (NULL != p_scux_info_ch->p_ssif_info2)
@@ -3983,35 +3936,21 @@ void SCUX_AsyncStopHw(scux_info_ch_t * const p_scux_info_ch)
 
                 if (0 == p_scux_info_ch->p_ssif_info2->scux_channel)
                 {
-#if defined (__ICCARM__)
-                    was_masked = __disable_irq_iar();
-#else
-                    was_masked = __disable_irq();
-#endif
+                    core_util_critical_section_enter();
 
                     /* clock mask */
                     CPGSTBCR11 |= ((uint8_t)gb_cpg_scux_ssif_stbcr_bit[p_scux_info_ch->p_ssif_info2->ssif_cfg.ssif_ch_num]);
 
-                    if (0 == was_masked)
-                    {
-                        __enable_irq();
-                    }
+                    core_util_critical_section_exit();
                 }
 
                 if (0 == p_scux_info_ch->p_ssif_info3->scux_channel)
                 {
-#if defined (__ICCARM__)
-                    was_masked = __disable_irq_iar();
-#else
-                    was_masked = __disable_irq();
-#endif
+                    core_util_critical_section_enter();
 
                     CPGSTBCR11 |= ((uint8_t)gb_cpg_scux_ssif_stbcr_bit[p_scux_info_ch->p_ssif_info3->ssif_cfg.ssif_ch_num]);
 
-                    if (0 == was_masked)
-                    {
-                        __enable_irq();
-                    }
+                    core_util_critical_section_exit();
                 }
 
                 if (false == p_scux_info_ch->cancel_operate_flag)

@@ -198,7 +198,7 @@ typedef struct ssif_info_ch
     bool_t      slave_mode;
     uint32_t    sample_freq;
     ssif_ch_stat_t ch_stat;
-    osSemaphoreId  sem_access;
+    osSemaphoreId_t sem_access;
     AHF_S       tx_que;
     AHF_S       rx_que;
     int_t       dma_rx_ch;

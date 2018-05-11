@@ -1070,7 +1070,6 @@ jcu_errorcode_t  R_JCU_Set2ndCacheAttribute(
 {
     static const uint32_t  mask_JCU = 0xFFFF0000u;
     jcu_errorcode_t    returnValue;
-    bool_t             was_all_enabled = false;
     uint32_t           new_value;
     volatile uint32_t  value;
     jcu_internal_information_t *const  self = &gs_jcu_internal_information;
@@ -1086,17 +1085,15 @@ jcu_errorcode_t  R_JCU_Set2ndCacheAttribute(
 
     new_value = ( read_cache_attribute << 24 ) | ( write_cache_attribute << 16 );
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
 
     value = INB.AXIBUSCTL0;
     value = new_value | ( value & ~mask_JCU );  /* Mutual Exclusion from Ether */
     INB.AXIBUSCTL0 = value;
 
     returnValue = JCU_ERROR_OK;
+    R_OSPL_EnableAllInterrupt();
 fin:
-    if ( was_all_enabled ) {
-        R_OSPL_EnableAllInterrupt();
-    }
 
     return  returnValue;
 }
@@ -1246,7 +1243,6 @@ fin:
 static bool_t  R_JCU_I_LOCK_Lock( void *const  self_ )
 {
     bool_t  is_locked;
-    bool_t  was_all_enabled; /* = false; */ /* QAC 3197 */
     bool_t  b;
     jcu_i_lock_t *const  self = (jcu_i_lock_t *) self_;
 
@@ -1255,7 +1251,7 @@ static bool_t  R_JCU_I_LOCK_Lock( void *const  self_ )
         goto fin;
     }
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
 
     is_locked = self->IsLock;
     if ( ! is_locked ) {
@@ -1264,9 +1260,7 @@ static bool_t  R_JCU_I_LOCK_Lock( void *const  self_ )
         self->IsLock = true;
     }
 
-    if ( IS( was_all_enabled ) ) {
-        R_OSPL_EnableAllInterrupt();
-    }
+    R_OSPL_EnableAllInterrupt();
 
 fin:
     return  ! is_locked;
@@ -1281,21 +1275,18 @@ fin:
 */
 static void  R_JCU_I_LOCK_Unlock( void *const  self_ )
 {
-    bool_t  was_all_enabled; /* = false; */ /* QAC 3197 */
     jcu_i_lock_t *const  self = (jcu_i_lock_t *) self_;
 
     IF_DQ( self == NULL ) {
         goto fin;
     }
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
 
     R_JCU_EnableInterrupt();
     self->IsLock = false;
 
-    if ( IS( was_all_enabled ) ) {
-        R_OSPL_EnableAllInterrupt();
-    }
+    R_OSPL_EnableAllInterrupt();
 
 fin:
     return;

@@ -476,7 +476,7 @@ static int_t R_SSIF_Open(void* const p_driver_instance, const char_t* const p_pa
         if (ESUCCESS == ercd)
         {
             /* ->MISRA 10.6 : This macro is defined by CMSIS-RTOS that can't be modified. */
-            os_ret = osSemaphoreWait(p_info_ch->sem_access, osWaitForever);
+            os_ret = osSemaphoreAcquire(p_info_ch->sem_access, osWaitForever);
             /* <-MISRA 10.6 */
 
             if ((-1) == os_ret)
@@ -545,7 +545,7 @@ static int_t R_SSIF_Close(void* const p_fd, int32_t* const p_errno)
     {
         /* ->MISRA 10.6 : This macro is defined by CMSIS-RTOS that can't be modified. */
         /* Get semaphore to access the channel data */
-        os_ret = osSemaphoreWait(p_info_ch->sem_access, osWaitForever);
+        os_ret = osSemaphoreAcquire(p_info_ch->sem_access, osWaitForever);
         /* <-MISRA 10.6 */
 
         if ((-1) == os_ret)
@@ -623,7 +623,7 @@ static int_t R_SSIF_Ioctl(void* const p_fd, const int_t request, void* const p_b
         else
         {
             /* ->MISRA 10.6 : This macro is defined by CMSIS-RTOS that can't be modified. */
-            os_ret = osSemaphoreWait(p_info_ch->sem_access, osWaitForever);
+            os_ret = osSemaphoreAcquire(p_info_ch->sem_access, osWaitForever);
             /* <-MISRA 10.6 */
 
             if ((-1) == os_ret)
@@ -817,7 +817,7 @@ static int_t R_SSIF_Cancel(void* const p_fd, AIOCB* const p_aio, int32_t* const 
     {
         /* ->MISRA 10.6 : This macro is defined by CMSIS-RTOS that can't be modified. */
         /* Get semaphore to access the channel data */
-        os_ret = osSemaphoreWait(p_info_ch->sem_access, osWaitForever);
+        os_ret = osSemaphoreAcquire(p_info_ch->sem_access, osWaitForever);
         /* <-MISRA 10.6 */
 
         if ((-1) == os_ret)

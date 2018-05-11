@@ -203,6 +203,7 @@ class USBMouse: public USBHID
     private:
         MOUSE_TYPE mouse_type;
         uint8_t button;
+        uint8_t _config_descriptor[41];
         bool mouseSend(int8_t x, int8_t y, uint8_t buttons, int8_t z);
 };
 

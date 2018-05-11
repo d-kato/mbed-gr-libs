@@ -755,18 +755,15 @@ void  R_OSPL_EnableAllInterrupt(void);
 *    @code
 *    void  Func()
 *    {
-*        bool_t  was_all_enabled = false;
-*
-*        was_all_enabled = R_OSPL_DisableAllInterrupt();
+*        R_OSPL_DisableAllInterrupt();
 *
 *        // All interrupt disabled
 *
-*        if ( was_all_enabled )
-*            { R_OSPL_EnableAllInterrupt(); }
+*        R_OSPL_EnableAllInterrupt();
 *    }
 *    @endcode
 */
-bool_t    R_OSPL_DisableAllInterrupt(void);
+void    R_OSPL_DisableAllInterrupt(void);
 
 
 /**

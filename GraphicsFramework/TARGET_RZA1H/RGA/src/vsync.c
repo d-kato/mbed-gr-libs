@@ -488,7 +488,6 @@ fin:
 static bool_t  R_V_SYNC_I_LOCK_Lock( r_v_sync_i_lock_t *const  self )
 {
     bool_t  is_locked;
-    bool_t  was_all_enabled; /* = false; */ /* QAC 3197 */
     bool_t  b;
 
     IF_DQ( self == NULL ) {
@@ -496,7 +495,7 @@ static bool_t  R_V_SYNC_I_LOCK_Lock( r_v_sync_i_lock_t *const  self )
         goto fin;
     }
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
 
     is_locked = self->is_lock;
     if ( ! is_locked ) {
@@ -505,9 +504,7 @@ static bool_t  R_V_SYNC_I_LOCK_Lock( r_v_sync_i_lock_t *const  self )
         self->is_lock = true;
     }
 
-    if ( IS( was_all_enabled ) ) {
-        R_OSPL_EnableAllInterrupt();
-    }
+    R_OSPL_EnableAllInterrupt();
 
 fin:
     return  ! is_locked;
@@ -522,20 +519,16 @@ fin:
 */
 static void  R_V_SYNC_I_LOCK_Unlock( r_v_sync_i_lock_t *const  self )
 {
-    bool_t  was_all_enabled; /* = false; */ /* QAC 3197 */
-
     IF_DQ( self == NULL ) {
         goto fin;
     }
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
 
     R_V_SYNC_EnableInterrupt( self->channel_num );
     self->is_lock = false;
 
-    if ( IS( was_all_enabled ) ) {
-        R_OSPL_EnableAllInterrupt();
-    }
+    R_OSPL_EnableAllInterrupt();
 fin:
     return;
 }

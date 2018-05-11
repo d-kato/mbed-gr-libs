@@ -92,6 +92,7 @@ int_t R_SSIF_Userdef_InitPinMux(const uint32_t ssif_ch)
     return ESUCCESS;
 }
 #else  /* not mbed */
+#include  "mbed_critical.h"
 
 #if defined(TARGET_RZA1H) /* mbed */
 /******************************************************************************
@@ -118,13 +119,8 @@ int_t R_SSIF_Userdef_InitPinMux(const uint32_t ssif_ch)
 int_t R_SSIF_Userdef_InitPinMux(const uint32_t ssif_ch)
 {
     int_t ercd = ESUCCESS;
-    int_t was_masked;
 
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* -> IPA R2.4.2 : This is implicit type conversion that doesn't have bad effect on writing to 16bit register. */
     switch (ssif_ch)
@@ -425,10 +421,7 @@ int_t R_SSIF_Userdef_InitPinMux(const uint32_t ssif_ch)
     }
     /* <- IPA R2.4.2 */
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return ercd;
 }
@@ -456,13 +449,8 @@ int_t R_SSIF_Userdef_InitPinMux(const uint32_t ssif_ch)
 int_t R_SSIF_Userdef_InitPinMux(const uint32_t ssif_ch)
 {
     int_t ercd = ESUCCESS;
-    int_t was_masked;
 
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* -> IPA R2.4.2 : This is implicit type conversion that doesn't have bad effect on writing to 16bit register. */
     switch (ssif_ch)
@@ -597,10 +585,7 @@ int_t R_SSIF_Userdef_InitPinMux(const uint32_t ssif_ch)
     }
     /* <- IPA R2.4.2 */
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return ercd;
 }

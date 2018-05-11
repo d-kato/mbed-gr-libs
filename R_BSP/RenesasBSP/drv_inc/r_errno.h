@@ -43,6 +43,7 @@ extern "C" {
 #define ESUCCESS    (0)
 #define EERROR      (-1)
 
+#if(0)
 #define EBADF       (-17) /* Bad file descriptor */
 #define EINVAL      (-28) /* Invalid argument */
 #define ENOMEM      (-33) /* No memory available */
@@ -107,6 +108,9 @@ extern "C" {
 #define EMEDIUMTYPE (-127) /* Wrong medium type */
 #define ENOMEDIUM   (-128) /* No medium present */
 #define ESEEKRANGE  (-129) /* seek setting error */  /* Source Merge 11-1 */
+#endif
+#define EBADF       (201) /* Bad file descriptor */
+#define ENOTSUP     (202) /* Not supported */
 
 /***********************************************************************************
  Defines

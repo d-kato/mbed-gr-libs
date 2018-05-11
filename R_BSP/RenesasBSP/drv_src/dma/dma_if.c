@@ -38,6 +38,7 @@ Includes <System Includes>, "Project Includes"
 *******************************************************************************/
 
 #include "dma.h"
+#include  "mbed_critical.h"
 
 /******************************************************************************
 Private global tables
@@ -70,7 +71,6 @@ int_t R_DMA_Init(const dma_drv_init_t * const p_dma_init_param, int32_t * const 
 {
     int_t         retval = ESUCCESS;
     int_t         result_init;
-    int_t         was_masked;
 
     DMA_SetErrCode(ESUCCESS, p_errno);
 
@@ -94,11 +94,7 @@ int_t R_DMA_Init(const dma_drv_init_t * const p_dma_init_param, int32_t * const 
     }
 
     /* disable all irq */
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     if (ESUCCESS == retval)
     {
@@ -111,10 +107,7 @@ int_t R_DMA_Init(const dma_drv_init_t * const p_dma_init_param, int32_t * const 
         }
     }
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }
@@ -153,18 +146,13 @@ int_t R_DMA_UnInit(int32_t * const p_errno)
     dma_info_ch_t  *dma_info_ch;
     int_t          ch_count;
     bool_t         ch_stat_check_flag;
-    int_t          was_masked;
 
     DMA_SetErrCode(ESUCCESS, p_errno);
 
     dma_info_drv = DMA_GetDrvInstance();
 
     /* disable all irq */
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* check driver status */
     if (ESUCCESS == retval)
@@ -224,10 +212,7 @@ int_t R_DMA_UnInit(int32_t * const p_errno)
         }
     }
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }
@@ -268,7 +253,6 @@ int_t R_DMA_Alloc(const int_t channel, int32_t * const p_errno)
     int_t           ercd = ESUCCESS;
     int_t           get_ch_num;
     dma_info_drv_t  *dma_info_drv;
-    int_t           was_masked;
 
     DMA_SetErrCode(ESUCCESS, p_errno);
 
@@ -276,11 +260,7 @@ int_t R_DMA_Alloc(const int_t channel, int32_t * const p_errno)
     dma_info_drv = DMA_GetDrvInstance();
 
     /* disable all irq */
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     if (ESUCCESS == ercd)
     {
@@ -330,10 +310,7 @@ int_t R_DMA_Alloc(const int_t channel, int32_t * const p_errno)
         DMA_SetErrCode(ercd, p_errno);
     }
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }
@@ -373,16 +350,11 @@ int_t R_DMA_Free(const int_t channel, int32_t *const p_errno)
     dma_info_drv_t  *dma_info_drv;
     dma_info_ch_t   *dma_info_ch;
     int_t           error_code;
-    int_t           was_masked;
 
     DMA_SetErrCode(ESUCCESS, p_errno);
 
     /* disable all irq */
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* check channel of argument */
     if ((0 <= channel) && (channel < DMA_CH_NUM))
@@ -445,10 +417,7 @@ int_t R_DMA_Free(const int_t channel, int32_t *const p_errno)
         DMA_SetErrCode(EINVAL, p_errno);
     }
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }
@@ -493,7 +462,6 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
     dma_ch_cfg_t     ch_cfg_set_table;
     uint32_t         set_reqd;
     bool_t           check_table_flag;
-    int_t            was_masked;
 
     /* Resouce Configure Set Table */
     static const dma_ch_cfg_t ch_cfg_table[DMA_CH_CONFIG_TABLE_NUM] =
@@ -735,11 +703,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
             }
 
             /* disable all irq */
-#if defined (__ICCARM__)
-            was_masked = __disable_irq_iar();
-#else
-            was_masked = __disable_irq();
-#endif
+            core_util_critical_section_enter();
 
             if (ESUCCESS == retval)
             {
@@ -779,10 +743,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
                 }
             }
 
-            if (0 == was_masked)
-            {
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
         }
         else
         {
@@ -837,16 +798,11 @@ int_t R_DMA_Start(const int_t channel, const dma_trans_data_t * const p_dma_data
     int_t          retval = ESUCCESS;
     dma_info_ch_t  *dma_info_ch;
     int_t          error_code;
-    int_t          was_masked;
 
     DMA_SetErrCode(ESUCCESS, p_errno);
 
     /* disable all irq */
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* check channel of argument */
     if ((0 <= channel) && (channel < DMA_CH_NUM))
@@ -919,10 +875,7 @@ int_t R_DMA_Start(const int_t channel, const dma_trans_data_t * const p_dma_data
         DMA_SetErrCode(EINVAL, p_errno);
     }
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }
@@ -963,16 +916,11 @@ int_t R_DMA_NextData(const int_t channel, const dma_trans_data_t * const p_dma_d
     int_t          retval = ESUCCESS;
     dma_info_ch_t  *dma_info_ch;
     int_t          error_code;
-    int_t          was_masked;
 
     DMA_SetErrCode(ESUCCESS, p_errno);
 
     /* disable all irq */
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* check channel of argument */
     if ((0 <= channel) && (channel < DMA_CH_NUM))
@@ -1046,10 +994,7 @@ int_t R_DMA_NextData(const int_t channel, const dma_trans_data_t * const p_dma_d
         DMA_SetErrCode(EINVAL, p_errno);
     }
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }
@@ -1087,16 +1032,11 @@ int_t R_DMA_Cancel(const int_t channel, uint32_t * const p_remain, int32_t * con
     int_t          retval = ESUCCESS;
     dma_info_ch_t  *dma_info_ch;
     int_t          error_code;
-    int_t          was_masked;
 
     DMA_SetErrCode(ESUCCESS, p_errno);
 
     /* disable all irq */
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* check channel of argument */
     if ((0 <= channel) && (channel < DMA_CH_NUM))
@@ -1153,10 +1093,7 @@ int_t R_DMA_Cancel(const int_t channel, uint32_t * const p_remain, int32_t * con
         DMA_SetErrCode(EINVAL, p_errno);
     }
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }

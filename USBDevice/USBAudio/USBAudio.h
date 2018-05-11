@@ -328,6 +328,8 @@ private:
 
     volatile float volume;
 
+    uint8_t _config_descriptor[184];
+
 };
 
 #endif

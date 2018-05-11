@@ -64,7 +64,7 @@ Private global variables and functions
 
 /** gs_ospl_mutex */
 #if R_OSPL_IS_PREEMPTION
-static osMutexId  gs_ospl_mutex;  /* gs_OSPL_Mutex */
+static osMutexId_t  gs_ospl_mutex;  /* gs_OSPL_Mutex */
 #endif
 
 
@@ -339,20 +339,20 @@ fin:
 #if R_OSPL_IS_PREEMPTION
 errnum_t  R_OSPL_Start_T_Lock(void)
 {
-    errnum_t  e;
-    osStatus  es;
+    errnum_t    e;
+    osStatus_t  es;
 
-    static osMutexDef( gs_ospl_mutex );
+    osMutexDef( gs_ospl_mutex );
 
     if ( gs_ospl_mutex == NULL ) {
-        gs_ospl_mutex = osMutexCreate( osMutex( gs_ospl_mutex ) );
+        gs_ospl_mutex = osMutexNew( osMutex( gs_ospl_mutex ) );
         if ( gs_ospl_mutex == NULL ) {
             e=E_OTHERS;
             goto fin;
         }
     }
 
-    es= osMutexWait( gs_ospl_mutex, osWaitForever );
+    es= osMutexAcquire( gs_ospl_mutex, osWaitForever );
     if ( es == osErrorISR ) {
         es = osOK;
     }
@@ -379,7 +379,7 @@ fin:
 void  R_OSPL_End_T_Lock(void)
 {
     if ( gs_ospl_mutex != NULL ) {
-        osStatus  rs;
+        osStatus_t rs;
 
         rs= osMutexRelease( gs_ospl_mutex );
         if ( rs == osErrorISR ) {

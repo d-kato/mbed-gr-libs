@@ -85,10 +85,9 @@ Private global variables and functions
 void  R_D_Add( int_fast32_t IndexNum, volatile const void *in_Address, uint32_t BreakValue, bool_t IsPrintf )
 {
     r_ospl_debug_watch4_t  *self = &g_r_ospl_debug_watch4[ IndexNum ];
-    bool_t                  was_all_enabled; /* = false; */ /* QAC 3197 */
     int_t                   r;
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
 
     if ( IS( IsPrintf ) ) {
         r= printf( "Debug_add( %d, 0x%08X )\n", IndexNum, (uintptr_t) in_Address );
@@ -98,9 +97,7 @@ void  R_D_Add( int_fast32_t IndexNum, volatile const void *in_Address, uint32_t 
     self->BreakValue = BreakValue;
     self->IsPrintf = IsPrintf;
 
-    if ( IS( was_all_enabled ) ) {
-        R_OSPL_EnableAllInterrupt();
-    }
+    R_OSPL_EnableAllInterrupt();
 }
 #endif  /* R_OSPL_DEBUG_TOOL */
 
@@ -112,10 +109,9 @@ void  R_D_Add( int_fast32_t IndexNum, volatile const void *in_Address, uint32_t 
 void  R_D_Watch( int_fast32_t in_IndexNum )
 {
     r_ospl_debug_watch4_t  *self = &g_r_ospl_debug_watch4[ in_IndexNum ];
-    bool_t                  was_all_enabled; /* = false; */ /* QAC 3197 */
     int_t                   r;
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
 
     if ( self->Address != NULL ) {
         if ( IS( self->IsPrintf ) ) {
@@ -128,9 +124,7 @@ void  R_D_Watch( int_fast32_t in_IndexNum )
         }
     }
 
-    if ( IS( was_all_enabled ) ) {
-        R_OSPL_EnableAllInterrupt();
-    }
+    R_OSPL_EnableAllInterrupt();
 }
 #endif  /* R_OSPL_DEBUG_TOOL */
 

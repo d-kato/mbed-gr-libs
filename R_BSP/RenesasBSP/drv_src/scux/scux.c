@@ -33,6 +33,7 @@ Includes <System Includes>, "Project Includes"
 *******************************************************************************/
 
 #include "scux.h"
+#include "mbed_critical.h"
 
 #if(1) /* mbed */
 /******************************************************************************
@@ -214,7 +215,7 @@ static volatile struct st_ssif * const p_scux_ssif_ch_reg_addr[SCUX_SSIF_CH_NUM]
 /* <-MISRA 11.3 */
 
 /* SCUX semaphore table define */
-static const osSemaphoreDef_t * const p_semdef_ch_scux_access[SCUX_CH_NUM] =
+static const osSemaphoreAttr_t * const p_semdef_ch_scux_access[SCUX_CH_NUM] =
 {
     osSemaphore(scux_ch0_access),
     osSemaphore(scux_ch1_access),
@@ -223,7 +224,7 @@ static const osSemaphoreDef_t * const p_semdef_ch_scux_access[SCUX_CH_NUM] =
 };
 
 /* SSIF semaphore table define */
-static const osSemaphoreDef_t * const p_semdef_ch_scux_ssif_access[SCUX_SSIF_CH_NUM] =
+static const osSemaphoreAttr_t * const p_semdef_ch_scux_ssif_access[SCUX_SSIF_CH_NUM] =
 {
     osSemaphore(scux_ssif_ch0_access),
     osSemaphore(scux_ssif_ch1_access),
@@ -360,7 +361,6 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
     scux_ssif_ch_num_t    ssif_ch_count;
     uint32_t cpg_value;
     bool_t   init_shared_flag = false;
-    int_t    was_masked;
     volatile uint8_t dummy_buf;
     uint32_t scux_init_count;
     int_t    uninit_ercd;
@@ -383,11 +383,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
 
         for (i = 0; ((i < INIT_WAIT_NUM) && (false == init_start_flag)); i++)
         {
-#if defined (__ICCARM__)
-            was_masked = __disable_irq_iar();
-#else
-            was_masked = __disable_irq();
-#endif
+            core_util_critical_section_enter();
 
             if (SCUX_DRV_INIT == gb_scux_info_drv.drv_stat)
             {
@@ -429,10 +425,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                 /* do nothing : SCUX_DRV_INIT_RUNNING */
             }
 
-            if (0 == was_masked)
-            {
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
 
             if (false == init_start_flag)
             {
@@ -504,11 +497,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                 gb_scux_info_drv.info_ch[scux_ch_count].p_scux_reg = &p_scux_ch_reg_addr_table[scux_ch_count];
                                        
                 if (false == init_shared_flag) {
-#if defined (__ICCARM__)
-                    was_masked = __disable_irq_iar();
-#else
-                    was_masked = __disable_irq();
-#endif
+                    core_util_critical_section_enter();
 
                     /* supply clock for SCUX */
                     cpg_value = (uint32_t)CPG.STBCR8 & ~(CPG_STBCR8_BIT_MSTP81);
@@ -518,10 +507,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                     (void)dummy_buf;
 #endif
                     
-                    if (0 == was_masked)
-                    {
-                        __enable_irq();
-                    }
+                    core_util_critical_section_exit();
 
                     /* software reset */
                     SCUX.SWRSR_CIM &= ~SWRSR_CIM_SWRST_SET;
@@ -635,7 +621,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                 }
             
                 /* set  semaphore parameter */
-                gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access = osSemaphoreCreate(p_semdef_ch_scux_access[scux_ch_count], 1);
+                gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access = osSemaphoreNew(0xffff, 1, p_semdef_ch_scux_access[scux_ch_count]);
                 if (NULL == gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access)
                 {
                      retval = ENOMEM;
@@ -644,7 +630,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                 {
                     for (ssif_ch_count = SCUX_SSIF_CH_0; ((ssif_ch_count < SCUX_SSIF_CH_NUM) && (ESUCCESS == retval)); ssif_ch_count++) 
                     {
-                        gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access = osSemaphoreCreate(p_semdef_ch_scux_ssif_access[ssif_ch_count], 1);
+                        gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access = osSemaphoreNew(0xffff, 1, p_semdef_ch_scux_ssif_access[ssif_ch_count]);
                         if (NULL == gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access)
                         {
                             retval = ENOMEM;
@@ -653,7 +639,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                 }
                 if ((ESUCCESS == retval) && (false == init_shared_flag))
                 {
-                    gb_scux_info_drv.shared_info.sem_shared_access = osSemaphoreCreate(osSemaphore(scux_shared_access), 1);
+                    gb_scux_info_drv.shared_info.sem_shared_access = osSemaphoreNew(0xffff, 1, osSemaphore(scux_shared_access));
                     if (NULL == gb_scux_info_drv.shared_info.sem_shared_access)
                     {
                         retval = ENOMEM;
@@ -683,11 +669,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                     gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access = NULL;
                 }
 
-#if defined (__ICCARM__)
-                was_masked = __disable_irq_iar();
-#else
-                was_masked = __disable_irq();
-#endif
+                core_util_critical_section_enter();
 
                 gb_scux_info_drv.info_ch[scux_ch_count].enabled = false;
 
@@ -705,10 +687,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                     uninit_all_flag = true;
                 }
 
-                if (0 == was_masked)
-                {
-                    __enable_irq();
-                }
+                core_util_critical_section_exit();
 
                 if (false != uninit_all_flag)
                 {
@@ -753,7 +732,6 @@ void SCUX_UnInitializeOne(const int_t channel)
     int_t    ssif_ch_count;
     bool_t   uninit_all_flag = false;
     uint32_t i;
-    int_t    was_masked;
 
     scux_ch_count = channel;
     if (false != gb_scux_info_drv.info_ch[scux_ch_count].enabled)
@@ -764,15 +742,11 @@ void SCUX_UnInitializeOne(const int_t channel)
             (SCUX_CH_STOP != gb_scux_info_drv.info_ch[scux_ch_count].ch_stat))
         {
             /* The exclusive access control (interrupt disabled) starts */
-#if defined (__ICCARM__)
-            was_masked = __disable_irq_iar();
-#else
-            was_masked = __disable_irq();
-#endif
+            core_util_critical_section_enter();
 
             /* This exclusive access control ends in the SCUX_IoctlClearStop */
             /* call the __enable_irq in the SCUX_IoctlClearStop */
-            ercd = SCUX_IoctlClearStop(scux_ch_count, was_masked);
+            ercd = SCUX_IoctlClearStop(scux_ch_count);
             if (ESUCCESS != ercd)
             {
                 /* NON_NOTICE_ASSERT: SCUX stop failed */
@@ -823,11 +797,7 @@ void SCUX_UnInitializeOne(const int_t channel)
         ahf_destroy(&gb_scux_info_drv.info_ch[scux_ch_count].rx_que);
     }
 
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     gb_scux_info_drv.info_ch[scux_ch_count].enabled = false;
 
@@ -848,10 +818,7 @@ void SCUX_UnInitializeOne(const int_t channel)
         }
     }
 
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     if (false != uninit_all_flag)
     {
@@ -914,7 +881,6 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
     scux_ssif_ch_num_t    ssif_ch_count;
     uint32_t cpg_value;
     bool_t   init_shared_flag = false;
-    int_t    was_masked;
     volatile uint8_t dummy_buf;
 
     if (NULL == p_scux_init_param)
@@ -991,11 +957,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                 gb_scux_info_drv.info_ch[scux_ch_count].p_scux_reg = &p_scux_ch_reg_addr_table[scux_ch_count];
 
                 if (false == init_shared_flag) {
-#if defined (__ICCARM__)
-                    was_masked = __disable_irq_iar();
-#else
-                    was_masked = __disable_irq();
-#endif
+                    core_util_critical_section_enter();
 
                     /* supply clock for SCUX */
                     cpg_value = (uint32_t)CPG.STBCR8 & ~(CPG_STBCR8_BIT_MSTP81);
@@ -1005,10 +967,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                     (void)dummy_buf;
 #endif
 
-                    if (0 == was_masked)
-                    {
-                        __enable_irq();
-                    }
+                    core_util_critical_section_exit();
 
                     /* software reset */
                     SCUX.SWRSR_CIM &= ~SWRSR_CIM_SWRST_SET;
@@ -1121,7 +1080,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                 }
 
                 /* set  semaphore parameter */
-                gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access = osSemaphoreCreate(p_semdef_ch_scux_access[scux_ch_count], 1);
+                gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access = osSemaphoreNew(0xffff, 1, p_semdef_ch_scux_access[scux_ch_count]);
                 if (NULL == gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access)
                 {
                      retval = ENOMEM;
@@ -1130,7 +1089,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                 {
                     for (ssif_ch_count = SCUX_SSIF_CH_0; ((ssif_ch_count < SCUX_SSIF_CH_NUM) && (ESUCCESS == retval)); ssif_ch_count++)
                     {
-                        gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access = osSemaphoreCreate(p_semdef_ch_scux_ssif_access[ssif_ch_count], 1);
+                        gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access = osSemaphoreNew(0xffff, 1, p_semdef_ch_scux_ssif_access[ssif_ch_count]);
                         if (NULL == gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access)
                         {
                             retval = ENOMEM;
@@ -1139,7 +1098,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                 }
                 if ((ESUCCESS == retval) && (false == init_shared_flag))
                 {
-                    gb_scux_info_drv.shared_info.sem_shared_access = osSemaphoreCreate(osSemaphore(scux_shared_access), 1);
+                    gb_scux_info_drv.shared_info.sem_shared_access = osSemaphoreNew(0xffff, 1, osSemaphore(scux_shared_access));
                     if (NULL == gb_scux_info_drv.shared_info.sem_shared_access)
                     {
                         retval = ENOMEM;
@@ -1225,7 +1184,6 @@ void SCUX_UnInitialize(void)
     int_t    scux_ch_count;
     int_t    ssif_ch_count;
     uint32_t cpg_value;
-    int_t    was_masked;
 
     for (scux_ch_count = 0; scux_ch_count < SCUX_CH_NUM; scux_ch_count++)
     {
@@ -1236,14 +1194,10 @@ void SCUX_UnInitialize(void)
                 (SCUX_CH_INIT != gb_scux_info_drv.info_ch[scux_ch_count].ch_stat) &&
                 (SCUX_CH_STOP != gb_scux_info_drv.info_ch[scux_ch_count].ch_stat))
             {
-#if defined (__ICCARM__)
-                was_masked = __disable_irq_iar();
-#else
-                was_masked = __disable_irq();
-#endif
+                core_util_critical_section_enter();
 
                 /* This exclusive access control ends in the SCUX_IoctlClearStop */
-                ercd = SCUX_IoctlClearStop(scux_ch_count, was_masked);
+                ercd = SCUX_IoctlClearStop(scux_ch_count);
                 if (ESUCCESS != ercd)
                 {
                     /* NON_NOTICE_ASSERT: SCUX stop failed */
@@ -1333,21 +1287,13 @@ void SCUX_UnInitialize(void)
 
     gb_scux_info_drv.shared_info.sem_shared_access = NULL;
 
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* stop clock for SCUX */
     cpg_value = ((uint32_t)CPG.STBCR8 | CPG_STBCR8_BIT_MSTP81);
     CPG.STBCR8 = (uint8_t)cpg_value;
 
-    if (0 == was_masked)
-    {
-        /* enable all irq */
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     gb_scux_info_drv.drv_stat = SCUX_DRV_UNINIT;
 }
@@ -1442,21 +1388,16 @@ int_t  SCUX_CloseChannel(const int_t channel)
 {
     int_t    retval = ESUCCESS;
     int_t    ercd;
-    int_t    was_masked;
 
     /* check ch_stat whether going transfer */
     if ((SCUX_CH_UNINIT != gb_scux_info_drv.info_ch[channel].ch_stat) &&
         (SCUX_CH_INIT != gb_scux_info_drv.info_ch[channel].ch_stat) &&
         (SCUX_CH_STOP != gb_scux_info_drv.info_ch[channel].ch_stat))
     {
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         /* This exclusive access control ends in the SCUX_IoctlClearStop */
-        ercd = SCUX_IoctlClearStop(channel, was_masked);
+        ercd = SCUX_IoctlClearStop(channel);
         if (ESUCCESS != ercd)
         {
             retval = EFAULT;
@@ -2838,7 +2779,6 @@ static int_t SCUX_CmnUnInitialize(void)
     osStatus sem_ercd;
     int_t    ssif_ch_count;
     uint32_t cpg_value;
-    uint32_t was_masked;
     volatile uint8_t dummy_buf;
 
     /* software reset */
@@ -2873,11 +2813,7 @@ static int_t SCUX_CmnUnInitialize(void)
         gb_scux_info_drv.shared_info.sem_shared_access = NULL;
     }
 
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* stop clock for SCUX */
     cpg_value = ((uint32_t)CPG.STBCR8 | CPG_STBCR8_BIT_MSTP81);
@@ -2887,11 +2823,7 @@ static int_t SCUX_CmnUnInitialize(void)
     (void)dummy_buf;
 #endif
 
-    if (0U == was_masked)
-    {
-        /* enable all irq */
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }

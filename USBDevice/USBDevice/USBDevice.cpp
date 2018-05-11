@@ -927,7 +927,7 @@ bool USBDevice::readEP_NB(uint8_t endpoint, uint8_t * buffer, uint32_t * size, u
 
 
 uint8_t * USBDevice::deviceDesc() {
-    static uint8_t deviceDescriptor[] = {
+    const uint8_t device_descriptor_temp[] = {
         DEVICE_DESCRIPTOR_LENGTH,       /* bLength */
         DEVICE_DESCRIPTOR,              /* bDescriptorType */
         LSB(USB_VERSION_2_0),           /* bcdUSB (LSB) */
@@ -947,7 +947,9 @@ uint8_t * USBDevice::deviceDesc() {
         STRING_OFFSET_ISERIAL,          /* iSerialNumber */
         0x01                            /* bNumConfigurations */
     };
-    return deviceDescriptor;
+    MBED_ASSERT(sizeof(device_descriptor_temp) == sizeof(device_descriptor));
+    memcpy(device_descriptor, device_descriptor_temp, sizeof(device_descriptor));
+    return device_descriptor;
 }
 
 uint8_t * USBDevice::stringLangidDesc() {

@@ -83,7 +83,7 @@ Imported global variables and functions (from other files)
 /******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 ******************************************************************************/
-extern uint32_t IRQNestLevel; /* Indicates whether inside an ISR, and the depth of nesting.  0 = not in ISR. */
+extern uint32_t IRQ_NestLevel; /* Indicates whether inside an ISR, and the depth of nesting.  0 = not in ISR. */
 
 /******************************************************************************
 Private global variables and functions
@@ -105,12 +105,12 @@ int32_t R_ExceptionalMode(void)
 
     switch(__get_CPSR() & 0x1fu)
     {
-    case MODE_USR:
+    case CPSR_M_USR:
         break;
-    case MODE_SYS:
+    case CPSR_M_SYS:
         break;
-    case MODE_SVC:
-        if (IRQNestLevel == 0)
+    case CPSR_M_SVC:
+        if (IRQ_NestLevel == 0)
         {
             /* handling a regular service call */
         }

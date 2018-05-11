@@ -167,6 +167,7 @@ private:
     HID_REPORT outputReport;
     uint8_t output_length;
     uint8_t input_length;
+    uint8_t _config_descriptor[41];
 };
 
 #endif

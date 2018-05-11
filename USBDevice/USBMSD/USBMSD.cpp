@@ -609,7 +609,7 @@ uint8_t * USBMSD::stringIproductDesc() {
 
 
 uint8_t * USBMSD::configurationDesc() {
-    static uint8_t configDescriptor[] = {
+    const uint8_t config_descriptor_temp[32] = {
 
         // Configuration 1
         9,      // bLength
@@ -651,5 +651,7 @@ uint8_t * USBMSD::configurationDesc() {
         MSB(MAX_PACKET_SIZE_EPBULK),// wMaxPacketSize (MSB)
         0                           // bInterval
     };
-    return configDescriptor;
+    MBED_ASSERT(sizeof(config_descriptor_temp) == sizeof(_config_descriptor));
+    memcpy(_config_descriptor, config_descriptor_temp, sizeof(_config_descriptor));
+    return _config_descriptor;
 }

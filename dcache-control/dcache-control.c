@@ -24,7 +24,7 @@ void dcache_clean(void * p_buf, uint32_t size) {
 
     /* Data cache clean */
     for (addr = start_addr; addr < end_addr; addr += 0x20) {
-        __v7_clean_dcache_mva((void *)addr);
+        L1C_CleanDCacheMVA((void *)addr);
     }
 }
 
@@ -35,7 +35,7 @@ void dcache_invalid(void * p_buf, uint32_t size) {
 
     /* Data cache invalid */
     for (addr = start_addr; addr < end_addr; addr += 0x20) {
-        __v7_inv_dcache_mva((void *)addr);
+        L1C_InvalidateDCacheMVA((void *)addr);
     }
 }
 

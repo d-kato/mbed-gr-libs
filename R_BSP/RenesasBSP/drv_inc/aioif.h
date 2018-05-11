@@ -22,8 +22,8 @@ typedef struct AHF_S
     struct aiocb *head;
     struct aiocb *tail;
     uint32_t flags;
-    osMutexId semid; /* Source Merge 08-81 */
-    osMutexDef_t* p_cmtx;
+    osMutexId_t semid; /* Source Merge 08-81 */
+    osMutexAttr_t* p_cmtx;
     int32_t saved_int_mask;
 } AHF_S;
 

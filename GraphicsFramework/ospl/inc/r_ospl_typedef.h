@@ -128,7 +128,7 @@ typedef int  ssize_t;
 * @brief  osMailQId
 */
 #ifdef IS_CMSIS_USED
-typedef struct os_mailQ_cb *osMailQId;
+typedef void *osMailQId;
 #endif
 
 

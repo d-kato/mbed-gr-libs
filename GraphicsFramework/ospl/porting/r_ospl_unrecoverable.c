@@ -62,12 +62,11 @@ Private global variables and functions
 ************************************************************************/
 void  R_OSPL_RaiseUnrecoverable( errnum_t const  e )
 {
-    bool_t    was_all_enabled;  /* = false; */ /* QAC 3197 */
     /* ->QAC 3204 */
     volatile  bool_t  is_loop = true;
     /* <-QAC 3204 */
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
 
     R_DebugBreak( NULL, e );
 
@@ -75,9 +74,7 @@ void  R_OSPL_RaiseUnrecoverable( errnum_t const  e )
         /* Infinite Loop. Set "is_loop" by the debugger */
     }
 
-    if ( IS( was_all_enabled ) ) {
-        R_OSPL_EnableAllInterrupt();
-    }
+    R_OSPL_EnableAllInterrupt();
 }
 
 

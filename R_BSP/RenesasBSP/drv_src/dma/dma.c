@@ -40,7 +40,7 @@ Includes <System Includes>, "Project Includes"
 #include "dma.h"
 #include "aioif.h"
 #include "iodefine.h"
-#include "gic.h"
+#include  "mbed_critical.h"
 
 /******************************************************************************
 Private global driver management information
@@ -354,10 +354,10 @@ int_t DMA_Initialize(const dma_drv_init_t * const p_dma_init_param)
         for (ch_count = 0; ch_count < DMA_CH_NUM; ch_count++)
         {
             /* set interrupt level (set edge trigger, 1-N model) */
-            GIC_SetLevelModel(gb_info_drv.info_ch[ch_count].end_irq_num, 1, 1);
+            GIC_SetConfiguration(gb_info_drv.info_ch[ch_count].end_irq_num, 3);
         }
         /* set DMA error interrupt level (set edge trgger, 1-N model) */
-        GIC_SetLevelModel(gb_info_drv.err_irq_num, 1, 1);
+        GIC_SetConfiguration(gb_info_drv.err_irq_num, 3);
         /* DMA error interrupt enable */
         GIC_EnableIRQ(gb_info_drv.err_irq_num);
     }
@@ -586,6 +586,9 @@ int_t DMA_GetFixedChannel(const int_t channel)
         }
         else
         {
+#if(1) /* mbed */
+            retval = EERROR;
+#else
             /* set error return value */
             switch (dma_info_ch->ch_stat)
             {
@@ -603,6 +606,7 @@ int_t DMA_GetFixedChannel(const int_t channel)
                 break;
 
             }
+#endif
         }
     }
 
@@ -1445,19 +1449,14 @@ End of function R_DMA_End15InterruptHandler
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
-__inline static void R_DMA_EndHandlerProcess(const int_t channel)
+__INLINE static void R_DMA_EndHandlerProcess(const int_t channel)
 {
     bool_t   store_next_dma_flag;
-    int_t    was_masked;
 
     if (NULL != gb_info_drv.info_ch[channel].p_end_aio)
     {
         /* disable all irq */
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         /* store next_dma_flag */
         store_next_dma_flag = gb_info_drv.info_ch[channel].next_dma_flag;
@@ -1502,10 +1501,7 @@ __inline static void R_DMA_EndHandlerProcess(const int_t channel)
         /* clear TC, END bit */
         gb_info_drv.info_ch[channel].p_dma_ch_reg->CHCTRL_n = (CHCTRL_SET_CLRTC | CHCTRL_SET_CLREND);
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
 
         /* call back to the module function which called DMA driver */
         ahf_complete(NULL, gb_info_drv.info_ch[channel].p_end_aio);

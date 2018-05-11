@@ -502,7 +502,7 @@ bool USBKeyboard::mediaControl(MEDIA_KEY key) {
                                + (2 * ENDPOINT_DESCRIPTOR_LENGTH))
 
 uint8_t * USBKeyboard::configurationDesc() {
-    static uint8_t configurationDescriptor[] = {
+    const uint8_t config_descriptor_temp[41] = {
         CONFIGURATION_DESCRIPTOR_LENGTH,    // bLength
         CONFIGURATION_DESCRIPTOR,           // bDescriptorType
         LSB(TOTAL_DESCRIPTOR_LENGTH),       // wTotalLength (LSB)
@@ -549,5 +549,7 @@ uint8_t * USBKeyboard::configurationDesc() {
         MSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (MSB)
         1,                                  // bInterval (milliseconds)
     };
-    return configurationDescriptor;
+    MBED_ASSERT(sizeof(config_descriptor_temp) == sizeof(_config_descriptor));
+    memcpy(_config_descriptor, config_descriptor_temp, sizeof(_config_descriptor));
+    return _config_descriptor;
 }

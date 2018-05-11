@@ -243,6 +243,8 @@ protected:
     uint16_t PRODUCT_ID;
     uint16_t PRODUCT_RELEASE;
 
+    uint8_t device_descriptor[18];
+
 private:
     bool addRateFeedbackEndpoint(uint8_t endpoint, uint32_t maxPacket);
     bool requestGetDescriptor(void);

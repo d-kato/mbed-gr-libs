@@ -35,6 +35,7 @@ Includes <System Includes>, "Project Includes"
 #include "iodefine.h"
 #include "ssif_int.h"
 #include "Renesas_RZ_A1.h"
+#include "mbed_critical.h"
 
 /*******************************************************************************
 Macro definitions
@@ -269,7 +270,6 @@ int_t SSIF_UnInitialise(void)
 int_t SSIF_EnableChannel(ssif_info_ch_t* const p_info_ch)
 {
     int_t ercd = ESUCCESS;
-    int_t was_masked;
     uint32_t ssif_ch;
     volatile uint8_t dummy_buf;
 
@@ -310,11 +310,7 @@ int_t SSIF_EnableChannel(ssif_info_ch_t* const p_info_ch)
             /* enable the SSIF clock */
             if (ESUCCESS == ercd)
             {
-#if defined (__ICCARM__)
-                was_masked = __disable_irq_iar();
-#else
-                was_masked = __disable_irq();
-#endif
+                core_util_critical_section_enter();
 
                 /* ->IPA R2.4.2 : This is implicit type conversion that doesn't have bad effect on writing to 8bit register. */
                 CPGSTBCR11 &= (uint8_t)~((uint8_t)gb_cpg_stbcr_bit[ssif_ch]);
@@ -324,10 +320,7 @@ int_t SSIF_EnableChannel(ssif_info_ch_t* const p_info_ch)
                 (void)dummy_buf;
 #endif
 
-                if (0 == was_masked)
-                {
-                    __enable_irq();
-                }
+                core_util_critical_section_exit();
             }
 
             /* configure channel hardware */
@@ -364,7 +357,6 @@ int_t SSIF_EnableChannel(ssif_info_ch_t* const p_info_ch)
 int_t SSIF_DisableChannel(ssif_info_ch_t* const p_info_ch)
 {
     uint32_t dummy_read;
-    int_t   was_masked;
     int_t   ret = ESUCCESS;
     uint32_t ssif_ch;
 
@@ -400,20 +392,13 @@ int_t SSIF_DisableChannel(ssif_info_ch_t* const p_info_ch)
             g_ssireg[ssif_ch]->SSISR = 0u; /* ALL CLEAR */
 
             /* disable ssif clock */
-#if defined (__ICCARM__)
-            was_masked = __disable_irq_iar();
-#else
-            was_masked = __disable_irq();
-#endif
+            core_util_critical_section_enter();
 
             /* ->IPA R2.4.2 : This is implicit type conversion that doesn't have bad effect on writing to 8bit register. */
             CPGSTBCR11 |= (uint8_t)gb_cpg_stbcr_bit[ssif_ch];
             /* <-IPA R2.4.2 */
 
-            if (0 == was_masked)
-            {
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
 
             /* cancel event to ongoing request */
             if (NULL != p_info_ch->p_aio_tx_curr)
@@ -788,7 +773,7 @@ static int_t SSIF_InitChannel(ssif_info_ch_t* const p_info_ch)
     int32_t os_ret;
     uint32_t ssif_ch;
     int_t ercd = ESUCCESS;
-    static const osSemaphoreDef_t* semdef_access[SSIF_NUM_CHANS] =
+    static const osSemaphoreAttr_t* semdef_access[SSIF_NUM_CHANS] =
     {
         osSemaphore(ssif_ch0_access),
         osSemaphore(ssif_ch1_access),
@@ -822,7 +807,7 @@ static int_t SSIF_InitChannel(ssif_info_ch_t* const p_info_ch)
         p_info_ch->is_full_duplex = is_duplex_ch[ssif_ch];
 
         /* Create sem_access semaphore */
-        p_info_ch->sem_access = osSemaphoreCreate(semdef_access[ssif_ch], 1);
+        p_info_ch->sem_access = osSemaphoreNew(0xffff, 1, semdef_access[ssif_ch]);
 
         if (NULL == p_info_ch->sem_access)
         {
@@ -896,7 +881,6 @@ static int_t SSIF_InitChannel(ssif_info_ch_t* const p_info_ch)
 static void SSIF_UnInitChannel(ssif_info_ch_t* const p_info_ch)
 {
     int32_t os_ret;
-    int_t was_masked;
     uint32_t ssif_ch;
 
     if (NULL == p_info_ch)
@@ -916,11 +900,7 @@ static void SSIF_UnInitChannel(ssif_info_ch_t* const p_info_ch)
 
         SSIF_DisableErrorInterrupt(ssif_ch);
 
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         /* delete the tx queue */
         ahf_cancelall(&p_info_ch->tx_que);
@@ -939,10 +919,7 @@ static void SSIF_UnInitChannel(ssif_info_ch_t* const p_info_ch)
 
         SSIF_InterruptShutdown(ssif_ch);
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return;
@@ -1058,7 +1035,6 @@ static int_t SSIF_UpdateChannelConfig(ssif_info_ch_t* const p_info_ch,
 static int_t SSIF_SetCtrlParams(const ssif_info_ch_t* const p_info_ch)
 {
     int_t ret = ESUCCESS;
-    int_t was_masked;
     uint32_t ssif_ch;
     static const uint32_t gpio_sncr_bit[SSIF_NUM_CHANS] =
     {
@@ -1104,11 +1080,7 @@ static int_t SSIF_SetCtrlParams(const ssif_info_ch_t* const p_info_ch)
         g_ssireg[ssif_ch]->SSITDMR = ((uint32_t)(p_info_ch->tdm_mode) << SSIF_TDMR_SHIFT_TDM);
 
         /* change SNCR register: enter exclusive */
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         if ((SSIF_CFG_ENABLE_NOISE_CANCEL == p_info_ch->noise_cancel)
             && (false != p_info_ch->slave_mode))
@@ -1123,10 +1095,7 @@ static int_t SSIF_SetCtrlParams(const ssif_info_ch_t* const p_info_ch)
         }
 
         /* change SNCR register: exit exclusive */
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return ret;
@@ -1456,7 +1425,6 @@ static int_t SSIF_CheckWordSize(const ssif_info_ch_t* const p_info_ch)
 ******************************************************************************/
 static void SSIF_Reset(const uint32_t ssif_ch)
 {
-    int_t was_masked;
     uint8_t dummy_read_u8;
     static const uint32_t cpg_swrst_bit[SSIF_NUM_CHANS] =
     {
@@ -1471,11 +1439,7 @@ static void SSIF_Reset(const uint32_t ssif_ch)
     };
 
     /* change register: enter exclusive */
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     /* SW Reset ON */
     /* ->IPA R2.4.2 : This is implicit type conversion that doesn't have bad effect on accessing to 8bit register. */
@@ -1492,10 +1456,7 @@ static void SSIF_Reset(const uint32_t ssif_ch)
     UNUSED_ARG(dummy_read_u8);
 
     /* change register: exit exclusive */
-    if (0 == was_masked)
-    {
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return;
 }

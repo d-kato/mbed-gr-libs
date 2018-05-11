@@ -230,6 +230,7 @@ private:
     int BlockSize;
     uint64_t MemorySize;
     uint64_t BlockCount;
+    uint8_t _config_descriptor[32];
 
     void CBWDecode(uint8_t * buf, uint16_t size);
     void sendCSW (void);

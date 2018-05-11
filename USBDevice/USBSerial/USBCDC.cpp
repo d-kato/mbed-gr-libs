@@ -141,7 +141,7 @@ bool USBCDC::readEP_NB(uint8_t * buffer, uint32_t * size) {
 
 
 uint8_t * USBCDC::deviceDesc() {
-    static uint8_t deviceDescriptor[] = {
+    const uint8_t device_descriptor_temp[] = {
         18,                   // bLength
         1,                    // bDescriptorType
         0x10, 0x01,           // bcdUSB
@@ -157,7 +157,9 @@ uint8_t * USBCDC::deviceDesc() {
         3,                    // iSerialNumber
         1                     // bNumConfigurations
     };
-    return deviceDescriptor;
+    MBED_ASSERT(sizeof(device_descriptor_temp) == sizeof(device_descriptor));
+    memcpy(device_descriptor, device_descriptor_temp, sizeof(device_descriptor));
+    return device_descriptor;
 }
 
 uint8_t * USBCDC::stringIinterfaceDesc() {
@@ -182,7 +184,7 @@ uint8_t * USBCDC::stringIproductDesc() {
 #define CONFIG1_DESC_SIZE (9+8+9+5+5+4+5+7+9+7+7)
 
 uint8_t * USBCDC::configurationDesc() {
-    static uint8_t configDescriptor[] = {
+    const uint8_t config_descriptor_temp[75] = {
         // configuration descriptor
         9,                      // bLength
         2,                      // bDescriptorType
@@ -282,5 +284,7 @@ uint8_t * USBCDC::configurationDesc() {
         MSB(MAX_PACKET_SIZE_EPBULK),// wMaxPacketSize (MSB)
         0                           // bInterval
     };
-    return configDescriptor;
+    MBED_ASSERT(sizeof(config_descriptor_temp) == sizeof(_config_descriptor));
+    memcpy(_config_descriptor, config_descriptor_temp, sizeof(_config_descriptor));
+    return _config_descriptor;
 }

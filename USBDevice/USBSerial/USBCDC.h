@@ -118,6 +118,8 @@ protected:
     virtual bool USBCallback_setConfiguration(uint8_t configuration);
     volatile bool terminal_connected;
 
+private:
+    uint8_t _config_descriptor[75];
 };
 
 #endif

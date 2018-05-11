@@ -177,6 +177,7 @@ private:
     };
 
     uint8_t lock_status;
+    uint8_t _config_descriptor[41];
 
 };
 

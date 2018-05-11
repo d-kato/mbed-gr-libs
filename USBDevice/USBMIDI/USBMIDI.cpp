@@ -177,7 +177,7 @@ uint8_t * USBMIDI::stringIproductDesc() {
 
 
 uint8_t * USBMIDI::configurationDesc() {
-    static uint8_t configDescriptor[] = {
+    const uint8_t config_descriptor_temp[101] = {
         // configuration descriptor
         0x09, 0x02, 0x65, 0x00, 0x02, 0x01, 0x00, 0xc0, 0x50,
 
@@ -203,5 +203,7 @@ uint8_t * USBMIDI::configurationDesc() {
         0x09, 0x05, 0x82, 0x02, 0x40, 0x00, 0x00, 0x00, 0x00,
         0x05, 0x25, 0x01, 0x01, 0x03,
     };
-    return configDescriptor;
+    MBED_ASSERT(sizeof(config_descriptor_temp) == sizeof(_config_descriptor));
+    memcpy(_config_descriptor, config_descriptor_temp, sizeof(_config_descriptor));
+    return _config_descriptor;
 }

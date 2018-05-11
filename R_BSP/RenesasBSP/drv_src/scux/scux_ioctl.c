@@ -34,6 +34,7 @@ Includes <System Includes>, "Project Includes"
 
 #include "scux.h"
 #include "bsp_util.h"
+#include  "mbed_critical.h"
 
 /******************************************************************************
 Exported global variables (to be accessed by other files)
@@ -77,7 +78,6 @@ int_t SCUX_IoctlTransStart(const int_t channel)
     int32_t          sem_wait_ercd;
     int_t            retval = ESUCCESS;
     uint32_t         ssif_sem_ch = 0;
-    int_t            was_masked;
     int_t            ssif_ch;
     osStatus         sem_ercd;
     scux_ssif_info_t * p_ssif_ch;
@@ -100,7 +100,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
         if (SCUX_ROUTE_MIX == (p_info_ch->route_set & SCUX_GET_ROUTE_MASK))
         {
             /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-            sem_wait_ercd = osSemaphoreWait(p_info_drv->shared_info.sem_shared_access, osWaitForever);
+            sem_wait_ercd = osSemaphoreAcquire(p_info_drv->shared_info.sem_shared_access, osWaitForever);
             /* <-MISRA 10.6 */
             /* semaphore error check */
             if ((-1) == sem_wait_ercd)
@@ -131,7 +131,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC0_SSIF0 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -148,7 +148,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC0_SSIF012 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -163,7 +163,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_1];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -178,7 +178,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_2];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -195,7 +195,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC0_SSIF3 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -213,7 +213,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC0_SSIF345 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -228,7 +228,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_4];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -243,7 +243,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_5];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -261,7 +261,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC1_SSIF0 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -278,7 +278,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC1_SSIF012 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -293,7 +293,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_1];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -308,7 +308,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_2];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -325,7 +325,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC1_SSIF3 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -343,7 +343,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC1_SSIF345 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -358,7 +358,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_4];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -373,7 +373,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_5];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -391,7 +391,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC2_SSIF1 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_1];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -409,7 +409,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC2_SSIF4 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_4];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -427,7 +427,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC3_SSIF2 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_2];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -445,7 +445,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC3_SSIF5 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_5];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -463,7 +463,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC0_MIX_SSIF0 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -480,7 +480,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC0_MIX_SSIF012 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -495,7 +495,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_1];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -510,7 +510,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_2];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -527,7 +527,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC0_MIX_SSIF3 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -545,7 +545,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC0_MIX_SSIF345 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -560,7 +560,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_4];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -575,7 +575,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_5];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -593,7 +593,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC1_MIX_SSIF0 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -610,7 +610,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC1_MIX_SSIF012 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -625,7 +625,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_1];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -640,7 +640,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_2];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -657,7 +657,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC1_MIX_SSIF3 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -675,7 +675,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC1_MIX_SSIF345 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -690,7 +690,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_4];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -705,7 +705,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_5];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -723,7 +723,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC2_MIX_SSIF0 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -740,7 +740,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC2_MIX_SSIF012 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -755,7 +755,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_1];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -770,7 +770,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_2];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -787,7 +787,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC2_MIX_SSIF3 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -805,7 +805,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC2_MIX_SSIF345 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -820,7 +820,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_4];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -835,7 +835,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_5];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -853,7 +853,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC3_MIX_SSIF0 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -870,7 +870,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC3_MIX_SSIF012 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_0];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -885,7 +885,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_1];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -900,7 +900,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_2];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -917,7 +917,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC3_MIX_SSIF3 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -935,7 +935,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 case SCUX_ROUTE_SRC3_MIX_SSIF345 :
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_3];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -950,7 +950,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_4];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -965,7 +965,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
                     p_ssif_ch = p_ssif_ch_num[SCUX_SSIF_CH_5];
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -994,11 +994,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
 
             if (ESUCCESS == retval)
             {
-#if defined (__ICCARM__)
-                was_masked = __disable_irq_iar();
-#else
-                was_masked = __disable_irq();
-#endif
+                core_util_critical_section_enter();
                 SCUX_InitHw(p_info_ch);
                 if (SCUX_ROUTE_MEM_TO_MEM != (p_info_ch->route_set & SCUX_GET_ROUTE_MASK))
                 {
@@ -1042,10 +1038,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     p_info_ch->err_stat_backup = ESUCCESS;
                 }
 
-                if (0 == was_masked)
-                {
-                    __enable_irq();
-                }
+                core_util_critical_section_exit();
             }
         }
 
@@ -1099,12 +1092,11 @@ End of function SCUX_IoctlTransStart
 *
 * @param[in]     channel:SCUX channel number.
 * @param[in]     (*callback)(void):callback function pointer.
-* @param[in]     was_masked:interrupt enable information.
 * @retval        ESUCCESS : Operation successful.
 *                EFAULT : Internal error is occured.
 ******************************************************************************/
 
-int_t SCUX_IoctlFlushStop(const int_t channel, void (* const callback)(int_t), const int_t was_masked)
+int_t SCUX_IoctlFlushStop(const int_t channel, void (* const callback)(int_t))
 {
     int_t retval = ESUCCESS;
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
@@ -1186,11 +1178,7 @@ int_t SCUX_IoctlFlushStop(const int_t channel, void (* const callback)(int_t), c
         }
     }
 
-    if (0 == was_masked)
-    {
-        /* enable all irq */
-        __enable_irq();
-    }
+    core_util_critical_section_exit();
 
     return retval;
 }
@@ -1210,7 +1198,7 @@ End of function SCUX_IoctlFlushStop
 *                EFAULT : Internal error is occured.
 ******************************************************************************/
 
-int_t SCUX_IoctlClearStop(const int_t channel, const int_t was_masked)
+int_t SCUX_IoctlClearStop(const int_t channel)
 {
     int_t retval = ESUCCESS;
 #if(1) /* mbed */
@@ -1227,11 +1215,7 @@ int_t SCUX_IoctlClearStop(const int_t channel, const int_t was_masked)
     if (NULL == p_info_ch)
     {
         retval = EFAULT;
-        if (0 == was_masked)
-        {
-            /* enable all irq */
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
     else
     {
@@ -1374,11 +1358,7 @@ int_t SCUX_IoctlClearStop(const int_t channel, const int_t was_masked)
             old_stat = p_info_ch->ch_stat;
             p_info_ch->ch_stat = SCUX_CH_STOP;
 
-            if (0 == was_masked)
-            {
-                /* enable all irq */
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
 
             if ((SCUX_CH_STOP_WAIT == old_stat) || (SCUX_CH_STOP_WAIT_IDLE == old_stat))
             {
@@ -1388,11 +1368,7 @@ int_t SCUX_IoctlClearStop(const int_t channel, const int_t was_masked)
         }
         else
         {
-            if (0 == was_masked)
-            {
-                /* enable all irq */
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
         }
     }
 
@@ -1474,7 +1450,7 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
             else
             {
                 /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                 /* <-MISRA 10.6 */
                 /* semaphore error check */
                 if ((-1) == sem_wait_ercd)
@@ -1505,7 +1481,7 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
                 if (ESUCCESS == retval)
                 {
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_info_drv->shared_info.sem_shared_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_info_drv->shared_info.sem_shared_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -1592,7 +1568,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
             else
             {
                 /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                 /* <-MISRA 10.6 */
                 /* semaphore error check */
                 if ((-1) == sem_wait_ercd)
@@ -1623,7 +1599,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
                 if (ESUCCESS == retval)
                 {
                     /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                    sem_wait_ercd = osSemaphoreWait(p_info_drv->shared_info.sem_shared_access, osWaitForever);
+                    sem_wait_ercd = osSemaphoreAcquire(p_info_drv->shared_info.sem_shared_access, osWaitForever);
                     /* <-MISRA 10.6 */
                     /* semaphore error check */
                     if ((-1) == sem_wait_ercd)
@@ -1832,7 +1808,6 @@ End of function SCUX_IoctlSetDvuCfg
 int_t SCUX_IoctlSetDvuDigiVol(const int_t channel, const scux_dvu_digi_vol_t * const p_digi_vol_param)
 {
     int_t retval = ESUCCESS;
-    int_t was_masked;
     scux_audio_channel_t audio_ch;
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
 
@@ -1864,11 +1839,7 @@ int_t SCUX_IoctlSetDvuDigiVol(const int_t channel, const scux_dvu_digi_vol_t * c
 
         if (ESUCCESS == retval)
         {
-#if defined (__ICCARM__)
-            was_masked = __disable_irq_iar();
-#else
-            was_masked = __disable_irq();
-#endif
+            core_util_critical_section_enter();
 
             if (SCUX_CH_STOP != p_info_ch->ch_stat)
             {
@@ -1880,10 +1851,7 @@ int_t SCUX_IoctlSetDvuDigiVol(const int_t channel, const scux_dvu_digi_vol_t * c
                 p_info_ch->p_scux_reg->p_dvu_reg->DVUER_DVU0_0 |= DVUER_DVU0_DVUEN_SET;
             }
 
-            if (0 == was_masked)
-            {
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
         }
     }
 
@@ -1910,7 +1878,6 @@ End of function SCUX_IoctlSetDvuDigiVol
 int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * const p_ramp_vol_param)
 {
     int_t retval = ESUCCESS;
-    int_t was_masked;
     scux_audio_channel_t audio_ch;
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
 
@@ -1968,11 +1935,7 @@ int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * c
 
         if (ESUCCESS == retval)
         {
-#if defined (__ICCARM__)
-            was_masked = __disable_irq_iar();
-#else
-            was_masked = __disable_irq();
-#endif
+            core_util_critical_section_enter();
 
             if ((SCUX_CH_STOP != p_info_ch->ch_stat) && (false != p_info_ch->first_ramp_flag))
             {
@@ -1987,10 +1950,7 @@ int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * c
             /* an updating setting is used when a seting is updated before the first request is going */
             p_info_ch->restart_ramp_flag = false;
 
-            if (0 == was_masked)
-            {
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
         }
     }
 
@@ -2017,7 +1977,6 @@ End of function SCUX_IoctlSetDvuRampVol
 int_t SCUX_IoctlSetDvuZerocrossMute(const int_t channel, const scux_zc_mute_t * const p_zc_mute_param)
 {
     int_t retval = ESUCCESS;
-    int_t was_masked;
     scux_audio_channel_t audio_ch;
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
 
@@ -2034,11 +1993,7 @@ int_t SCUX_IoctlSetDvuZerocrossMute(const int_t channel, const scux_zc_mute_t * 
             p_info_ch->dvu_cfg.dvu_zc_mute.pcallback[audio_ch] = p_zc_mute_param->pcallback[audio_ch];
         }
 
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         if (SCUX_CH_STOP != p_info_ch->ch_stat)
         {
@@ -2050,10 +2005,7 @@ int_t SCUX_IoctlSetDvuZerocrossMute(const int_t channel, const scux_zc_mute_t * 
             p_info_ch->p_scux_reg->p_dvu_reg->DVUER_DVU0_0 |= DVUER_DVU0_DVUEN_SET;
         }
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return retval;
@@ -2079,7 +2031,6 @@ End of function SCUX_IoctlSetDvuZerocrossMute
 int_t SCUX_IoctlSetStopMute(const int_t channel, const uint32_t audio_channel)
 {
     int_t retval = ESUCCESS;
-    int_t was_masked;
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
 
     if (NULL == p_info_ch)
@@ -2095,11 +2046,7 @@ int_t SCUX_IoctlSetStopMute(const int_t channel, const uint32_t audio_channel)
 
         if (ESUCCESS == retval)
         {
-#if defined (__ICCARM__)
-            was_masked = __disable_irq_iar();
-#else
-            was_masked = __disable_irq();
-#endif
+            core_util_critical_section_enter();
 
             p_info_ch->dvu_mute_stat &= ~(1U << audio_channel);
             p_info_ch->dvu_cfg.dvu_zc_mute.zc_mute_enable[audio_channel] = false;
@@ -2107,10 +2054,7 @@ int_t SCUX_IoctlSetStopMute(const int_t channel, const uint32_t audio_channel)
             p_info_ch->p_scux_reg->p_dvu_reg->ZCMCR_DVU0_0 &= ~(ZCMCR_DVU0_ZCEN_SET << audio_channel);
             p_info_ch->p_scux_reg->p_dvu_reg->DVUER_DVU0_0 |= DVUER_DVU0_DVUEN_SET;
 
-            if (0 == was_masked)
-            {
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
         }
     }
 
@@ -2138,7 +2082,6 @@ int_t SCUX_IoctlSetMixCfg(const scux_mix_cfg_t * const p_mix_param)
     int_t retval = ESUCCESS;
     int_t scux_ch;
     int_t audio_ch;
-    int_t was_masked;
     scux_info_drv_t * const p_info_drv = SCUX_GetDrvInstance();
 
     if ((NULL == p_info_drv) || (NULL == p_mix_param))
@@ -2147,11 +2090,7 @@ int_t SCUX_IoctlSetMixCfg(const scux_mix_cfg_t * const p_mix_param)
     }
     else
     {
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         p_info_drv->shared_info.mixmode_ramp = p_mix_param->mixmode_ramp;
         p_info_drv->shared_info.up_period = p_mix_param->up_period;
@@ -2197,10 +2136,7 @@ int_t SCUX_IoctlSetMixCfg(const scux_mix_cfg_t * const p_mix_param)
             p_info_drv->shared_info.mix_setup = false;
         }
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return retval;
@@ -2226,7 +2162,6 @@ End of function SCUX_IoctlSetMixCfg
 int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
 {
     int_t retval = ESUCCESS;
-    int_t was_masked;
     int32_t  sem_wait_ercd;
     osStatus sem_ercd;
     scux_info_drv_t * const p_info_drv = SCUX_GetDrvInstance();
@@ -2240,7 +2175,7 @@ int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
         if (0 == R_ExceptionalMode())
         {
-            sem_wait_ercd = osSemaphoreWait(p_info_drv->shared_info.sem_shared_access, osWaitForever);
+            sem_wait_ercd = osSemaphoreAcquire(p_info_drv->shared_info.sem_shared_access, osWaitForever);
             /* <-MISRA 10.6 */
             /* semaphore error check */
             if ((-1) == sem_wait_ercd)
@@ -2254,11 +2189,7 @@ int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
         {
             p_info_drv->shared_info.mix_vol[channel] = mix_vol;
 
-#if defined (__ICCARM__)
-            was_masked = __disable_irq_iar();
-#else
-            was_masked = __disable_irq();
-#endif
+            core_util_critical_section_enter();
 
             /* check going channel number */
             if (0U != (p_info_drv->shared_info.mix_run_ch & (1U << channel)))
@@ -2275,10 +2206,7 @@ int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
                 }
             }
 
-            if (0 == was_masked)
-            {
-                __enable_irq();
-            }
+            core_util_critical_section_exit();
         }
 
         if (0 == R_ExceptionalMode())
@@ -2337,7 +2265,7 @@ int_t SCUX_IoctlSetSsifCfg(const scux_ssif_cfg_t * const p_ssif_param)
             else
             {
                 /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                sem_wait_ercd = osSemaphoreWait(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
+                sem_wait_ercd = osSemaphoreAcquire(p_ssif_ch->sem_ch_scux_ssif_access, osWaitForever);
                 /* <-MISRA 10.6 */
                 /* semaphore error check */
                 if ((-1) == sem_wait_ercd)
@@ -2403,7 +2331,6 @@ End of function SCUX_IoctlSetMixVol
 
 void SCUX_IoctlGetWriteStat(const int_t channel, uint32_t * const p_write_stat)
 {
-    int_t was_masked;
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
 
     if ((NULL == p_info_ch) || (NULL == p_write_stat))
@@ -2412,11 +2339,7 @@ void SCUX_IoctlGetWriteStat(const int_t channel, uint32_t * const p_write_stat)
     }
     else
     {
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         if ((SCUX_CH_STOP == p_info_ch->ch_stat) ||
             (SCUX_CH_STOP_WAIT == p_info_ch->ch_stat) ||
@@ -2433,10 +2356,7 @@ void SCUX_IoctlGetWriteStat(const int_t channel, uint32_t * const p_write_stat)
             *p_write_stat = SCUX_STAT_TRANS;
         }
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return;
@@ -2459,14 +2379,9 @@ End of function SCUX_IoctlGetWriteStat
 
 void SCUX_IoctlGetReadStat(const int_t channel, uint32_t * const p_read_stat)
 {
-    int_t was_masked;
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
 
-#if defined (__ICCARM__)
-    was_masked = __disable_irq_iar();
-#else
-    was_masked = __disable_irq();
-#endif
+    core_util_critical_section_enter();
 
     if ((NULL == p_info_ch) || (NULL == p_read_stat))
     {
@@ -2489,10 +2404,7 @@ void SCUX_IoctlGetReadStat(const int_t channel, uint32_t * const p_read_stat)
             *p_read_stat = SCUX_STAT_TRANS;
         }
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return;
@@ -2546,7 +2458,6 @@ End of function SCUX_IoctlGetDvuStat
 
 void SCUX_IoctlGetMuteStat(const int_t channel, uint32_t * const p_mute_stat)
 {
-    int_t was_masked;
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
 
     if ((NULL == p_info_ch) || (NULL == p_mute_stat))
@@ -2555,18 +2466,11 @@ void SCUX_IoctlGetMuteStat(const int_t channel, uint32_t * const p_mute_stat)
     }
     else
     {
-#if defined (__ICCARM__)
-        was_masked = __disable_irq_iar();
-#else
-        was_masked = __disable_irq();
-#endif
+        core_util_critical_section_enter();
 
         *p_mute_stat = p_info_ch->dvu_mute_stat;
 
-        if (0 == was_masked)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
 
     return;

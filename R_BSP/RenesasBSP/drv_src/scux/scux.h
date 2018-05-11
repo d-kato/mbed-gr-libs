@@ -641,7 +641,7 @@ typedef struct
 {
     bool_t                  ssif_enable;              /* USE SSIF flag */
     bool_t                  ssif_setup;               /* SSIF setup complete flag */
-    osSemaphoreId           sem_ch_scux_ssif_access;  /* SSIF info semaphore */
+    osSemaphoreId_t         sem_ch_scux_ssif_access;  /* SSIF info semaphore */
     int_t                   scux_channel;             /* SCUX ch which is using SSIF */
     scux_src_clk_source_t   pin_clk;                  /* AUDIO_CLK source */
     scux_pin_mode_t         pin_mode;                 /* SSIF sync setting */
@@ -654,7 +654,7 @@ typedef struct
 /* Information of Driver */
 typedef struct
 {
-    osSemaphoreId        sem_shared_access;        /* Shared info semaphore */
+    osSemaphoreId_t      sem_shared_access;        /* Shared info semaphore */
     bool_t               mix_setup;                /* MIX setup complete flag */
     uint32_t             mix_run_ch;               /* MIX used channel */
     uint32_t             mix_ssif_ch;              /* SSIF channel on used MIX */
@@ -673,7 +673,7 @@ typedef struct
     bool_t             enabled;                    /* Used channel flag */
     int_t              open_flags;                 /* Read/write flag */
     scux_stat_ch_t     ch_stat;                    /* Channel Status */
-    osSemaphoreId      sem_ch_scux_access;         /* Channel Semaphore */
+    osSemaphoreId_t    sem_ch_scux_access;         /* Channel Semaphore */
     AHF_S              tx_que;                     /* Write request queue */
     AHF_S              rx_que;                     /* Read request queue */
     AIOCB              *p_tx_aio;                  /* Write request information pointer */
@@ -746,8 +746,8 @@ void SCUX_UnInitialize(void);
 int_t SCUX_OpenChannel(const int_t channel, const int_t flags);
 int_t SCUX_CloseChannel(const int_t channel);
 int_t SCUX_IoctlTransStart(const int_t channel);
-int_t SCUX_IoctlFlushStop(const int_t channel, void (* const callback)(int_t ercd), const int_t was_masked);
-int_t SCUX_IoctlClearStop(const int_t channel, const int_t was_masked);
+int_t SCUX_IoctlFlushStop(const int_t channel, void (* const callback)(int_t ercd));
+int_t SCUX_IoctlClearStop(const int_t channel);
 void SCUX_IoctlSetRoute(const int_t channel, const scux_route_t route);
 int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const p_pin_clk_param);
 int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * const p_pin_mode_param);

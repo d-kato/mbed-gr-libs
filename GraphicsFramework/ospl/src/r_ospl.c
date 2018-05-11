@@ -38,6 +38,7 @@ Includes   <System Includes> , "Project Includes"
 #include  "iobitmasks/cpg_iobitmask.h"
 #include  "r_ospl_private.h"
 #include  "r_ospl_os_less_private.h"
+#include  "mbed_critical.h"
 #if R_OSPL_IS_PREEMPTION
 #include  "r_ospl_RTX_private.h"
 #endif
@@ -269,22 +270,16 @@ fin:
 ************************************************************************/
 void  R_OSPL_EnableAllInterrupt(void)
 {
-    __enable_irq();
+    core_util_critical_section_exit();
 }
 
 
 /***********************************************************************
 * Implement: R_OSPL_DisableAllInterrupt
 ************************************************************************/
-bool_t  R_OSPL_DisableAllInterrupt(void)
+void  R_OSPL_DisableAllInterrupt(void)
 {
-#ifdef __ICCARM__
-    bool_t  was_enabled = ( ( __get_interrupt_state() & 0x80 ) == 0 );
-    __disable_irq();
-    return  was_enabled;
-#else
-    return  (bool_t)( __disable_irq() == 0 );
-#endif
+    core_util_critical_section_enter();
 }
 
 
@@ -293,7 +288,7 @@ bool_t  R_OSPL_DisableAllInterrupt(void)
 ************************************************************************/
 void  R_BSP_InterruptsEnable(void)
 {
-    __enable_irq();
+    core_util_critical_section_exit();
 }
 
 
@@ -302,14 +297,7 @@ void  R_BSP_InterruptsEnable(void)
 ************************************************************************/
 void  R_BSP_InterruptsDisable(void)
 {
-#ifdef __ICCARM__
-    __disable_irq();
-#else
-    int_fast32_t  ret;
-
-    ret = __disable_irq();
-    R_UNREFERENCED_VARIABLE( ret );  /* QAC 3200 : This is not error information */
-#endif
+    core_util_critical_section_enter();
 }
 
 
@@ -602,9 +590,8 @@ errnum_t  R_OSPL_FTIMER_InitializeIfNot( r_ospl_ftimer_spec_t *const  out_Specif
 #if  R_OSPL_FTIMER_IS != R_OSPL_FTIMER_IS_MTU2_1_2
         enum {  free_running_no_interrupt = 2 };
 #endif
-        bool_t  was_all_enabled; /* = false; */ /* QAC 3197 */
 
-        was_all_enabled = R_OSPL_DisableAllInterrupt();
+        R_OSPL_DisableAllInterrupt();
 
 #if  R_OSPL_FTIMER_IS == R_OSPL_FTIMER_IS_MTU2_1_2
         {
@@ -644,9 +631,7 @@ errnum_t  R_OSPL_FTIMER_InitializeIfNot( r_ospl_ftimer_spec_t *const  out_Specif
         }
 #endif
 
-        if ( IS( was_all_enabled ) ) {
-            R_OSPL_EnableAllInterrupt();
-        }
+        R_OSPL_EnableAllInterrupt();
     }
 
     R_OSPL_FTIMER_GetSpecification( out_Specification );

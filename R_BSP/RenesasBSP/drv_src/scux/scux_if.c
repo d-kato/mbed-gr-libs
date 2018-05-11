@@ -35,6 +35,7 @@ Includes <System Includes>, "Project Includes"
 
 #include "scux.h"
 #include "bsp_util.h"
+#include "mbed_critical.h"
 
 /******************************************************************************
 Macro definitions
@@ -589,7 +590,7 @@ static int_t R_SCUX_Open(void * const p_driver_instance, const char_t * p_path_n
 
             /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
             /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-            sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+            sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
             /* <-MISRA 10.6 */
             /* <-MISRA 1.2 */
             /* semaphore error check */
@@ -685,7 +686,7 @@ static int_t R_SCUX_Close(void * const p_fd, int32_t * const p_errno)
         {
             /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
             /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-            sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+            sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
             /* <-MISRA 10.6 */
             /* <-MISRA 1.2 */
             /* semaphore error check */
@@ -767,7 +768,6 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
     int_t retval = ESUCCESS;
     int_t ercd = ESUCCESS;
     int32_t sem_wait_ercd;
-    int_t  was_masked;
     osStatus sem_ercd;
     scux_info_ch_t * const p_info_ch = p_fd;
     scux_info_drv_t * const p_info_drv = SCUX_GetDrvInstance();
@@ -789,7 +789,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
             /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
             if (0 == R_ExceptionalMode())
             {
-                sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                 /* <-MISRA 10.6 */
                 /* <-MISRA 1.2 */
                 /* semaphore error check */
@@ -837,7 +837,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -872,7 +872,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -890,28 +890,24 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                             }
                             else
                             {
-#if defined (__ICCARM__)
-                                was_masked = __disable_irq_iar();
-#else
-                                was_masked = __disable_irq();
-#endif
+                                core_util_critical_section_enter();
                                 if (SCUX_CH_STOP == p_info_ch->ch_stat)
                                 {
                                     ercd = EBUSY;
                                 }
 
                                 /* The mesure to MISRA 1.1 , SEC P1.1.1 */
-                                if ((ESUCCESS != ercd) && (0 == was_masked))
+                                if (ESUCCESS != ercd)
                                 {
                                     /* enable all irq when ch_stat is SCUX_CH_STOP */
-                                    __enable_irq();
+                                    core_util_critical_section_exit();
                                 }
 
                                 if (ESUCCESS == ercd)
                                 {
                                     /* ->MISRA 11.1 Since it is necessary to register a callback function,
                                     the cast from a void pointer is performed intentionally. */
-                                    ercd = SCUX_IoctlFlushStop(p_info_ch->channel, (void ( *)(int_t))p_buf, was_masked);
+                                    ercd = SCUX_IoctlFlushStop(p_info_ch->channel, (void ( *)(int_t))p_buf);
                                     /* <-MISRA 11.1 */
                                 }
 
@@ -931,7 +927,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -943,25 +939,17 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         }
                         else
                         {
-#if defined (__ICCARM__)
-                            was_masked = __disable_irq_iar();
-#else
-                            was_masked = __disable_irq();
-#endif
+                            core_util_critical_section_enter();
                             if (SCUX_CH_STOP == p_info_ch->ch_stat)
                             {
                                 ercd = EBUSY;
 
-                                if (0 == was_masked)
-                                {
-                                    /* enable all irq */
-                                    __enable_irq();
-                                }
+                                core_util_critical_section_exit();
                             }
                             else
                             {
                                 /* This exclusive access control ends in the SCUX_IoctlClearStop */
-                                ercd = SCUX_IoctlClearStop(p_info_ch->channel, was_masked);
+                                ercd = SCUX_IoctlClearStop(p_info_ch->channel);
                             }
                         }
 
@@ -979,7 +967,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -1021,7 +1009,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -1063,7 +1051,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -1105,7 +1093,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -1147,7 +1135,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -1267,7 +1255,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
                         /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-                        sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+                        sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
                         /* <-MISRA 10.6 */
                         /* <-MISRA 1.2 */
                         /* semaphore error check */
@@ -1418,7 +1406,6 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
     int_t ercd = ESUCCESS;
     int_t sem_ercd;
     int32_t  sem_wait_ercd;
-    int_t was_masked;
     scux_info_ch_t * const p_info_ch = p_fd;
     scux_info_drv_t * const p_info_drv = SCUX_GetDrvInstance();
 
@@ -1445,7 +1432,7 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
         {
             /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
             /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-            sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+            sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
             /* <-MISRA 10.6 */
             /* <-MISRA 1.2 */
             /* semaphore error check */
@@ -1464,11 +1451,7 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
 
             if (ESUCCESS == ercd)
             {
-#if defined (__ICCARM__)
-                was_masked = __disable_irq_iar();
-#else
-                was_masked = __disable_irq();
-#endif
+                core_util_critical_section_enter();
 
                 if (ESUCCESS != p_info_ch->err_stat_backup)
                 {
@@ -1520,10 +1503,7 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
                     }
                 }
 
-                if (0 == was_masked)
-                {
-                    __enable_irq();
-                }
+                core_util_critical_section_exit();
             }
             sem_ercd = osSemaphoreRelease(p_info_ch->sem_ch_scux_access);
             /* semaphore error check */
@@ -1575,7 +1555,6 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
     int_t ercd = ESUCCESS;
     osStatus sem_ercd;
     int32_t sem_wait_ercd;
-    int_t was_masked;
     scux_info_ch_t * const p_info_ch = p_fd;
     scux_info_drv_t * const p_info_drv = SCUX_GetDrvInstance();
 
@@ -1602,7 +1581,7 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
         {
             /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
             /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-            sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+            sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
             /* <-MISRA 10.6 */
             /* <-MISRA 1.2 */
             /* semaphore error check */
@@ -1637,11 +1616,7 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
 
                 if (ESUCCESS == ercd)
                 {
-#if defined (__ICCARM__)
-                    was_masked = __disable_irq_iar();
-#else
-                    was_masked = __disable_irq();
-#endif
+                    core_util_critical_section_enter();
 
                     if (ESUCCESS != p_info_ch->err_stat_backup)
                     {
@@ -1690,10 +1665,7 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
                         }
                     }
 
-                    if (0 == was_masked)
-                    {
-                        __enable_irq();
-                    }
+                    core_util_critical_section_exit();
                 }
             }
             sem_ercd = osSemaphoreRelease(p_info_ch->sem_ch_scux_access);
@@ -1761,7 +1733,7 @@ static int_t R_SCUX_Cancel(void * const p_fd, AIOCB * const p_aio, int32_t * con
         {
             /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
             /* ->MISRA 10.6, osWaitForever is defined by the header got from related section*/
-            sem_wait_ercd = osSemaphoreWait(p_info_ch->sem_ch_scux_access, osWaitForever);
+            sem_wait_ercd = osSemaphoreAcquire(p_info_ch->sem_ch_scux_access, osWaitForever);
             /* <-MISRA 10.6 */
             /* <-MISRA 1.2 */
             /* semaphore error check */

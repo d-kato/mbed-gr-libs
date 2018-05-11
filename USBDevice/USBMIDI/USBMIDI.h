@@ -105,6 +105,7 @@ private:
     uint8_t data[MAX_MIDI_MESSAGE_SIZE+1];
     uint8_t cur_data;
     bool data_end;
+    uint8_t _config_descriptor[101];
     
     void (*midi_evt)(MIDIMessage);
 };

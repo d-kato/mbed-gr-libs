@@ -374,7 +374,7 @@ void USBAudio::USBCallback_requestCompleted(uint8_t * buf, uint32_t length) {
                                       2*OUTPUT_TERMINAL_DESCRIPTOR_LENGTH)
 
 uint8_t * USBAudio::configurationDesc() {
-    static uint8_t configDescriptor[] = {
+    const uint8_t config_descriptor_temp[184] = {
         // Configuration 1
         CONFIGURATION_DESCRIPTOR_LENGTH,        // bLength
         CONFIGURATION_DESCRIPTOR,               // bDescriptorType
@@ -615,7 +615,9 @@ uint8_t * USBAudio::configurationDesc() {
         // Terminator
         0                                       // bLength
     };
-    return configDescriptor;
+    MBED_ASSERT(sizeof(config_descriptor_temp) == sizeof(_config_descriptor));
+    memcpy(_config_descriptor, config_descriptor_temp, sizeof(_config_descriptor));
+    return _config_descriptor;
 }
 
 uint8_t * USBAudio::stringIinterfaceDesc() {

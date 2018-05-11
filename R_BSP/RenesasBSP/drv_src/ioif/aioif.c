@@ -17,6 +17,7 @@
 #include <aioif.h>
 #if(1) /* mbed */
 #include "cmsis.h"
+#include "mbed_critical.h"
 #else  /* not mbed */
 #include <ipcb.h>
 #include <ioif_aio_helper.h>
@@ -43,15 +44,11 @@ static void ahf_lock(AHF_S * const ahf)
 {
     if(ahf->flags & AHF_LOCKSEM)
     {
-        osMutexWait(ahf->semid, 0);
+        osMutexAcquire(ahf->semid, 0);
     }
     else if (ahf->flags & AHF_LOCKINT)
     {
-#if defined (__ICCARM__)
-        ahf->saved_int_mask = __disable_irq_iar();
-#else
-        ahf->saved_int_mask = __disable_irq();
-#endif
+        core_util_critical_section_enter();
     }
     else
     {
@@ -67,10 +64,7 @@ static void ahf_unlock(AHF_S * const ahf)
     }
     else if (ahf->flags & AHF_LOCKINT)
     {
-        if (0 == ahf->saved_int_mask)
-        {
-            __enable_irq();
-        }
+        core_util_critical_section_exit();
     }
     else
     {
@@ -91,11 +85,8 @@ Return value:   0 on success.   negative error code on error.
 ***********************************************************************************/
 int32_t ahf_create (AHF_S * const ahf, const uint32_t f)
 {
-    osMutexDef_t* p_mutex_def;
+    osMutexAttr_t* p_mutex_def;
     uint32_t*     p_mutex_data;
-#if defined (__GNUC__)
-    int_t was_masked;
-#endif/*__GNUC__*/
 
     if (ahf == NULL)
     {
@@ -111,15 +102,12 @@ int32_t ahf_create (AHF_S * const ahf, const uint32_t f)
     {
 #if defined (__GNUC__)
         /* disable all irq */
-        was_masked = __disable_irq();
+        core_util_critical_section_enter();
 #endif/*__GNUC__*/
-        p_mutex_def = calloc(1, sizeof(osMutexDef_t));
+        p_mutex_def = calloc(1, sizeof(osMutexAttr_t));
 #if defined (__GNUC__)
-        if (0 == was_masked)
-        {
-            /* enable all irq */
-            __enable_irq();
-        }
+        /* enable all irq */
+        core_util_critical_section_exit();
 #endif/*__GNUC__*/
         if ( NULL == p_mutex_def )
         {
@@ -127,49 +115,40 @@ int32_t ahf_create (AHF_S * const ahf, const uint32_t f)
         }
 #if defined (__GNUC__)
         /* disable all irq */
-        was_masked = __disable_irq();
+        core_util_critical_section_enter();
 #endif/*__GNUC__*/
-        p_mutex_data = calloc(3, sizeof(uint32_t));
+        p_mutex_data = calloc(7, sizeof(uint32_t));
 #if defined (__GNUC__)
-        if (0 == was_masked)
-        {
-            /* enable all irq */
-            __enable_irq();
-        }
+        /* enable all irq */
+        core_util_critical_section_exit();
 #endif/*__GNUC__*/
         if ( NULL == p_mutex_data )
         {
 #if defined (__GNUC__)
             /* disable all irq */
-            was_masked = __disable_irq();
+            core_util_critical_section_enter();
 #endif/*__GNUC__*/
             free(p_mutex_def);
 #if defined (__GNUC__)
-            if (0 == was_masked)
-            {
-                /* enable all irq */
-                __enable_irq();
-            }
+            /* enable all irq */
+            core_util_critical_section_exit();
 #endif/*__GNUC__*/
             return ENOMEM;
         }
-        p_mutex_def->mutex = p_mutex_data;
+        p_mutex_def->cb_mem = p_mutex_data;
         ahf->p_cmtx = p_mutex_def;
-        ahf->semid = osMutexCreate (p_mutex_def);
+        ahf->semid = osMutexNew (p_mutex_def);
         if ( NULL == ahf->semid )
         {
 #if defined (__GNUC__)
             /* disable all irq */
-            was_masked = __disable_irq();
+            core_util_critical_section_enter();
 #endif/*__GNUC__*/
             free(p_mutex_data);
             free(p_mutex_def);
 #if defined (__GNUC__)
-            if (0 == was_masked)
-            {
-                /* enable all irq */
-                __enable_irq();
-            }
+            /* enable all irq */
+            core_util_critical_section_exit();
 #endif/*__GNUC__*/
             return ENOMEM;
         }
@@ -191,10 +170,6 @@ Return value:   void
 ***********************************************************************************/
 void ahf_destroy (AHF_S const * const ahf)
 {
-#if defined (__GNUC__)
-    int_t was_masked;
-#endif/*__GNUC__*/
-
     if (ahf == NULL)
     {
         return;
@@ -205,16 +180,13 @@ void ahf_destroy (AHF_S const * const ahf)
         osMutexDelete (ahf->semid);
 #if defined (__GNUC__)
         /* disable all irq */
-        was_masked = __disable_irq();
+        core_util_critical_section_enter();
 #endif/*__GNUC__*/
-        free(ahf->p_cmtx->mutex);
+        free(ahf->p_cmtx->cb_mem);
         free(ahf->p_cmtx);
 #if defined (__GNUC__)
-        if (0 == was_masked)
-        {
-            /* enable all irq */
-            __enable_irq();
-        }
+        /* enable all irq */
+        core_util_critical_section_exit();
 #endif/*__GNUC__*/
     }
 }
@@ -383,7 +355,7 @@ void ahf_complete (AHF_S *ahf, struct aiocb * const aio)
     switch (aio->aio_sigevent.sigev_notify)
     {
     case SIGEV_EVENT:
-         osSignalSet ((osThreadId)aio->aio_sigevent.sigev_value.sival_int,
+         osSignalSet ((osThreadId_t)aio->aio_sigevent.sigev_value.sival_int,
              (int32_t)aio->aio_sigevent.sigev_signo);
         break;
 

@@ -36,10 +36,9 @@ Includes   <System Includes> , "Project Includes"
 #include  "r_ospl.h"
 #include  "r_ospl_os_less_private.h"
 #include  "r_ospl_private.h"
-#include  "pl310.h"  /* 2nd cache */
+#include  "core_ca.h"
 #if R_OSPL_IS_PREEMPTION
 #include  "cmsis_os.h"
-#include  "gic.h"
 #include  "r_ospl_RTX_private.h"
 #endif
 
@@ -118,7 +117,7 @@ void  R_OSPL_EVENT_Set( r_ospl_thread_id_t const  ThreadId,  bit_flags32_t const
         R_D_AddToIntLog( (uintptr_t) ThreadId );
 #endif
 
-        ret = osSignalSet( (osThreadId) ThreadId, (int32_t) SetFlags );
+        ret = osSignalSet( (osThreadId_t) ThreadId, (int32_t) SetFlags );
         ASSERT_D( (ret & OS_ERROR_SIGNAL) == 0,  R_NOOP() );
         R_UNREFERENCED_VARIABLE( ret );  /* for Release configuration */
     }
@@ -143,7 +142,7 @@ void  R_OSPL_EVENT_Clear( r_ospl_thread_id_t const  ThreadId,  bit_flags32_t con
         R_D_AddToIntLog( (uintptr_t) ThreadId );
 #endif
 
-        ret = osSignalClear( (osThreadId) ThreadId, (int32_t) ClearFlags1 );
+        ret = osSignalClear( (osThreadId_t) ThreadId, (int32_t) ClearFlags1 );
         /* "& 0xFFFF" is for avoiding error in osSignalClear */
         ASSERT_D( (ret & OS_ERROR_SIGNAL) == 0,  R_NOOP() );
         R_UNREFERENCED_VARIABLE( ret );  /* for Release configuration */
@@ -162,7 +161,7 @@ bit_flags32_t  R_OSPL_EVENT_Get( r_ospl_thread_id_t const  ThreadId )
     if ( ThreadId == NULL ) {
         ret = 0;
     } else {
-        ret = osSignalGet( (osThreadId) ThreadId );
+        ret = osSignalGet( (osThreadId_t) ThreadId );
         ASSERT_D( (ret & OS_ERROR_SIGNAL) == 0,  R_NOOP() );
     }
 
@@ -246,7 +245,7 @@ void  R_OSPL_MEMORY_Flush( r_ospl_flush_t const  FlushType )
 #endif
 
 #if IS_RTX_USED
-        __v7_clean_inv_dcache_all();
+        L1C_CleanInvalidateDCacheAll();
 #else
 #error
 #endif
@@ -255,7 +254,7 @@ void  R_OSPL_MEMORY_Flush( r_ospl_flush_t const  FlushType )
         printf( "PL310Flush\n" );
 #endif
 
-        PL310_CleanInvAllByWay();
+        L2C_CleanInvAllByWay();
     } else {
         ASSERT_D( false,  R_NOOP() );
     }
@@ -347,8 +346,8 @@ fin:
 ************************************************************************/
 errnum_t  R_OSPL_Delay( uint32_t const  DelayTime_msec )
 {
-    errnum_t  e;
-    osStatus  rs;
+    errnum_t   e;
+    osStatus_t rs;
     bool_t const    is_overflow = ( DelayTime_msec > R_OSPL_MAX_TIME_OUT );
     uint32_t const  delay_parameter = DelayTime_msec + 1u;
 
@@ -419,7 +418,6 @@ errnum_t  R_OSPL_QUEUE_Allocate( r_ospl_queue_t *self,  void *out_Address,  uint
 {
     errnum_t  e;
     void     *address;
-    bool_t    was_all_enabled = false;
 
     address = osMailAlloc( self->MailQId, Timeout_msec );
     *(void **) out_Address = address;
@@ -432,14 +430,12 @@ errnum_t  R_OSPL_QUEUE_Allocate( r_ospl_queue_t *self,  void *out_Address,  uint
         goto fin;
     }
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
     self->PublicStatus.UsedCount += 1;
 
     e=0;
+    R_OSPL_EnableAllInterrupt();
 fin:
-    if ( was_all_enabled ) {
-        R_OSPL_EnableAllInterrupt();
-    }
     return  e;
 }
 
@@ -449,8 +445,8 @@ fin:
 ************************************************************************/
 errnum_t  R_OSPL_QUEUE_Put( r_ospl_queue_t *self,  void *Address )
 {
-    errnum_t  e;
-    osStatus  status;
+    errnum_t    e;
+    osStatus_t  status;
 
     status = osMailPut( self->MailQId, Address );
     IF ( status != osOK ) {
@@ -504,9 +500,8 @@ fin:
 ************************************************************************/
 errnum_t  R_OSPL_QUEUE_Free( r_ospl_queue_t *self,  void *Address )
 {
-    errnum_t  e;
-    osStatus  status;
-    bool_t    was_all_enabled = false;
+    errnum_t    e;
+    osStatus_t  status;
 
     status = osMailFree( self->MailQId, Address );
     IF ( status != osOK ) {
@@ -514,14 +509,12 @@ errnum_t  R_OSPL_QUEUE_Free( r_ospl_queue_t *self,  void *Address )
         goto fin;
     }
 
-    was_all_enabled = R_OSPL_DisableAllInterrupt();
+    R_OSPL_DisableAllInterrupt();
     self->PublicStatus.UsedCount -= 1;
 
     e=0;
+    R_OSPL_EnableAllInterrupt();
 fin:
-    if ( was_all_enabled ) {
-        R_OSPL_EnableAllInterrupt();
-    }
     return  e;
 }
 
