@@ -65,7 +65,8 @@
 Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
 #include "cmsis_os.h"
-#include "Renesas_RZ_A1.h"
+#include "mbed_critical.h"
+#include "Renesas_RZ_A.h"
 #include "bsp_util.h"
 
 /******************************************************************************
@@ -83,7 +84,6 @@ Imported global variables and functions (from other files)
 /******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 ******************************************************************************/
-extern uint32_t IRQ_NestLevel; /* Indicates whether inside an ISR, and the depth of nesting.  0 = not in ISR. */
 
 /******************************************************************************
 Private global variables and functions
@@ -101,30 +101,11 @@ Private global variables and functions
 ******************************************************************************/
 int32_t R_ExceptionalMode(void)
 {
-    int32_t ret = 0;
-
-    switch(__get_CPSR() & 0x1fu)
-    {
-    case CPSR_M_USR:
-        break;
-    case CPSR_M_SYS:
-        break;
-    case CPSR_M_SVC:
-        if (IRQ_NestLevel == 0)
-        {
-            /* handling a regular service call */
-        }
-        else
-        {
-            /* handling an ISR in SVC mode */
-            ret = 1;
-        }
-        break;
-    default:
-        ret = 1;
-        break;
+    if (core_util_is_isr_active() == false) {
+        return 0;
+    } else {
+        return 1;
     }
-    return ret;
 }
 
 /******************************************************************************
