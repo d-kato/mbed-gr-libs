@@ -42,16 +42,29 @@ public:
      * @param tprst tprst pin
      * @param tpint tpint pin
      */
-    TouchKey(PinName tprst, PinName tpint) : touch_reset(tprst), touch_int(tpint) {
+    TouchKey(PinName tprst, PinName tpint) : touch_int(tpint) {
+        if (tprst != NC) {
+            p_touch_reset = new DigitalOut(tprst);
+        } else {
+            p_touch_reset = NULL;
+        }
+    }
+
+    ~TouchKey() {
+        if (p_touch_reset != NULL) {
+            delete p_touch_reset;
+        }
     }
 
     /** Initialization of touch panel IC
      * 
      */
     void Reset(void) {
-        touch_reset = 0;
-        wait_ms(1);
-        touch_reset = 1;
+        if (p_touch_reset != NULL) {
+            *p_touch_reset = 0;
+            wait_ms(1);
+            *p_touch_reset = 1;
+        }
     }
 
     /** Attach a function to call when touch panel int
@@ -87,7 +100,7 @@ public:
     virtual int GetCoordinates(int touch_buff_num, touch_pos_t * p_touch) = 0;
 
 private:
-    DigitalOut  touch_reset;
+    DigitalOut * p_touch_reset;
     InterruptIn touch_int;
 };
 
