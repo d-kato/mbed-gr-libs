@@ -322,13 +322,12 @@ void USBHost::transferCompleted(volatile uint32_t addr)
             if (((HCTD *)td)->control >> 28) {
                 state = ((HCTD *)td)->control >> 28;
             } else {
-                if (td->currBufPtr)
+                if (td->currBufPtr) {
                     ep->setLengthTransferred((uint32_t)td->currBufPtr - (uint32_t)ep->getBufStart());
+                }
                 state = 16 /*USB_TYPE_IDLE*/;
             }
 #endif
-            if (state == USB_TYPE_IDLE)
-                ep->setLengthTransferred((uint32_t)td->currBufPtr - (uint32_t)ep->getBufStart());
 
             ep->unqueueTransfer(td);
 
