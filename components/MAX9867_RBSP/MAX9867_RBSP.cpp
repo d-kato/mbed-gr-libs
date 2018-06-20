@@ -25,8 +25,9 @@
 #include "MAX9867_RBSP.h"
 #include "pinmap.h"
 
-MAX9867_RBSP::MAX9867_RBSP(PinName sda, PinName scl, PinName sck, PinName ws, PinName tx, PinName rx, uint8_t int_level, int32_t max_write_num, int32_t max_read_num) 
-       : mI2c_(sda, scl), mI2s_(sck, ws, tx, rx, int_level, max_write_num, max_read_num) {
+MAX9867_RBSP::MAX9867_RBSP(PinName sda, PinName scl, PinName sck, PinName ws, PinName tx, PinName rx,
+    uint8_t int_level, int32_t max_write_num, int32_t max_read_num) 
+       : mI2c_(sda, scl), mI2s_(sck, ws, tx, rx) {
     mAddr     = 0x30;
 
     // I2S Mode
@@ -48,7 +49,7 @@ MAX9867_RBSP::MAX9867_RBSP(PinName sda, PinName scl, PinName sck, PinName ws, Pi
     ssif_cfg.tdm_mode               = SSIF_CFG_DISABLE_TDM;
     ssif_cfg.romdec_direct.mode     = SSIF_CFG_DISABLE_ROMDEC_DIRECT;
     ssif_cfg.romdec_direct.p_cbfunc = NULL;
-    mI2s_.ConfigChannel(&ssif_cfg);
+    mI2s_.init(&ssif_cfg, max_write_num, max_read_num);
 
     mI2c_.frequency(150000);
     power(false);                  // Power off

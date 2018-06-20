@@ -26,7 +26,6 @@
 #include "bsp_drv_cmn.h"
 #if defined (__ICCARM__)
 #include <intrinsics.h>
-#include "Renesas_RZ_A1.h"
 #endif
 
 /*************************************************************************

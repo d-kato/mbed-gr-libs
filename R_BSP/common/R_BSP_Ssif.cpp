@@ -18,7 +18,7 @@
 * you agree to the additional terms and conditions found by accessing the
 * following link:
 * http://www.renesas.com/disclaimer*
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 
 #include "r_bsp_cmn.h"
@@ -26,39 +26,25 @@
 #include "ssif_if.h"
 #include "ssif_api.h"
 
-R_BSP_Ssif::R_BSP_Ssif(PinName sck, PinName ws, PinName tx, PinName rx, uint8_t int_level, int32_t max_write_num, int32_t max_read_num) {
+R_BSP_Ssif::R_BSP_Ssif(PinName sck, PinName ws, PinName tx, PinName rx, PinName audio_clk) : ssif_ch(-1) {
     int32_t wk_channel;
 
-    wk_channel = ssif_init(sck, ws, tx, rx);
+    wk_channel = ssif_init(sck, ws, tx, rx, audio_clk);
     if (wk_channel != NC) {
         ssif_ch      = wk_channel;
-
-        ssif_cfg.enabled                = true;
-        ssif_cfg.int_level              = int_level;
-        ssif_cfg.slave_mode             = true;
-        ssif_cfg.sample_freq            = 44100u;
-        ssif_cfg.clk_select             = SSIF_CFG_CKS_AUDIO_X1;
-        ssif_cfg.multi_ch               = SSIF_CFG_MULTI_CH_1;
-        ssif_cfg.data_word              = SSIF_CFG_DATA_WORD_16;
-        ssif_cfg.system_word            = SSIF_CFG_SYSTEM_WORD_32;
-        ssif_cfg.bclk_pol               = SSIF_CFG_FALLING;
-        ssif_cfg.ws_pol                 = SSIF_CFG_WS_LOW;
-        ssif_cfg.padding_pol            = SSIF_CFG_PADDING_LOW;
-        ssif_cfg.serial_alignment       = SSIF_CFG_DATA_FIRST;
-        ssif_cfg.parallel_alignment     = SSIF_CFG_LEFT;
-        ssif_cfg.ws_delay               = SSIF_CFG_DELAY;
-        ssif_cfg.noise_cancel           = SSIF_CFG_ENABLE_NOISE_CANCEL;
-        ssif_cfg.tdm_mode               = SSIF_CFG_DISABLE_TDM;
-        ssif_cfg.romdec_direct.mode     = SSIF_CFG_DISABLE_ROMDEC_DIRECT;
-        ssif_cfg.romdec_direct.p_cbfunc = NULL;
-
-        init_channel(R_SSIF_MakeCbTbl_mbed(), ssif_ch, &ssif_cfg, max_write_num, max_read_num);
     }
 }
 
 R_BSP_Ssif::~R_BSP_Ssif() {
     // do nothing
 }
+
+void R_BSP_Ssif::init(const ssif_channel_cfg_t* const p_ch_cfg, int32_t max_write_num, int32_t max_read_num) {
+    if (ssif_ch >= 0) {
+        init_channel(R_SSIF_MakeCbTbl_mbed(), ssif_ch, (void *)p_ch_cfg, max_write_num, max_read_num);
+    }
+}
+
 
 bool R_BSP_Ssif::ConfigChannel(const ssif_channel_cfg_t* const p_ch_cfg) {
     return ioctl(SSIF_CONFIG_CHANNEL, (void *)p_ch_cfg);

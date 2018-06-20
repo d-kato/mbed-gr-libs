@@ -46,27 +46,6 @@ public:
         TLV320_RBSP::mic(true);
         TLV320_RBSP::micVolume(true, false);
     }
-
-    void power(bool type = true) {
-        if (type) {
-            TLV320_RBSP::power(0x00);
-        } else {
-            TLV320_RBSP::power(0x80);
-        }
-    }
-
-    bool micVolume(float VolumeIn) {
-        if (VolumeIn > 0) {
-            if (VolumeIn >= 0.5) {
-                TLV320_RBSP::micVolume(false , true);
-            } else {
-                TLV320_RBSP::micVolume(false, false);
-            }
-        } else {
-            TLV320_RBSP::micVolume(true, false);
-        }
-        return true;
-    }
 };
 
 #elif defined(TARGET_GR_LYCHEE)

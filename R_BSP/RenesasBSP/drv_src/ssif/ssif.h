@@ -227,6 +227,9 @@ typedef struct ssif_info_ch
 #if defined(TARGET_RZA1H) /* mbed */
     ssif_chcfg_romdec_t             romdec_direct;
 #endif /* mbed */
+#if(1) /* mbed */
+    uint8_t     int_level;
+#endif
 } ssif_info_ch_t;
 
 

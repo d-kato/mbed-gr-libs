@@ -34,7 +34,7 @@ Includes <System Includes>, "Project Includes"
 #include "dma_if.h"
 #include "ssif_if.h"
 #include "iodefine.h"
-#include "Renesas_RZ_A1.h"
+#include "cmsis.h"
 
 /*******************************************************************************
 Macro definitions

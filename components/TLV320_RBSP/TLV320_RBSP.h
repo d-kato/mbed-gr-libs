@@ -25,12 +25,13 @@
 #define MBED_TLV320_RBSP_H
 
 #include "mbed.h"
+#include "AUDIO_RBSP.h"
 #include "R_BSP_Ssif.h"
 
 /** TLV320_RBSP class, defined on the I2C master bus
 *
 */
-class TLV320_RBSP {
+class TLV320_RBSP : public AUDIO_RBSP {
 public:
 
     /** Create a TLV320_RBSP object defined on the I2C port
@@ -48,6 +49,8 @@ public:
      */
     TLV320_RBSP(PinName cs, PinName sda, PinName scl, PinName sck, PinName ws, PinName tx, PinName rx, uint8_t int_level = 0x80, int32_t max_write_num = 16, int32_t max_read_num = 16);
 
+    virtual ~TLV320_RBSP() {}
+
     /** Overloaded power() function default = 0x80, record requires 0x02
      *
      * @param device Call individual devices to power up/down
@@ -60,14 +63,26 @@ public:
      * Microphone input  0x00 = On 0x02 = Off
      * Line input        0x00 = On 0x01 = Off
      */
-    void power(int device = 0x07);
+    void power(int device);
+
+    /** Overloaded power()
+     *
+     * @param type true=power up, false=power down
+     */
+    virtual void power(bool type = true) {
+        if (type) {
+            power(0x00);
+        } else {
+            power(0x80);
+        }
+    }
 
     /** Set I2S interface bit length and mode
      *
      * @param length Set bit length to 16, 20, 24 or 32 bits
      * @return true = success, false = failure
      */
-    bool format(char length);
+    virtual bool format(char length);
 
     /** Set sample frequency
      *
@@ -77,7 +92,7 @@ public:
      * The TLV320 supports the following frequencies: 8kHz, 8.021kHz, 32kHz, 44.1kHz, 48kHz, 88.2kHz, 96kHz
      * Default is 44.1kHz
      */
-    bool frequency(int hz);
+    virtual bool frequency(int hz);
 
     /** Reset TLV320
      *
@@ -99,7 +114,7 @@ public:
      * @param p_data_conf Asynchronous control block structure
      * @return Number of bytes written on success. negative number on error.
      */
-    int write(void * const p_data, uint32_t data_size, const rbsp_data_conf_t * const p_data_conf = NULL) {
+    virtual int write(void * const p_data, uint32_t data_size, const rbsp_data_conf_t * const p_data_conf = NULL) {
         return mI2s_.write(p_data, data_size, p_data_conf);
     };
 
@@ -110,7 +125,7 @@ public:
      * @param p_data_conf Asynchronous control block structure
      * @return Number of bytes read on success. negative number on error.
      */
-    int read(void * const p_data, uint32_t data_size, const rbsp_data_conf_t * const p_data_conf = NULL) {
+    virtual int read(void * const p_data, uint32_t data_size, const rbsp_data_conf_t * const p_data_conf = NULL) {
         return mI2s_.read(p_data, data_size, p_data_conf);
     };
 
@@ -132,7 +147,7 @@ public:
      * Parameters accept a value, where 0.0 < parameter < 1.0 and where 0.0 maps to -73dB (mute) 
      * and 1.0 maps to +6dB (0.5 = default)
      */
-    bool outputVolume(float leftVolumeOut, float rightVolumeOut);
+    virtual bool outputVolume(float leftVolumeOut, float rightVolumeOut);
 
     /** Analog audio path control (Bypass) function default = false
      *
@@ -151,7 +166,25 @@ public:
      * @param mute Microphone mute. true : mute , false : normal
      * @param boost Microphone boost. true : 20dB , false : 0dB
      */
-    void micVolume(bool mute, bool boost = false);
+    void micVolume(bool mute, bool boost);
+
+    /** Microphone volume
+     *
+     * @param VolumeIn Microphone volume
+     * @return Returns "true" for success, "false" if parameters are out of range
+     */
+    virtual bool micVolume(float VolumeIn) {
+        if (VolumeIn > 0) {
+            if (VolumeIn >= 0.5) {
+                micVolume(false , true);
+            } else {
+                micVolume(false, false);
+            }
+        } else {
+            micVolume(true, false);
+        }
+        return true;
+    }
 
     /** Digital audio path control
      *

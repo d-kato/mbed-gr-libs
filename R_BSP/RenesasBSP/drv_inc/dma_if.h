@@ -256,6 +256,9 @@ typedef struct
     dma_addr_cnt_t     dst_cnt;      /* DMA Address Count (Destination) */
     dma_addr_cnt_t     src_cnt;      /* DMA Address Count (Source) */
     AIOCB              *p_aio;       /* set callback function (DMA end interrupt) */
+#if(1) /* mbed */
+    uint8_t            int_level;
+#endif
 } dma_ch_setup_t;
 
 /* DMA Transfer Paramter */

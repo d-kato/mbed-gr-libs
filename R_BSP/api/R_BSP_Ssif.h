@@ -47,16 +47,23 @@ public:
      * @param ws  SSIF word selection
      * @param tx  SSIF serial data output
      * @param rx  SSIF serial data input
-     * @param int_level     Interupt priority (SSIF)
-     * @param max_write_num The upper limit of write buffer (SSIF)
-     * @param max_read_num  The upper limit of read buffer (SSIF)
      */
-    R_BSP_Ssif(PinName sck, PinName ws, PinName tx, PinName rx, uint8_t int_level = 0x80, int32_t max_write_num = 16, int32_t max_read_num = 16);
+    R_BSP_Ssif(PinName sck, PinName ws, PinName tx, PinName rx, PinName audio_clk = NC);
 
     /** Destructor
      *
      */
     virtual ~R_BSP_Ssif();
+
+
+    /** Initialization
+     *
+     * @param p_ch_cfg SSIF channel configuration parameter
+     * @param max_write_num The upper limit of write buffer (SSIF)
+     * @param max_read_num  The upper limit of read buffer (SSIF)
+     * @return true = success, false = failure
+     */
+    void init(const ssif_channel_cfg_t* const p_ch_cfg, int32_t max_write_num, int32_t max_read_num);
 
     /** Get a value of SSIF channel number
      *
@@ -81,7 +88,6 @@ public:
     bool GetStatus(uint32_t* const p_status);
 
 private:
-    ssif_channel_cfg_t  ssif_cfg;
     int32_t ssif_ch;
 };
 #endif

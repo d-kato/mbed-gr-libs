@@ -38,7 +38,7 @@ Includes <System Includes>, "Project Includes"
 #include "scux_int.h"
 #include "aioif.h"
 #include "iodefine.h"
-#include "Renesas_RZ_A1.h"
+#include "cmsis.h"
 #include "dma_if.h"
 #include "bsp_drv_cmn.h"
 

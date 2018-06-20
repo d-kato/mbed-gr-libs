@@ -33,7 +33,7 @@ Includes <System Includes>, "Project Includes"
 *******************************************************************************/
 #include "ssif.h"
 #include "ssif_int.h"
-#include "Renesas_RZ_A1.h"
+#include "cmsis.h"
 
 /*******************************************************************************
 Typedef definitions

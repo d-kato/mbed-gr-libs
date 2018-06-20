@@ -28,6 +28,9 @@
 #ifndef R_BSP_SCUX_H
 #define R_BSP_SCUX_H
 
+#if defined(TARGET_RZ_A1XX)
+#define R_BSP_SCUX_ENABLE    1
+
 #include "R_BSP_SerialFamily.h"
 #include "R_BSP_ScuxDef.h"
 
@@ -145,4 +148,5 @@ public:
 private:
     int32_t scux_ch;
 };
+#endif /* TARGET_RZ_A1XX */
 #endif /* R_BSP_SCUX_H */

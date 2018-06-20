@@ -23,6 +23,7 @@
 
 #include "ssif_api.h"
 
+#if defined(TARGET_RZ_A1XX)
 #if defined(TARGET_RZA1H) /* mbed */
 static const PinMap PinMap_SSIF_SCK[] = {
 //   pin      ch     func
@@ -103,6 +104,11 @@ static const PinMap PinMap_SSIF_RxD[] = {
     {P4_10  , 5    , 5},
     {NC     , NC   , 0}
 };
+
+static const PinMap PinMap_SPDIF_AUDIO_CLK[] = {
+    {NC,    NC,     0}
+};
+
 #else
 static const PinMap PinMap_SSIF_SCK[] = {
 //   pin      ch     func
@@ -127,6 +133,11 @@ static const PinMap PinMap_SSIF_RxD[] = {
     {P2_6   , 3    , 2},
     {NC     , NC   , 0}
 };
+
+static const PinMap PinMap_SPDIF_AUDIO_CLK[] = {
+    {NC,    NC,     0}
+};
+
 #endif
 
 static void ssif_power_enable(uint32_t ssif_ch) {
@@ -158,7 +169,9 @@ static void ssif_power_enable(uint32_t ssif_ch) {
     (void)dummy;
 }
 
-int32_t ssif_init(PinName sck, PinName ws, PinName tx, PinName rx) {
+#endif
+
+int32_t ssif_init(PinName sck, PinName ws, PinName tx, PinName rx, PinName audio_clk) {
     /* determine the ssif to use */
     uint32_t ssif_sck = pinmap_peripheral(sck, PinMap_SSIF_SCK);
     uint32_t ssif_ws  = pinmap_peripheral(ws,  PinMap_SSIF_WS);
@@ -172,6 +185,9 @@ int32_t ssif_init(PinName sck, PinName ws, PinName tx, PinName rx) {
         pinmap_pinout(ws,  PinMap_SSIF_WS);
         pinmap_pinout(tx,  PinMap_SSIF_TxD);
         pinmap_pinout(rx,  PinMap_SSIF_RxD);
+        if ((int32_t)audio_clk != NC) {
+            pinmap_pinout(audio_clk, PinMap_SPDIF_AUDIO_CLK);
+        }
     } else {
         ssif_ch = (uint32_t)NC;
     }

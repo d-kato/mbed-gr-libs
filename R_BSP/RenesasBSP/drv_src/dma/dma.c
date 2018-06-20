@@ -36,11 +36,10 @@
 /*******************************************************************************
 Includes <System Includes>, "Project Includes"
 *******************************************************************************/
-
 #include "dma.h"
 #include "aioif.h"
 #include "iodefine.h"
-#include  "mbed_critical.h"
+#include "mbed_critical.h"
 
 /******************************************************************************
 Private global driver management information
@@ -340,6 +339,9 @@ int_t DMA_Initialize(const dma_drv_init_t * const p_dma_init_param)
             error_code = InterruptHandlerRegister(gb_info_drv.err_irq_num,
                                                   &R_DMA_ErrInterruptHandler
                                                  );
+#if(1) /* mbed */
+            GIC_SetPriority(gb_info_drv.err_irq_num, 0x80);
+#endif
             /* 0 is no error on InterruptHandlerRegister() */
             if (0U != error_code)
             {
@@ -660,6 +662,10 @@ void DMA_SetParam(const int_t channel, const dma_ch_setup_t *const p_ch_setup,
 {
     uint32_t  chcfg_sel;
     uint32_t  value_dmars;
+
+#if(1) /* mbed */
+    GIC_SetPriority(gb_info_drv.info_ch[channel].end_irq_num, p_ch_setup->int_level);
+#endif
 
     /* set DMA transfer parameter to DMA channel infomation */
     gb_info_drv.info_ch[channel].resource =  p_ch_setup->resource;

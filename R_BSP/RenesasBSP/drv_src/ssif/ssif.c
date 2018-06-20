@@ -34,7 +34,7 @@ Includes <System Includes>, "Project Includes"
 #include "ssif.h"
 #include "iodefine.h"
 #include "ssif_int.h"
-#include "Renesas_RZ_A1.h"
+#include "cmsis.h"
 #include "mbed_critical.h"
 
 /*******************************************************************************
@@ -403,25 +403,41 @@ int_t SSIF_DisableChannel(ssif_info_ch_t* const p_info_ch)
             /* cancel event to ongoing request */
             if (NULL != p_info_ch->p_aio_tx_curr)
             {
+#if(1) /* mbed */
+                p_info_ch->p_aio_tx_curr->aio_return = -1;
+#else
                 p_info_ch->p_aio_tx_curr->aio_return = ECANCELED;
+#endif
                 ahf_complete(&p_info_ch->tx_que, p_info_ch->p_aio_tx_curr);
                 p_info_ch->p_aio_tx_curr = NULL;
             }
             if (NULL != p_info_ch->p_aio_tx_next)
             {
+#if(1) /* mbed */
+                p_info_ch->p_aio_tx_next->aio_return = -1;
+#else
                 p_info_ch->p_aio_tx_next->aio_return = ECANCELED;
+#endif
                 ahf_complete(&p_info_ch->tx_que, p_info_ch->p_aio_tx_next);
                 p_info_ch->p_aio_tx_next = NULL;
             }
             if (NULL != p_info_ch->p_aio_rx_curr)
             {
+#if(1) /* mbed */
+                p_info_ch->p_aio_rx_curr->aio_return = -1;
+#else
                 p_info_ch->p_aio_rx_curr->aio_return = ECANCELED;
+#endif
                 ahf_complete(&p_info_ch->rx_que, p_info_ch->p_aio_rx_curr);
                 p_info_ch->p_aio_rx_curr = NULL;
             }
             if (NULL != p_info_ch->p_aio_rx_next)
             {
+#if(1) /* mbed */
+                p_info_ch->p_aio_rx_next->aio_return = -1;
+#else
                 p_info_ch->p_aio_rx_next->aio_return = ECANCELED;
+#endif
                 ahf_complete(&p_info_ch->rx_que, p_info_ch->p_aio_rx_next);
                 p_info_ch->p_aio_rx_next = NULL;
             }
@@ -487,25 +503,41 @@ void SSIF_ErrorRecovery(ssif_info_ch_t* const p_info_ch)
             /* cancel event to ongoing request */
             if (NULL != p_info_ch->p_aio_tx_curr)
             {
+#if(1) /* mbed */
+                p_info_ch->p_aio_tx_curr->aio_return = -1;
+#else
                 p_info_ch->p_aio_tx_curr->aio_return = EIO;
+#endif
                 ahf_complete(&p_info_ch->tx_que, p_info_ch->p_aio_tx_curr);
                 p_info_ch->p_aio_tx_curr = NULL;
             }
             if (NULL != p_info_ch->p_aio_tx_next)
             {
+#if(1) /* mbed */
+                p_info_ch->p_aio_tx_next->aio_return = -1;
+#else
                 p_info_ch->p_aio_tx_next->aio_return = EIO;
+#endif
                 ahf_complete(&p_info_ch->tx_que, p_info_ch->p_aio_tx_next);
                 p_info_ch->p_aio_tx_next = NULL;
             }
             if (NULL != p_info_ch->p_aio_rx_curr)
             {
+#if(1) /* mbed */
+                p_info_ch->p_aio_rx_curr->aio_return = -1;
+#else
                 p_info_ch->p_aio_rx_curr->aio_return = EIO;
+#endif
                 ahf_complete(&p_info_ch->rx_que, p_info_ch->p_aio_rx_curr);
                 p_info_ch->p_aio_rx_curr = NULL;
             }
             if (NULL != p_info_ch->p_aio_rx_next)
             {
+#if(1) /* mbed */
+                p_info_ch->p_aio_rx_next->aio_return = -1;
+#else
                 p_info_ch->p_aio_rx_next->aio_return = EIO;
+#endif
                 ahf_complete(&p_info_ch->rx_que, p_info_ch->p_aio_rx_next);
                 p_info_ch->p_aio_rx_next = NULL;
             }

@@ -41,7 +41,7 @@ Includes <System Includes>, "Project Includes"
 ******************************************************************************/
 
 #include "dma_if.h"
-#include "Renesas_RZ_A1.h"
+#include "cmsis.h"
 #include "bsp_drv_cmn.h"
 
 /******************************************************************************

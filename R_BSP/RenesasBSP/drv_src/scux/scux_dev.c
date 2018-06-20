@@ -2958,6 +2958,9 @@ int_t SCUX_SetupDma(scux_info_ch_t * const p_scux_info_ch)
         p_scux_info_ch->dma_tx_setup.dst_cnt = DMA_ADDR_FIX;
         p_scux_info_ch->dma_tx_setup.src_cnt = DMA_ADDR_INCREMENT;
         p_scux_info_ch->dma_tx_setup.p_aio = dma_aio;
+#if(1) /* mbed */
+        p_scux_info_ch->dma_tx_setup.int_level = p_scux_info_ch->int_level;
+#endif
 
         /* get read DMA channel */
         if (SCUX_ROUTE_MEM_TO_MEM == (p_scux_info_ch->route_set & SCUX_GET_ROUTE_MASK))
@@ -2998,6 +3001,9 @@ int_t SCUX_SetupDma(scux_info_ch_t * const p_scux_info_ch)
                 p_scux_info_ch->dma_rx_setup.dst_cnt = DMA_ADDR_INCREMENT;
                 p_scux_info_ch->dma_rx_setup.src_cnt = DMA_ADDR_FIX;
                 p_scux_info_ch->dma_rx_setup.p_aio = dma_aio;
+#if(1) /* mbed */
+                p_scux_info_ch->dma_rx_setup.int_level = p_scux_info_ch->int_level;
+#endif
             }
         }
 

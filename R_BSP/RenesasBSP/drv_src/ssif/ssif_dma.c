@@ -35,7 +35,7 @@ Includes <System Includes>, "Project Includes"
 #include "iodefine.h"
 #include "ssif_int.h"
 #include "dma_if.h"
-#include "Renesas_RZ_A1.h"
+#include "cmsis.h"
 
 /*******************************************************************************
 Macro definitions
@@ -187,6 +187,9 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
                 dma_ch_setup.dst_cnt = DMA_ADDR_FIX;
                 dma_ch_setup.src_cnt = DMA_ADDR_INCREMENT;
                 dma_ch_setup.p_aio = p_tx_aio;
+#if(1) /* mbed */
+                dma_ch_setup.int_level = p_info_ch->int_level;
+#endif
 
                 dma_ret = R_DMA_Setup(p_info_ch->dma_tx_ch, &dma_ch_setup, &dma_ercd);
 
@@ -214,6 +217,9 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
                 dma_ch_setup.src_cnt = DMA_ADDR_FIX;
                 dma_ch_setup.p_aio = p_rx_aio;
                 dma_ch_setup.dst_cnt = DMA_ADDR_INCREMENT;
+#if(1) /* mbed */
+                dma_ch_setup.int_level = p_info_ch->int_level;
+#endif
                 dma_ret = R_DMA_Setup(p_info_ch->dma_rx_ch, &dma_ch_setup, &dma_ercd);
 
                 if (EERROR == dma_ret)
@@ -460,6 +466,9 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
                 dma_ch_setup.dst_cnt = DMA_ADDR_FIX;
                 dma_ch_setup.src_cnt = DMA_ADDR_INCREMENT;
                 dma_ch_setup.p_aio = p_tx_aio;
+#if(1) /* mbed */
+                dma_ch_setup.int_level = p_info_ch->int_level;
+#endif
 
                 dma_ret = R_DMA_Setup(p_info_ch->dma_tx_ch, &dma_ch_setup, &dma_ercd);
 
@@ -487,6 +496,9 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
                 dma_ch_setup.dst_cnt = DMA_ADDR_INCREMENT;
                 dma_ch_setup.src_cnt = DMA_ADDR_FIX;
                 dma_ch_setup.p_aio = p_rx_aio;
+#if(1) /* mbed */
+                dma_ch_setup.int_level = p_info_ch->int_level;
+#endif
 
                 dma_ret = R_DMA_Setup(p_info_ch->dma_rx_ch, &dma_ch_setup, &dma_ercd);
 

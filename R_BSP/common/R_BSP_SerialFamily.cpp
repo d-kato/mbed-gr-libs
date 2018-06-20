@@ -49,8 +49,19 @@ bool R_BSP_SerialFamily::init_channel(RBSP_MBED_FNS * function_list, int channel
     bool    ret = false;
     int32_t wk_errno;
     char_t  path_name[PATH_NAME_LENGTH];
+    int_t   flags;
 
-    if ((channel >= 0) && (channel <= 9) && (function_list != NULL)) {
+    if ((max_write_num > 0) && (max_read_num > 0)) {
+        flags = O_RDWR;
+    } else if (max_write_num > 0) {
+        flags = O_WRONLY;
+    } else if (max_read_num > 0) {
+        flags = O_RDONLY;
+    } else {
+        flags = 0;
+    }
+
+    if ((channel >= 0) && (channel <= 9) && (function_list != NULL) && (flags != 0)) {
         ch_no     = channel;
         functions = function_list;
 
@@ -61,7 +72,7 @@ bool R_BSP_SerialFamily::init_channel(RBSP_MBED_FNS * function_list, int channel
                 path_name[PATH_TOP_PART]  = PATH_SEPARATOR;
                 path_name[CH_ID_PART]     = CHARACTER_0 + ch_no;
                 path_name[TERM_CHAR_PART] = '\0';
-                ch_handle = (void *)functions->open(instance, path_name, O_RDWR, 0, &wk_errno);
+                ch_handle = (void *)functions->open(instance, path_name, flags, 0, &wk_errno);
                 if ((int32_t)ch_handle != EERROR) {
                     if (functions->write_a != NULL) {
                         write_init(ch_handle, (void *)functions->write_a, max_write_num);

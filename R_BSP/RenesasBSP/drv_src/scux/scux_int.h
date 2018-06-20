@@ -35,7 +35,7 @@ Includes <System Includes>, "Project Includes"
 ******************************************************************************/
 
 #include "scux.h"
-#include "Renesas_RZ_A1.h"
+#include "cmsis.h"
 
 /******************************************************************************
 Macro definitions

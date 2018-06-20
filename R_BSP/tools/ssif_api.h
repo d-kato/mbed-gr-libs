@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-int32_t ssif_init(PinName sck, PinName ws, PinName tx, PinName rx);
+int32_t ssif_init(PinName sck, PinName ws, PinName tx, PinName rx, PinName audio_clk);
 
 #ifdef __cplusplus
 }

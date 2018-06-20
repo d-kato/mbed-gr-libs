@@ -21,8 +21,9 @@
 * Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 
-#include "r_bsp_cmn.h"
 #include "R_BSP_Scux.h"
+#if (R_BSP_SCUX_ENABLE == 1)
+#include "r_bsp_cmn.h"
 #include "scux_if.h"
 
 #define CH_ERR_NUM                  (-1)     /* Channel error number */
@@ -352,3 +353,5 @@ static bool set_src_init_cfg(scux_src_cfg_t * const src_cfg) {
 
     return ret;
 }
+
+#endif /* R_BSP_SCUX_ENABLE */
