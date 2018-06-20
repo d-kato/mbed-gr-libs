@@ -105,6 +105,11 @@ public:
         }
         return false;
     }
+
+    FATFileSystem * get_fs() {
+        return &fs;
+    }
+
 private:
     FATFileSystem fs;
     SDBlockDevice_GRBoard sd;
