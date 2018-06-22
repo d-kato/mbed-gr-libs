@@ -110,6 +110,9 @@ extern "C" {
 #define ESEEKRANGE  (-129) /* seek setting error */  /* Source Merge 11-1 */
 #endif
 #define EBADF       (201) /* Bad file descriptor */
+#ifndef ENOTSUP
+#define ENOTSUP     (202) /* Not supported */
+#endif
 
 /***********************************************************************************
  Defines
