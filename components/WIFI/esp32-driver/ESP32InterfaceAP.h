@@ -28,17 +28,47 @@ class ESP32InterfaceAP : public ESP32Stack, public WiFiInterface
 {
 public:
     /** ESP32InterfaceAP lifetime
-     * @param en        EN pin
-     * @param io0       IO0 pin
+     * @param en        EN pin  (If not used this pin, please set "NC")
+     * @param io0       IO0 pin (If not used this pin, please set "NC")
      * @param tx        TX pin
      * @param rx        RX pin
      * @param debug     Enable debugging
-     * @param rts       RTS pin
-     * @param cts       CTS pin
-     * @param baudrate  The baudrate of the serial port (default = 1000000).
+     * @param baudrate  The baudrate of the serial port (default = 230400).
      */
-    ESP32InterfaceAP(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false,
-                     PinName rts = NC, PinName cts = NC, int baudrate = 1000000);
+    ESP32InterfaceAP(PinName en, PinName io0, PinName tx, PinName rx, bool debug = false, int baudrate = 230400);
+
+    /** ESP32InterfaceAP lifetime
+     * @param tx        TX pin
+     * @param rx        RX pin
+     * @param debug     Enable debugging
+     * @param baudrate  The baudrate of the serial port (default = 230400).
+     */
+    ESP32InterfaceAP(PinName tx, PinName rx, bool debug = false, int baudrate = 230400);
+
+    /** Set a static IP address
+     *
+     *  Configures this network interface to use a static IP address.
+     *  Implicitly disables DHCP, which can be enabled in set_dhcp.
+     *  Requires that the network is disconnected.
+     *
+     *  @param ip_address Null-terminated representation of the local IP address
+     *  @param netmask    Null-terminated representation of the local network mask
+     *  @param gateway    Null-terminated representation of the local gateway
+     *  @return           0 on success, negative error code on failure
+     */
+    virtual nsapi_error_t set_network(
+            const char *ip_address, const char *netmask, const char *gateway);
+
+    /** Enable or disable DHCP on the network
+     *
+     *  Enables DHCP on connecting the network. Defaults to enabled unless
+     *  a static IP address has been assigned. Requires that the network is
+     *  disconnected.
+     *
+     *  @param dhcp     True to enable DHCP
+     *  @return         0 on success, negative error code on failure
+     */
+    virtual nsapi_error_t set_dhcp(bool dhcp);
 
     /** Start the interface
      *
@@ -151,6 +181,27 @@ public:
      */
     using NetworkInterface::add_dns_server;
 
+    /** Register callback for status reporting
+     *
+     *  The specified status callback function will be called on status changes
+     *  on the network. The parameters on the callback are the event type and
+     *  event-type dependent reason parameter.
+     *
+     *  In ESP32 the callback will be called when processing OOB-messages via
+     *  AT-parser. Do NOT call any ESP8266Interface -functions or do extensive
+     *  processing in the callback.
+     *
+     *  @param status_cb The callback for status changes
+     */
+    virtual void attach(mbed::Callback<void(nsapi_event_t, intptr_t)> status_cb);
+
+    /** Get the connection status
+     *
+     *  @return         The connection status according to ConnectionStatusType
+     */
+    virtual nsapi_connection_status_t get_connection_status() const;
+
+
     /** Provide access to the NetworkStack object
      *
      *  @return The underlying NetworkStack object
@@ -161,10 +212,16 @@ public:
     }
 
 private:
-    char own_ssid[33]; /* 32 is what 802.11 defines as longest possible name; +1 for the \0 */
-    nsapi_security_t own_sec;
-    char own_pass[64]; /* The longest allowed passphrase */
-    uint8_t own_ch;
+    bool _dhcp;
+    uint8_t _own_ch;
+    char _own_ssid[33]; /* 32 is what 802.11 defines as longest possible name; +1 for the \0 */
+    char _own_pass[64]; /* The longest allowed passphrase */
+    nsapi_security_t _own_sec;
+    char _ip_address[NSAPI_IPv6_SIZE];
+    char _netmask[NSAPI_IPv4_SIZE];
+    char _gateway[NSAPI_IPv4_SIZE];
+    nsapi_connection_status_t _connection_status;
+    Callback<void(nsapi_event_t, intptr_t)> _connection_status_cb;
 };
 
 #endif

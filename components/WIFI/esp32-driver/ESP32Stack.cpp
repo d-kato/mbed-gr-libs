@@ -19,10 +19,10 @@
 #include "ESP32Stack.h"
 
 // ESP32Stack implementation
-ESP32Stack::ESP32Stack(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
-    PinName rts, PinName cts, int baudrate)
+ESP32Stack::ESP32Stack(PinName en, PinName io0, PinName tx, PinName rx, bool debug, int baudrate)
 {
-    _esp = ESP32::getESP32Inst(en, io0, tx, rx, debug, rts, cts, baudrate);
+    _esp = ESP32::getESP32Inst(en, io0, tx, rx, debug, baudrate);
+    memset(_local_ports, 0, sizeof(_local_ports));
 }
 
 struct esp32_socket {
@@ -30,6 +30,7 @@ struct esp32_socket {
     nsapi_protocol_t proto;
     bool connected;
     SocketAddress addr;
+    int keepalive; // TCP
     bool accept_id;
     bool tcp_server;
 };
@@ -51,6 +52,7 @@ int ESP32Stack::socket_open(void **handle, nsapi_protocol_t proto)
     socket->id = id;
     socket->proto = proto;
     socket->connected = false;
+    socket->keepalive = 0;
     socket->accept_id = false;
     socket->tcp_server = false;
     *handle = socket;
@@ -62,6 +64,10 @@ int ESP32Stack::socket_close(void *handle)
     struct esp32_socket *socket = (struct esp32_socket *)handle;
     int err = 0;
 
+    if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
+
     if (!_esp->close(socket->id, socket->accept_id)) {
         err = NSAPI_ERROR_DEVICE_ERROR;
     }
@@ -69,6 +75,7 @@ int ESP32Stack::socket_close(void *handle)
     if (socket->tcp_server) {
         _esp->del_server();
     }
+    _local_ports[socket->id] = 0;
 
     delete socket;
     return err;
@@ -77,6 +84,26 @@ int ESP32Stack::socket_close(void *handle)
 int ESP32Stack::socket_bind(void *handle, const SocketAddress &address)
 {
     struct esp32_socket *socket = (struct esp32_socket *)handle;
+
+    if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
+
+    if (socket->proto == NSAPI_UDP) {
+        if(address.get_addr().version != NSAPI_UNSPEC) {
+            return NSAPI_ERROR_UNSUPPORTED;
+        }
+
+        for(int id = 0; id < ESP32::SOCKET_COUNT; id++) {
+            if(_local_ports[id] == address.get_port() && id != socket->id) { // Port already reserved by another socket
+                return NSAPI_ERROR_PARAMETER;
+            } else if (id == socket->id && socket->connected) {
+                return NSAPI_ERROR_PARAMETER;
+            }
+        }
+        _local_ports[socket->id] = address.get_port();
+        return 0;
+    }
 
     socket->addr = address;
     return 0;
@@ -87,6 +114,10 @@ int ESP32Stack::socket_listen(void *handle, int backlog)
     struct esp32_socket *socket = (struct esp32_socket *)handle;
 
     (void)backlog;
+
+    if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
 
     if (socket->proto != NSAPI_TCP) {
         return NSAPI_ERROR_UNSUPPORTED;
@@ -104,9 +135,18 @@ int ESP32Stack::socket_connect(void *handle, const SocketAddress &addr)
 {
     struct esp32_socket *socket = (struct esp32_socket *)handle;
 
-    const char *proto = (socket->proto == NSAPI_UDP) ? "UDP" : "TCP";
-    if (!_esp->open(proto, socket->id, addr.get_ip_address(), addr.get_port())) {
-        return NSAPI_ERROR_DEVICE_ERROR;
+    if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
+
+    if (socket->proto == NSAPI_UDP) {
+        if (!_esp->open("UDP", socket->id, addr.get_ip_address(), addr.get_port(), _local_ports[socket->id])) {
+            return NSAPI_ERROR_DEVICE_ERROR;
+        }
+    } else {
+        if (!_esp->open("TCP", socket->id, addr.get_ip_address(), addr.get_port(), socket->keepalive)) {
+            return NSAPI_ERROR_DEVICE_ERROR;
+        }
     }
 
     socket->connected = true;
@@ -115,14 +155,15 @@ int ESP32Stack::socket_connect(void *handle, const SocketAddress &addr)
 
 int ESP32Stack::socket_accept(void *server, void **socket, SocketAddress *addr)
 {
+    struct esp32_socket *socket_new = new struct esp32_socket;
     int id;
 
-    if (!_esp->accept(&id)) {
+    if (!socket_new) {
         return NSAPI_ERROR_NO_SOCKET;
     }
 
-    struct esp32_socket *socket_new = new struct esp32_socket;
-    if (!socket_new) {
+    if (!_esp->accept(&id)) {
+        delete socket_new;
         return NSAPI_ERROR_NO_SOCKET;
     }
 
@@ -140,6 +181,10 @@ int ESP32Stack::socket_send(void *handle, const void *data, unsigned size)
 {
     struct esp32_socket *socket = (struct esp32_socket *)handle;
 
+    if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
+
     if (!_esp->send(socket->id, data, size)) {
         return NSAPI_ERROR_DEVICE_ERROR;
     }
@@ -150,6 +195,10 @@ int ESP32Stack::socket_send(void *handle, const void *data, unsigned size)
 int ESP32Stack::socket_recv(void *handle, void *data, unsigned size)
 {
     struct esp32_socket *socket = (struct esp32_socket *)handle;
+
+    if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
 
     int32_t recv = _esp->recv(socket->id, data, size);
     if (recv == -1) {
@@ -166,6 +215,10 @@ int ESP32Stack::socket_recv(void *handle, void *data, unsigned size)
 int ESP32Stack::socket_sendto(void *handle, const SocketAddress &addr, const void *data, unsigned size)
 {
     struct esp32_socket *socket = (struct esp32_socket *)handle;
+
+    if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
 
     if (socket->connected && socket->addr != addr) {
         if (!_esp->close(socket->id, socket->accept_id)) {
@@ -188,6 +241,11 @@ int ESP32Stack::socket_sendto(void *handle, const SocketAddress &addr, const voi
 int ESP32Stack::socket_recvfrom(void *handle, SocketAddress *addr, void *data, unsigned size)
 {
     struct esp32_socket *socket = (struct esp32_socket *)handle;
+
+    if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
+
     int ret = socket_recv(socket, data, size);
     if (ret >= 0 && addr) {
         *addr = socket->addr;
@@ -199,6 +257,70 @@ int ESP32Stack::socket_recvfrom(void *handle, SocketAddress *addr, void *data, u
 void ESP32Stack::socket_attach(void *handle, void (*callback)(void *), void *data)
 {
     struct esp32_socket *socket = (struct esp32_socket *)handle;
-    _esp->attach(socket->id, callback, data);
+
+    if (!socket) {
+        return;
+    }
+
+    _esp->socket_attach(socket->id, callback, data);
+}
+
+nsapi_error_t ESP32Stack::setsockopt(nsapi_socket_t handle, int level, 
+        int optname, const void *optval, unsigned optlen)
+{
+    struct esp32_socket *socket = (struct esp32_socket *)handle;
+
+    if (!optlen) {
+        return NSAPI_ERROR_PARAMETER;
+    } else if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
+
+    if (level == NSAPI_SOCKET && socket->proto == NSAPI_TCP) {
+        switch (optname) {
+            case NSAPI_KEEPALIVE: {
+                if(socket->connected) {// ESP32 limitation, keepalive needs to be given before connecting
+                    return NSAPI_ERROR_UNSUPPORTED;
+                }
+
+                if (optlen == sizeof(int)) {
+                    int secs = *(int *)optval;
+                    if (secs  >= 0 && secs <= 7200) {
+                        socket->keepalive = secs;
+                        return NSAPI_ERROR_OK;
+                    }
+                }
+                return NSAPI_ERROR_PARAMETER;
+            }
+        }
+    }
+
+    return NSAPI_ERROR_UNSUPPORTED;
+}
+
+nsapi_error_t ESP32Stack::getsockopt(nsapi_socket_t handle, int level,
+        int optname, void *optval, unsigned *optlen)
+{
+    struct esp32_socket *socket = (struct esp32_socket *)handle;
+
+    if (!optval || !optlen) {
+        return NSAPI_ERROR_PARAMETER;
+    } else if (!socket) {
+        return NSAPI_ERROR_NO_SOCKET;
+    }
+
+    if (level == NSAPI_SOCKET && socket->proto == NSAPI_TCP) {
+        switch (optname) {
+            case NSAPI_KEEPALIVE: {
+                if(*optlen > sizeof(int)) {
+                    *optlen = sizeof(int);
+                }
+                memcpy(optval, &(socket->keepalive), *optlen);
+                return NSAPI_ERROR_OK;
+            }
+        }
+    }
+
+    return NSAPI_ERROR_UNSUPPORTED;
 }
 

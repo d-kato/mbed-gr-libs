@@ -18,9 +18,18 @@
 #ifndef ESP32_H
 #define ESP32_H
 
-#include "ATParser_os.h"
+#include <vector>
+#include "ATCmdParser.h"
 
-#define ESP32_SOCKET_COUNT 5
+#ifndef ESP32_CONNECT_TIMEOUT
+#define ESP32_CONNECT_TIMEOUT 15000
+#endif
+#ifndef ESP32_RECV_TIMEOUT
+#define ESP32_RECV_TIMEOUT    2000
+#endif
+#ifndef ESP32_MISC_TIMEOUT
+#define ESP32_MISC_TIMEOUT    2000
+#endif
 
 /** ESP32Interface class.
     This is an interface to a ESP32 radio.
@@ -31,11 +40,16 @@ public:
     /**
     * Static method to create or retrieve the single ESP32 instance
     */
-    static ESP32 * getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
-                                PinName rts, PinName cts, int baudrate);
+    static ESP32 * getESP32Inst(PinName en, PinName io0, PinName tx, PinName rx, bool debug, int baudrate);
 
-    ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
-          PinName rts, PinName cts, int baudrate);
+    ESP32(PinName en, PinName io0, PinName tx, PinName rx, bool debug, int baudrate);
+
+    /**
+    * Check firmware version of ESP8266
+    *
+    * @return integer firmware version or -1 if firmware query command gives outdated response
+    */
+    int get_firmware_version(void);
 
     /**
     * Sets the Wi-Fi Mode
@@ -131,9 +145,12 @@ public:
     * @param id id to give the new socket, valid 0-4
     * @param port port to open connection with
     * @param addr the IP address of the destination
+    * @param addr the IP address of the destination
+    * @param opt  type=" UDP" : UDP socket's local port, zero means any
+    *             type=" TCP" : TCP connection's keep alive time, zero means disabled
     * @return true only if socket opened successfully
     */
-    bool open(const char *type, int id, const char* addr, int port);
+    bool open(const char *type, int id, const char* addr, int port, int opt = 0);
 
     /**
     * Sends data to an open socket
@@ -153,7 +170,7 @@ public:
     * @param amount number of bytes to be received
     * @return the number of bytes received
     */
-    int32_t recv(int id, void *data, uint32_t amount);
+    int32_t recv(int id, void *data, uint32_t amount, uint32_t timeout = ESP32_RECV_TIMEOUT);
 
     /**
     * Closes a socket
@@ -162,14 +179,14 @@ public:
     * @param wait_close 
     * @return true only if socket is closed successfully
     */
-    bool close(int id, bool wait_close);
+    bool close(int id, bool wait_close = false);
 
     /**
     * Allows timeout to be changed between commands
     *
     * @param timeout_ms timeout of the connection
     */
-    void setTimeout(uint32_t timeout_ms);
+    void setTimeout(uint32_t timeout_ms = ESP32_MISC_TIMEOUT);
 
     /**
     * Checks if data is available
@@ -181,23 +198,48 @@ public:
     */
     bool writeable();
 
-    void attach(int id, void (*callback)(void *), void *data);
+    void socket_attach(int id, void (*callback)(void *), void *data);
     int get_free_id();
 
     bool config_soft_ap(const char *ap, const char *passPhrase, uint8_t chl, uint8_t ecn);
 
     bool restart();
-    bool get_ssid(const char *ap);
+    bool get_ssid(char *ap);
     bool cre_server(int port);
     bool del_server();
     bool accept(int * p_id);
 
+    bool set_network(const char *ip_address, const char *netmask, const char *gateway);
+    bool set_network_ap(const char *ip_address, const char *netmask, const char *gateway);
+
+    /**
+    * Attach a function to call whenever network state has changed
+    *
+    * @param func A pointer to a void function, or 0 to set as none
+    */
+    void attach_wifi_status(mbed::Callback<void(int8_t)> status_cb);
+
+    /** Get the connection status
+     *
+     *  @return         The connection status according to ConnectionStatusType
+     */
+    int8_t get_wifi_status() const;
+
+    static const int8_t WIFIMODE_STATION = 1;
+    static const int8_t WIFIMODE_SOFTAP = 2;
+    static const int8_t WIFIMODE_STATION_SOFTAP = 3;
+    static const int8_t SOCKET_COUNT = 5;
+
+    static const int8_t STATUS_DISCONNECTED = 0;
+    static const int8_t STATUS_CONNECTED = 1;
+    static const int8_t STATUS_GOT_IP = 2;
+
 private:
-    DigitalOut wifi_en;
-    DigitalOut wifi_io0;
+    DigitalOut * _p_wifi_en;
+    DigitalOut * _p_wifi_io0;
     bool init_end;
-    BufferedSerial _serial;
-    ATParser_os _parser;
+    UARTSerial _serial;
+    ATCmdParser _parser;
     struct packet {
         struct packet *next;
         int id;
@@ -207,23 +249,22 @@ private:
     } *_packets, **_packets_end;
     int _wifi_mode;
     int _baudrate;
-    PinName _rts;
-    PinName _cts;
-    int _flow_control;
 
     std::vector<int> _accept_id;
     uint32_t _id_bits;
     uint32_t _id_bits_close;
     bool _server_act;
-    rtos::Mutex _lock;
+    rtos::Mutex _smutex; // Protect serial port access
     static ESP32 * instESP32;
+    int8_t _wifi_status;
+    Callback<void(int8_t)> _wifi_status_cb;
 
-    bool _ids[ESP32_SOCKET_COUNT];
+    bool _ids[SOCKET_COUNT];
     struct {
         void (*callback)(void *);
         void *data;
         int  Notified;
-    } _cbs[ESP32_SOCKET_COUNT];
+    } _cbs[SOCKET_COUNT];
 
     bool startup();
     bool reset(void);
@@ -239,6 +280,7 @@ private:
     void _closed_handler_2();
     void _closed_handler_3();
     void _closed_handler_4();
+    void _connection_status_handler();
     void _packet_handler();
     void event();
     bool recv_ap(nsapi_wifi_ap_t *ap);

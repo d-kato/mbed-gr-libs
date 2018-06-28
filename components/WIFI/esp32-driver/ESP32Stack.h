@@ -28,15 +28,14 @@ class ESP32Stack : public NetworkStack
 {
 protected:
     /** ESP32Stack lifetime
+     * @param en        EN pin
+     * @param io0       IO0 pin
      * @param tx        TX pin
      * @param rx        RX pin
      * @param debug     Enable debugging
-     * @param rts       RTS pin
-     * @param cts       CTS pin
      * @param baudrate  The baudrate of the serial port.
      */
-    ESP32Stack(PinName en, PinName io0, PinName tx, PinName rx, bool debug,
-               PinName rts, PinName cts, int baudrate);
+    ESP32Stack(PinName en, PinName io0, PinName tx, PinName rx, bool debug, int baudrate);
 
 protected:
     /** Open a socket
@@ -137,8 +136,39 @@ protected:
      */
     virtual void socket_attach(void *handle, void (*callback)(void *), void *data);
 
+    /** Set stack-specific socket options
+     *  The setsockopt allow an application to pass stack-specific hints
+     *  to the underlying stack. For unsupported options,
+     *  NSAPI_ERROR_UNSUPPORTED is returned and the socket is unmodified.
+     *
+     *  @param handle   Socket handle
+     *  @param level    Stack-specific protocol level
+     *  @param optname  Stack-specific option identifier
+     *  @param optval   Option value
+     *  @param optlen   Length of the option value
+     *  @return         0 on success, negative error code on failure
+     */
+    virtual nsapi_error_t setsockopt(nsapi_socket_t handle, int level,
+            int optname, const void *optval, unsigned optlen);
+
+    /** Get stack-specific socket options
+     *  The getstackopt allow an application to retrieve stack-specific hints
+     *  from the underlying stack. For unsupported options,
+     *  NSAPI_ERROR_UNSUPPORTED is returned and optval is unmodified.
+     *
+     *  @param handle   Socket handle
+     *  @param level    Stack-specific protocol level
+     *  @param optname  Stack-specific option identifier
+     *  @param optval   Destination for option value
+     *  @param optlen   Length of the option value
+     *  @return         0 on success, negative error code on failure
+     */
+    virtual nsapi_error_t getsockopt(nsapi_socket_t handle, int level,
+            int optname, void *optval, unsigned *optlen);
+
 protected:
     ESP32 *_esp;
+    uint16_t _local_ports[ESP32::SOCKET_COUNT];
 };
 
 #endif
