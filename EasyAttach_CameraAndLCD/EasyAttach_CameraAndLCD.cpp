@@ -10,7 +10,6 @@ static DigitalOut lcd_blon(P8_1);
 static DigitalOut lcd_cntrst(P8_15);
 #elif (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD)
 static DigitalOut lcd_pwon(P5_12);
-static DigitalOut lcd_sd(P7_5);
 static PwmOut lcd_cntrst(P3_12);
 #endif
 #ifndef VOLTAGE_ADJUSTMENT
@@ -54,20 +53,10 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     };
 
     lcd_pwon = 0;
-    #if MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
-    lcd_sd = 0;
-    #else
-    lcd_sd = 1;
-    #endif
     lcd_cntrst.period_us(500);
     Thread::wait(100);
     lcd_pwon = 1;
     Thread::wait(1);
-    #if MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
-    lcd_sd = 1;
-    #else
-    lcd_sd = 0;
-    #endif
 
     Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
 
