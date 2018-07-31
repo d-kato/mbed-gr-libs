@@ -1,6 +1,6 @@
 
-#ifndef LCD_CFG_LYCHEE_H
-#define LCD_CFG_LYCHEE_H
+#ifndef LCD_CFG_40PIN_4_3INCH_H
+#define LCD_CFG_40PIN_4_3INCH_H
 
 #include "DisplayBace.h"
 
@@ -16,8 +16,7 @@
 #define LCD_V_FRONT_PORCH                   (4u)
 #define LCD_V_SYNC_WIDTH                    (10u)
 
-extern const DisplayBase::lcd_config_t LcdCfgTbl_lychee;
+extern const DisplayBase::lcd_config_t LcdCfgTbl_40pin_4_3inch;
 
 #endif
-
 

@@ -42,10 +42,11 @@
     #error "MBED_CONF_APP_CAMERA_TYPE is not supported in this target."
   #endif
 
-  #if MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV7725
+  #if MBED_CONF_APP_CAMERA_TYPE == CAMERA_MT9V111
+    #include "MT9V111_config.h"
+  #elif MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV7725
     #include "OV7725_config.h"
-  #endif
-  #if MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV5642
+  #elif MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV5642
     #include "OV5642_config.h"
   #endif
 #endif
@@ -53,11 +54,15 @@
 // lcd
 #if MBED_CONF_APP_LCD
   // lcd-type
-  #define GR_PEACH_4_3INCH_SHIELD     1
-  #define GR_PEACH_7_1INCH_SHIELD     2
-  #define GR_PEACH_RSK_TFT            3
-  #define GR_PEACH_DISPLAY_SHIELD     4
-  #define GR_LYCHEE_LCD               5
+  #define GR_PEACH_4_3INCH_SHIELD     0x0000
+  #define GR_PEACH_7_1INCH_SHIELD     0x0001
+  #define GR_PEACH_RSK_TFT            0x0002
+  #define GR_PEACH_DISPLAY_SHIELD     0x0100
+  #define GR_LYCHEE_TF043HV001A0      0x1000
+  #define GR_LYCHEE_ATM0430D25        0x1001
+  #define GR_LYCHEE_FG040346DSSWBG03  0x1002
+
+  #define GR_LYCHEE_LCD               GR_LYCHEE_TF043HV001A0
 
   #ifndef MBED_CONF_APP_LCD_TYPE
     #if defined(TARGET_RZ_A1H)
@@ -67,10 +72,10 @@
     #endif
   #endif
 
-  #if (MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD) && defined(TARGET_RZ_A1H)
+  #if defined(TARGET_RZ_A1H) && ((MBED_CONF_APP_LCD_TYPE & 0xFF00) != 0x0000)
     #error "MBED_CONF_APP_LCD_TYPE is not supported in this target."
   #endif
-  #if (MBED_CONF_APP_LCD_TYPE >= GR_PEACH_4_3INCH_SHIELD) && (MBED_CONF_APP_LCD_TYPE <= GR_PEACH_DISPLAY_SHIELD) && defined(TARGET_GR_LYCHEE)
+  #if defined(TARGET_GR_LYCHEE) && ((MBED_CONF_APP_LCD_TYPE & 0xFF00) != 0x1000)
     #error "MBED_CONF_APP_LCD_TYPE is not supported in this target."
   #endif
 
@@ -82,8 +87,12 @@
     #include "LCD_shield_config_RSK_TFT.h"
   #elif MBED_CONF_APP_LCD_TYPE == GR_PEACH_DISPLAY_SHIELD
     #include "Display_shield_config.h"
-  #elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_LCD
-    #include "LCD_config_lychee.h"
+  #elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_TF043HV001A0
+    #include "LCD_config_TF043HV001A0.h"
+  #elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_ATM0430D25
+    #include "LCD_config_ATM0430D25.h"
+  #elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_FG040346DSSWBG03
+    #include "LCD_config_FG040346DSSWBG03.h"
   #else
     #error "No lcd chosen. Please add 'config.lcd-type.value' to your mbed_app.json (see README.md for more information)."
   #endif
@@ -99,6 +108,8 @@ extern DisplayBase::graphics_error_t EasyAttach_CameraStart(
     DisplayBase& Display,
     DisplayBase::video_input_channel_t channel = DisplayBase::VIDEO_INPUT_CHANNEL_0
 );
+
+extern void EasyAttach_SetTypicalBacklightVol(float typ_vol);
 
 extern void EasyAttach_LcdBacklight(bool type = true);
 

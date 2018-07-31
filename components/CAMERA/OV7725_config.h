@@ -3,8 +3,9 @@
 #define OV7725_CONFIG_H
 
 #include "mbed.h"
+#include "camera_config.h"
 
-class OV7725_config {
+class OV7725_config : public camera_config {
 
 public:
 
@@ -12,7 +13,7 @@ public:
      *
      * @return true = success, false = failure
      */
-    static bool Initialise() {
+    virtual bool Initialise() {
         /* OV7725 camera input config */
         const char OV7725_InitRegTable[][2] = {
             {0x0D, 0x41}, /* COM4 */
@@ -96,6 +97,23 @@ public:
         }
 
         return true;
+    }
+
+    virtual void SetExtInConfig(DisplayBase::video_ext_in_config_t * p_cfg) {
+        p_cfg->inp_format     = DisplayBase::VIDEO_EXTIN_FORMAT_BT601; /* BT601 8bit YCbCr format */
+        p_cfg->inp_pxd_edge   = DisplayBase::EDGE_RISING;              /* Clock edge select for capturing data          */
+        p_cfg->inp_vs_edge    = DisplayBase::EDGE_RISING;              /* Clock edge select for capturing Vsync signals */
+        p_cfg->inp_hs_edge    = DisplayBase::EDGE_RISING;              /* Clock edge select for capturing Hsync signals */
+        p_cfg->inp_endian_on  = DisplayBase::OFF;                      /* External input bit endian change on/off       */
+        p_cfg->inp_swap_on    = DisplayBase::OFF;                      /* External input B/R signal swap on/off         */
+        p_cfg->inp_vs_inv     = DisplayBase::SIG_POL_NOT_INVERTED;     /* External input DV_VSYNC inversion control     */
+        p_cfg->inp_hs_inv     = DisplayBase::SIG_POL_NOT_INVERTED;     /* External input DV_HSYNC inversion control     */
+        p_cfg->inp_f525_625   = DisplayBase::EXTIN_LINE_525;           /* Number of lines for BT.656 external input */
+        p_cfg->inp_h_pos      = DisplayBase::EXTIN_H_POS_YCBYCR;       /* Y/Cb/Y/Cr data string start timing to Hsync reference */
+        p_cfg->cap_vs_pos     = 4+21;                                  /* Capture start position from Vsync */
+        p_cfg->cap_hs_pos     = 68;                                    /* Capture start position form Hsync */
+        p_cfg->cap_width      = 640;                                   /* Capture width Max */
+        p_cfg->cap_height     = 480;                                   /* Capture height Max */
     }
 
     /** Exposure and Gain Setting

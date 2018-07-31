@@ -48,22 +48,24 @@ Add the following to your ``mbed_app.json`` file:
 }
 ```
 
-| camera-type "value"     | Description                        |
-|:------------------------|:-----------------------------------|
-| CAMERA_CVBS             | GR-PEACH NTSC signal               |
-| CAMERA_MT9V111          | GR-PEACH MT9V111                   |
-| CAMERA_OV7725           | GR-LYHCEE included camera          |
-| CAMERA_OV5642           | GR-PEACH OV5642                    |
-| CAMERA_WIRELESS_CAMERA  | GR-PEACH Wireless/Camera shield (MT9V111) |
+| camera-type "value"        | Description                        |
+|:---------------------------|:-----------------------------------|
+| CAMERA_CVBS                | GR-PEACH NTSC signal               |
+| CAMERA_MT9V111             | GR-PEACH MT9V111                   |
+| CAMERA_OV7725              | GR-LYHCEE included camera          |
+| CAMERA_OV5642              | GR-PEACH OV5642                    |
+| CAMERA_WIRELESS_CAMERA     | GR-PEACH Wireless/Camera shield (MT9V111) |
 
-| lcd-type "value"        | Description                        |
-|:------------------------|:-----------------------------------|
-| GR_PEACH_4_3INCH_SHIELD | GR-PEACH 4.3 inch LCD shield       |
-| GR_PEACH_7_1INCH_SHIELD | GR-PEACH 7.1 inch LCD shield       |
-| GR_PEACH_RSK_TFT        | GR-PEACH RSK board LCD             |
-| GR_PEACH_DISPLAY_SHIELD | GR-PEACH Display Shield            |
-| GR_LYCHEE_LCD           | GR-LYHCEE TF043HV001A0..etc(40pin) |
-
+| lcd-type "value"           | Description                        |
+|:---------------------------|:-----------------------------------|
+| GR_PEACH_4_3INCH_SHIELD    | GR-PEACH 4.3 inch LCD shield       |
+| GR_PEACH_7_1INCH_SHIELD    | GR-PEACH 7.1 inch LCD shield       |
+| GR_PEACH_RSK_TFT           | GR-PEACH RSK board LCD             |
+| GR_PEACH_DISPLAY_SHIELD    | GR-PEACH Display Shield            |
+| GR_LYCHEE_TF043HV001A0     | GR-LYHCEE TF043HV001A0             |
+| GR_LYCHEE_ATM0430D25       | GR-LYHCEE ATM0430D25               |
+| GR_LYCHEE_FG040346DSSWBG03 | GR-LYHCEE FG040346DSSWBG03         |
+| GR_LYCHEE_LCD              | GR-LYHCEE TF043HV001A0 (For compatibility) |
 
 If camera-type and lcd-type are not specified, the following are specified.
 * GR-PEACH   camera：CAMERA_MT9V111, LCD：GR_PEACH_4_3INCH_SHIELD  

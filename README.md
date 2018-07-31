@@ -58,21 +58,24 @@ GR-LYCHEEの開発環境については、[GR-LYCHEE用オフライン開発環�
 }
 ```
 
-| camera-type "value"     | 説明                               |
-|:------------------------|:-----------------------------------|
-| CAMERA_CVBS             | GR-PEACH NTSC信号                  |
-| CAMERA_MT9V111          | GR-PEACH MT9V111                   |
-| CAMERA_OV7725           | GR-LYHCEE 付属カメラ               |
-| CAMERA_OV5642           | GR-PEACH OV5642                    |
-| CAMERA_WIRELESS_CAMERA  | GR-PEACH Wireless/Cameraシールド (OV7725) |
+| camera-type "value"        | 説明                               |
+|:---------------------------|:-----------------------------------|
+| CAMERA_CVBS                | GR-PEACH NTSC信号                  |
+| CAMERA_MT9V111             | GR-PEACH MT9V111                   |
+| CAMERA_OV7725              | GR-LYHCEE 付属カメラ               |
+| CAMERA_OV5642              | GR-PEACH OV5642                    |
+| CAMERA_WIRELESS_CAMERA     | GR-PEACH Wireless/Cameraシールド (OV7725) |
 
-| lcd-type "value"        | 説明                               |
-|:------------------------|:-----------------------------------|
-| GR_PEACH_4_3INCH_SHIELD | GR-PEACH 4.3インチLCDシールド      |
-| GR_PEACH_7_1INCH_SHIELD | GR-PEACH 7.1インチLCDシールド      |
-| GR_PEACH_RSK_TFT        | GR-PEACH RSKボード用LCD            |
-| GR_PEACH_DISPLAY_SHIELD | GR-PEACH Display Shield            |
-| GR_LYCHEE_LCD           | GR-LYHCEE TF043HV001A0など(40pin)  |
+| lcd-type "value"           | 説明                               |
+|:---------------------------|:-----------------------------------|
+| GR_PEACH_4_3INCH_SHIELD    | GR-PEACH 4.3インチLCDシールド      |
+| GR_PEACH_7_1INCH_SHIELD    | GR-PEACH 7.1インチLCDシールド      |
+| GR_PEACH_RSK_TFT           | GR-PEACH RSKボード用LCD            |
+| GR_PEACH_DISPLAY_SHIELD    | GR-PEACH Display Shield            |
+| GR_LYCHEE_TF043HV001A0     | GR-LYHCEE TF043HV001A0             |
+| GR_LYCHEE_ATM0430D25       | GR-LYHCEE ATM0430D25               |
+| GR_LYCHEE_FG040346DSSWBG03 | GR-LYHCEE FG040346DSSWBG03         |
+| GR_LYCHEE_LCD              | GR-LYHCEE TF043HV001A0 (互換性のため) |
 
 
 camera-typeとlcd-typeを指定しない場合は以下の設定となります。  

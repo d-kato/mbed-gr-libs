@@ -3,6 +3,7 @@
 #define OV5642_CONFIG_H
 
 #include "mbed.h"
+#include "camera_config.h"
 
 #define SIZE_640x480   1
 #define SIZE_800x600   2
@@ -19,7 +20,7 @@ public:
      *
      * @return true = success, false = failure
      */
-    static bool Initialise() {
+    virtual bool Initialise() {
         /* OV5642 camera input config */
         const char OV5642_InitRegTable[][3] = {
             {0x31, 0x03, 0x93}, {0x30, 0x08, 0x82}, {0x30, 0x17, 0x7f}, {0x30, 0x18, 0xfc},
@@ -149,6 +150,24 @@ public:
 
         return true;
     }
+
+    virtual void SetExtInConfig(DisplayBase::video_ext_in_config_t * p_cfg) {
+        p_cfg->inp_format     = DisplayBase::VIDEO_EXTIN_FORMAT_BT601; /* BT601 8bit YCbCr format */
+        p_cfg->inp_pxd_edge   = DisplayBase::EDGE_RISING;              /* Clock edge select for capturing data          */
+        p_cfg->inp_vs_edge    = DisplayBase::EDGE_RISING;              /* Clock edge select for capturing Vsync signals */
+        p_cfg->inp_hs_edge    = DisplayBase::EDGE_RISING;              /* Clock edge select for capturing Hsync signals */
+        p_cfg->inp_endian_on  = DisplayBase::OFF;                      /* External input bit endian change on/off       */
+        p_cfg->inp_swap_on    = DisplayBase::OFF;                      /* External input B/R signal swap on/off         */
+        p_cfg->inp_vs_inv     = DisplayBase::SIG_POL_NOT_INVERTED;     /* External input DV_VSYNC inversion control     */
+        p_cfg->inp_hs_inv     = DisplayBase::SIG_POL_NOT_INVERTED;     /* External input DV_HSYNC inversion control     */
+        p_cfg->inp_f525_625   = DisplayBase::EXTIN_LINE_525;           /* Number of lines for BT.656 external input */
+        p_cfg->inp_h_pos      = DisplayBase::EXTIN_H_POS_YCBYCR;       /* Y/Cb/Y/Cr data string start timing to Hsync reference */
+        p_cfg->cap_vs_pos     = 8;                                     /* Capture start position from Vsync */
+        p_cfg->cap_hs_pos     = 8;                                     /* Capture start position form Hsync */
+        p_cfg->cap_width      = 640;                                   /* Capture width  */
+        p_cfg->cap_height     = 480u;                                  /* Capture height Max 480[line] */
+    }
+
 };
 
 #endif

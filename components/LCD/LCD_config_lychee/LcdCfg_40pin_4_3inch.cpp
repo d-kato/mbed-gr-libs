@@ -1,6 +1,6 @@
-#include "LcdCfg_lychee.h"
+#include "LcdCfg_40pin_4_3inch.h"
 
-const DisplayBase::lcd_config_t LcdCfgTbl_lychee = {
+const DisplayBase::lcd_config_t LcdCfgTbl_40pin_4_3inch = {
       DisplayBase::LCD_TYPE_PARALLEL_RGB                                            /* lcd_type             */
     , LCD_INPUT_CLOCK                                                               /* intputClock          */
     , LCD_OUTPUT_CLOCK                                                              /* outputClock          */
