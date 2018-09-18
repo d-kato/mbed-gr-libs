@@ -75,6 +75,7 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
  #else
     DisplayBase::graphics_error_t error;
     DisplayBase::video_ext_in_config_t ext_in_config;
+    DisplayBase::video_input_sel_t video_input_sel;
 
   #if defined(TARGET_RZ_A1H)
     PinName cmos_camera_pin[11] = {
@@ -118,7 +119,13 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
   #endif
 
     /* camera input port setting */
+  #if CAMERA_MODULE == MODULE_VDC
+    video_input_sel = DisplayBase::INPUT_SEL_EXT;
     error = Display.Graphics_Dvinput_Port_Init(cmos_camera_pin, 11);
+  #else
+    video_input_sel = DisplayBase::INPUT_SEL_CEU;
+    error = Display.Graphics_Ceu_Port_Init(cmos_camera_pin, 11);
+  #endif
     if( error != DisplayBase::GRAPHICS_OK ) {
         printf("Line %d, error %d\n", __LINE__, error);
         return error;
@@ -143,7 +150,7 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
         ext_in_config.cap_height = cap_height;                            /* Capture heigh */
     }
 
-    error = Display.Graphics_Video_init(DisplayBase::INPUT_SEL_EXT, &ext_in_config);
+    error = Display.Graphics_Video_init(video_input_sel, &ext_in_config);
     if( error != DisplayBase::GRAPHICS_OK ) {
         printf("Line %d, error %d\n", __LINE__, error);
         return error;
@@ -207,6 +214,7 @@ DisplayBase::graphics_error_t EasyAttach_CameraStart(DisplayBase& Display, Displ
         return error;
     }
 
+  #if CAMERA_MODULE == MODULE_VDC
     /* Video write process stop */
     error = Display.Video_Stop(channel);
     if (error != DisplayBase::GRAPHICS_OK) {
@@ -220,6 +228,7 @@ DisplayBase::graphics_error_t EasyAttach_CameraStart(DisplayBase& Display, Displ
         printf("Line %d, error %d\n", __LINE__, error);
         return error;
     }
+  #endif
 #endif
 
     return DisplayBase::GRAPHICS_OK;

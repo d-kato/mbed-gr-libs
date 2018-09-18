@@ -33,7 +33,7 @@ Add the following to your ``mbed_app.json`` file:
             "value": "1"
         },
         "camera-type":{
-            "help": "Please see README.md",
+            "help": "Please see EasyAttach_CameraAndLCD/README.md",
             "value": "CAMERA_CVBS"
         },
         "lcd":{
@@ -41,7 +41,7 @@ Add the following to your ``mbed_app.json`` file:
             "value": "1"
         },
         "lcd-type":{
-            "help": "Please see README.md",
+            "help": "Please see EasyAttach_CameraAndLCD/README.md",
             "value": "GR_PEACH_4_3INCH_SHIELD"
         }
     }
@@ -68,8 +68,8 @@ Add the following to your ``mbed_app.json`` file:
 | GR_LYCHEE_LCD              | GR-LYHCEE TF043HV001A0 (For compatibility) |
 
 If camera-type and lcd-type are not specified, the following are specified.
-* GR-PEACH   camera：CAMERA_MT9V111, LCD：GR_PEACH_4_3INCH_SHIELD  
-* GR-LYCHEE  camera：CAMERA_OV7725,  LCD：GR_LYCHEE_LCD  
+* GR-PEACH   camera:CAMERA_MT9V111, LCD:GR_PEACH_4_3INCH_SHIELD  
+* GR-LYCHEE  camera:CAMERA_OV7725,  LCD:GR_LYCHEE_LCD  
 
 
 ## Using Easy Connect Camera from your application

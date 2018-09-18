@@ -124,7 +124,7 @@ DisplayBase::Graphics_Video_init( video_input_sel_t video_input_sel, video_ext_i
 {
     graphics_error_t error = GRAPHICS_OK;
 
-    if( _video_input_sel == INPUT_SEL_VDEC || _video_input_sel == INPUT_SEL_EXT ) {
+    if ((video_input_sel == INPUT_SEL_EXT) || (video_input_sel == INPUT_SEL_CEU)) {
         _video_input_sel = video_input_sel;
     } else {
         error = GRAPHICS_PARAM_RANGE_ERR;
@@ -189,6 +189,18 @@ DisplayBase::Graphics_Dvinput_Port_Init( PinName *pin, unsigned int pin_count )
 {
     return (graphics_error_t)DRV_Graphics_Dvinput_Port_Init( pin, pin_count );
 } /* End of method Graphics_Dvinput_Port_Init() */
+
+/**************************************************************************//**
+ * @brief       CEU input I/O port initialization processing
+ * @param[in]   pin                       : Pointer of the pin assignment
+ * @param[in]   pin_count                 : Total number of the pin assignment
+ * @retval      error code
+******************************************************************************/
+DisplayBase::graphics_error_t
+DisplayBase::Graphics_Ceu_Port_Init( PinName *pin, unsigned int pin_count )
+{
+    return (graphics_error_t)DRV_Graphics_CEU_Port_Init( pin, pin_count );
+} /* End of method Graphics_Ceu_Port_Init() */
 
 /**************************************************************************//**
  * @brief       IRQ interrupt handler setting
@@ -418,6 +430,15 @@ DisplayBase::Video_Write_Setting(
                     write_buff_vw,
                     write_buff_hw,
                     (drv_rect_t *)&cap_area );
+    } else if( _video_input_sel == INPUT_SEL_CEU ) {
+        error = (graphics_error_t) DRV_Video_Write_Setting_Ceu(
+                    framebuff,
+                    fb_stride,
+                    (drv_video_format_t)video_format,
+                    (drv_wr_rd_swa_t)wr_rd_swa,
+                    write_buff_vw,
+                    write_buff_hw,
+                    (drv_video_ext_in_config_t *)&_video_ext_in_config);
     } else {
         error = GRAPHICS_PARAM_RANGE_ERR;
     }

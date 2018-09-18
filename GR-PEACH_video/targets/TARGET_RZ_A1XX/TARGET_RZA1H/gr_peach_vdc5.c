@@ -39,9 +39,11 @@ Includes   <System Includes> , "Project Includes"
 #include    "video_decoder.h"
 #include    "lvds_pll_calc.h"
 #include    "gr_board_vdc5.h"
+#include    "r_ceu.h"
 
 #include    "mbed_assert.h"
 #include    "pinmap.h"
+#include    "RZ_A1_Init.h"
 
 /******************************************************************************
 Macro definitions
@@ -104,6 +106,32 @@ static const PinMap PinMap_DV_INPUT_PIN[] = {
     {P2_2  , VDC5_CH0, 3}, /* DV0_DATA2  */
     {P2_1  , VDC5_CH0, 3}, /* DV0_DATA1  */
     {P2_0  , VDC5_CH0, 3}, /* DV0_DATA0  */
+    {NC    , NC   , 0}
+};
+
+static const PinMap PinMap_CEU_PIN[] = {
+    {P1_5  , 0, 5}, /* VIO_CLK    */
+    {P10_0 , 0, 6}, /* VIO_CLK    */
+    {P1_0  , 0, 5}, /* VIO_VD     */
+    {P10_1 , 0, 6}, /* VIO_VD     */
+    {P1_1  , 0, 5}, /* VIO_HD     */
+    {P10_2 , 0, 6}, /* VIO_HD     */
+    {P2_7  , 0, 7}, /* VIO_D7     */
+    {P10_11, 0, 6}, /* VIO_D7     */
+    {P2_6  , 0, 7}, /* VIO_D6     */
+    {P10_10, 0, 6}, /* VIO_D6     */
+    {P2_5  , 0, 7}, /* VIO_D5     */
+    {P10_9 , 0, 6}, /* VIO_D5     */
+    {P2_4  , 0, 7}, /* VIO_D4     */
+    {P10_8 , 0, 6}, /* VIO_D4     */
+    {P2_3  , 0, 7}, /* VIO_D3     */
+    {P10_7 , 0, 6}, /* VIO_D3     */
+    {P2_2  , 0, 7}, /* VIO_D2     */
+    {P10_6 , 0, 6}, /* VIO_D2     */
+    {P2_1  , 0, 7}, /* VIO_D1     */
+    {P10_5 , 0, 6}, /* VIO_D1     */
+    {P2_0  , 0, 7}, /* VIO_D0     */
+    {P10_4 , 0, 6}, /* VIO_D0     */
     {NC    , NC   , 0}
 };
 
@@ -212,6 +240,8 @@ static const IRQn_Type vdc5_irq_set_tbl[] = {
 /******************************************************************************
 Private global variables and functions
 ******************************************************************************/
+static drv_video_input_sel_t _drv_video_input_sel;
+
 static void init_func (const uint32_t user_num);
 static void DRV_Graphics_Irq_Set(vdc5_int_type_t irq, uint32_t enable);
 
@@ -291,6 +321,13 @@ static void DRV_Graphics_Irq_Set(vdc5_int_type_t irq, uint32_t enable)
     }
 } /* End of function DRV_Graphics_Irq_Set() */
 
+static void (* ceu_callback_func)(vdc5_int_type_t);
+static void Ceu_Irq_Handler_wrapper(ceu_int_type_t ceu_int_type) {
+    if ((ceu_callback_func != NULL) && ((ceu_int_type & CEU_INT_CPEIE) != 0)) {
+        ceu_callback_func(VDC5_INT_TYPE_S0_VFIELD);
+    }
+}
+
 /**************************************************************************//**
  * @brief       Interrupt callback setup
  *              This function performs the following processing:
@@ -308,27 +345,39 @@ drv_graphics_error_t DRV_Graphics_Irq_Handler_Set(
     uint16_t num,
     void (* callback)(vdc5_int_type_t)  )
 {
-    vdc5_channel_t          ch          = VDC5_CHANNEL_0;
     drv_graphics_error_t    drv_error   = DRV_GRAPHICS_OK;
-    vdc5_error_t            error;
-    vdc5_int_t              interrupt;
 
-    if( callback == NULL ) {
-        DRV_Graphics_Irq_Set( irq, 0 );
+    if ((_drv_video_input_sel == DRV_INPUT_SEL_CEU) && (irq == VDC5_INT_TYPE_S0_VFIELD)) {
+        /* ceu wrapper */
+        if( callback == NULL ) {
+            R_CEU_InterruptDisable();
+            ceu_callback_func = NULL;
+        } else {
+            ceu_callback_func = callback;
+            R_CEU_InterruptEnable(CEU_INT_CPEIE, &Ceu_Irq_Handler_wrapper);
+        }
     } else {
-        DRV_Graphics_Irq_Set( irq, 1 );
-    }
+        vdc5_channel_t          ch          = VDC5_CHANNEL_0;
+        vdc5_error_t            error;
+        vdc5_int_t              interrupt;
 
-    /* Interrupt parameter */
-    interrupt.type      = irq;        /* Interrupt type */
-    interrupt.line_num  = num ;       /* Line number */
+        if( callback == NULL ) {
+            DRV_Graphics_Irq_Set( irq, 0 );
+        } else {
+            DRV_Graphics_Irq_Set( irq, 1 );
+        }
 
-    /* Interrupt parameter */
-    interrupt.callback = callback;    /* Callback function pointer */
-    /* Set interrupt service routine */
-    error = R_VDC5_CallbackISR(ch, &interrupt);
-    if (error != VDC5_OK) {
-        drv_error = DRV_GRAPHICS_VDC5_ERR;
+        /* Interrupt parameter */
+        interrupt.type      = irq;        /* Interrupt type */
+        interrupt.line_num  = num ;       /* Line number */
+
+        /* Interrupt parameter */
+        interrupt.callback = callback;    /* Callback function pointer */
+        /* Set interrupt service routine */
+        error = R_VDC5_CallbackISR(ch, &interrupt);
+        if (error != VDC5_OK) {
+            drv_error = DRV_GRAPHICS_VDC5_ERR;
+        }
     }
     return drv_error ;
 } /* End of function DRV_Graphics_Irq_Handler_Set() */
@@ -388,6 +437,24 @@ drv_graphics_error_t DRV_Graphics_Dvinput_Port_Init( PinName *pin, uint32_t pin_
 } /* End of function DRV_Graphics_Dvinput_Port_Init() */
 
 /**************************************************************************//**
+ * @brief       CEU inpout port initialization processing
+ * @param[in]   pin                     : Pin assign for digital video input port
+ * @param[in]   pin_count               : Total number of pin assign
+ * @retval      Error code
+******************************************************************************/
+drv_graphics_error_t DRV_Graphics_CEU_Port_Init( PinName *pin, uint32_t pin_count )
+{
+    drv_graphics_error_t    drv_error   = DRV_GRAPHICS_OK;
+    uint32_t count;
+
+    for( count = 0 ; count < pin_count ; count++ ) {
+        pinmap_peripheral(pin[count], PinMap_CEU_PIN);
+        pinmap_pinout(pin[count], PinMap_CEU_PIN);
+    }
+    return drv_error;
+} /* End of function DRV_Graphics_CEU_Port_Init() */
+
+/**************************************************************************//**
  * @brief       Graphics initialization processing
  * @param[in]   drv_lcd_config          : LCD configuration
  * @retval      Error code
@@ -400,7 +467,7 @@ drv_graphics_error_t DRV_Graphics_Init( drv_lcd_config_t * drv_lcd_config )
     vdc5_init_t             init;
     vdc5_lvds_t             vdc5_lvds;
     pll_parameter_t         pll_parameter;
-    double                  InputClock   = DEFAULT_INPUT_CLOCK;
+    double                  InputClock;
     double                  OutputClock  = DEFAULT_OUTPUT_CLOCK;
     uint32_t                LvdsUsed     = LVDS_IF_USE;
 
@@ -408,8 +475,13 @@ drv_graphics_error_t DRV_Graphics_Init( drv_lcd_config_t * drv_lcd_config )
     init.panel_icksel   = VDC5_PANEL_ICKSEL_LVDS;      /* Panel clock select */
     init.panel_dcdr     = VDC5_PANEL_CLKDIV_1_1;       /* Panel clock frequency division ratio */
 
+    if (RZ_A1_IsClockMode0() == false) {
+        InputClock = CM1_RENESAS_RZ_A1_P1_CLK / 1000000;
+    } else {
+        InputClock = CM0_RENESAS_RZ_A1_P1_CLK / 1000000;
+    }
+
     if( drv_lcd_config != NULL ) {
-        InputClock  = drv_lcd_config->intputClock;
         OutputClock = drv_lcd_config->outputClock;
 
         /* LVDS PLL Setting Calculation */
@@ -568,6 +640,18 @@ drv_graphics_error_t DRV_Graphics_Video_init( drv_video_input_sel_t drv_video_in
     vdc5_ext_in_sig_t       ext_in_sig;
     vdc5_sync_delay_t       sync_delay;
 
+    if ((drv_video_input_sel != DRV_INPUT_SEL_VDEC)
+     && (drv_video_input_sel != DRV_INPUT_SEL_EXT)
+     && (drv_video_input_sel != DRV_INPUT_SEL_CEU)) {
+        return DRV_GRAPHICS_VDC5_ERR;
+    }
+    _drv_video_input_sel = drv_video_input_sel;
+
+    if (drv_video_input_sel == DRV_INPUT_SEL_CEU) {
+        R_CEU_Initialize(&R_CEU_OnInitialize, 0);
+        return DRV_GRAPHICS_OK;
+    }
+
     input.inp_sel   = (vdc5_input_sel_t)drv_video_input_sel; /* Input select */
     input.inp_fh50  = (uint16_t)VSYNC_1_2_FH_TIMING;         /* Vsync signal 1/2fH phase timing */
     input.inp_fh25  = (uint16_t)VSYNC_1_4_FH_TIMING;         /* Vsync signal 1/4fH phase timing */
@@ -709,27 +793,32 @@ drv_graphics_error_t DRV_Graphics_Stop ( drv_graphics_layer_t layer_id )
 drv_graphics_error_t DRV_Video_Start ( drv_video_input_channel_t video_input_ch )
 {
     drv_graphics_error_t    drv_error   = DRV_GRAPHICS_OK;
-    vdc5_channel_t          ch          = VDC5_CHANNEL_0;
-    vdc5_error_t            error;
-    vdc5_start_t            start;
-    vdc5_gr_disp_sel_t      gr_disp_sel;
-    vdc5_layer_id_t         vdc5_layer_id;
 
-    if( video_input_ch == DRV_VIDEO_INPUT_CHANNEL_0 ) {
-        vdc5_layer_id   = VDC5_LAYER_ID_0_WR;
-    } else if ( video_input_ch == DRV_VIDEO_INPUT_CHANNEL_1 ) {
-        vdc5_layer_id   = VDC5_LAYER_ID_1_WR;
+    if (_drv_video_input_sel == DRV_INPUT_SEL_CEU) {
+        R_CEU_Start();
     } else {
-        drv_error = DRV_GRAPHICS_LAYER_ERR;
-    }
+        vdc5_channel_t          ch          = VDC5_CHANNEL_0;
+        vdc5_error_t            error;
+        vdc5_start_t            start;
+        vdc5_gr_disp_sel_t      gr_disp_sel;
+        vdc5_layer_id_t         vdc5_layer_id;
 
-    if( drv_error == DRV_GRAPHICS_OK ) {
-        /* Start process */
-        gr_disp_sel         = VDC5_DISPSEL_CURRENT;    /* CURRENT fixed for weave input mode */
-        start.gr_disp_sel   = &gr_disp_sel;
-        error = R_VDC5_StartProcess( ch, vdc5_layer_id, &start );
-        if (error != VDC5_OK) {
-            drv_error = DRV_GRAPHICS_VDC5_ERR;
+        if( video_input_ch == DRV_VIDEO_INPUT_CHANNEL_0 ) {
+            vdc5_layer_id   = VDC5_LAYER_ID_0_WR;
+        } else if ( video_input_ch == DRV_VIDEO_INPUT_CHANNEL_1 ) {
+            vdc5_layer_id   = VDC5_LAYER_ID_1_WR;
+        } else {
+            drv_error = DRV_GRAPHICS_LAYER_ERR;
+        }
+
+        if( drv_error == DRV_GRAPHICS_OK ) {
+            /* Start process */
+            gr_disp_sel         = VDC5_DISPSEL_CURRENT;    /* CURRENT fixed for weave input mode */
+            start.gr_disp_sel   = &gr_disp_sel;
+            error = R_VDC5_StartProcess( ch, vdc5_layer_id, &start );
+            if (error != VDC5_OK) {
+                drv_error = DRV_GRAPHICS_VDC5_ERR;
+            }
         }
     }
     return drv_error;
@@ -743,27 +832,32 @@ drv_graphics_error_t DRV_Video_Start ( drv_video_input_channel_t video_input_ch 
 drv_graphics_error_t DRV_Video_Stop ( drv_video_input_channel_t video_input_ch )
 {
     drv_graphics_error_t    drv_error   = DRV_GRAPHICS_OK;
-    vdc5_channel_t          ch          = VDC5_CHANNEL_0;
-    vdc5_error_t            error;
-    vdc5_layer_id_t         vdc5_layer_id;
 
-    switch (video_input_ch) {
-        case DRV_VIDEO_INPUT_CHANNEL_0:
-            vdc5_layer_id   = VDC5_LAYER_ID_0_WR;
-            break;
-        case DRV_VIDEO_INPUT_CHANNEL_1:
-            vdc5_layer_id   = VDC5_LAYER_ID_1_WR;
-            break;
-        default:
-            drv_error = DRV_GRAPHICS_LAYER_ERR;
-            break;
-    }
+    if (_drv_video_input_sel == DRV_INPUT_SEL_CEU) {
+        R_CEU_Stop();
+    } else {
+        vdc5_channel_t          ch          = VDC5_CHANNEL_0;
+        vdc5_error_t            error;
+        vdc5_layer_id_t         vdc5_layer_id;
 
-    if( drv_error == DRV_GRAPHICS_OK ) {
-        /* Stop process */
-        error = R_VDC5_StopProcess ( ch, vdc5_layer_id );
-        if (error != VDC5_OK) {
-            drv_error = DRV_GRAPHICS_VDC5_ERR;
+        switch (video_input_ch) {
+            case DRV_VIDEO_INPUT_CHANNEL_0:
+                vdc5_layer_id   = VDC5_LAYER_ID_0_WR;
+                break;
+            case DRV_VIDEO_INPUT_CHANNEL_1:
+                vdc5_layer_id   = VDC5_LAYER_ID_1_WR;
+                break;
+            default:
+                drv_error = DRV_GRAPHICS_LAYER_ERR;
+                break;
+        }
+
+        if( drv_error == DRV_GRAPHICS_OK ) {
+            /* Stop process */
+            error = R_VDC5_StopProcess ( ch, vdc5_layer_id );
+            if (error != VDC5_OK) {
+                drv_error = DRV_GRAPHICS_VDC5_ERR;
+            }
         }
     }
     return drv_error;
@@ -1153,6 +1247,158 @@ drv_graphics_error_t DRV_Video_Write_Setting_Digital (
     }
     return drv_error;
 }   /* End of function DRV_Video_Write_Setting_Digital() */
+
+drv_graphics_error_t DRV_Video_Write_Setting_Ceu (
+    void                          * framebuff,
+    uint32_t                        fb_stride,
+    drv_video_format_t              video_format,
+    drv_wr_rd_swa_t                 wr_rd_swa,
+    uint16_t                        video_write_buff_vw,
+    uint16_t                        video_write_buff_hw,
+    drv_video_ext_in_config_t     * drv_video_ext_in_config)
+{
+    drv_graphics_error_t        drv_error   = DRV_GRAPHICS_OK;
+    ceu_cap_rect_t              ceu_cap;
+    ceu_config_t                ceu_config;
+
+    if (video_format != DRV_VIDEO_FORMAT_YCBCR422) {
+        return DRV_GRAPHICS_FORMAT_ERR;
+    }
+
+    /* CEU mode */
+    ceu_config.jpg = CEU_DATA_SYNC_MODE;
+
+    /* Capture timing */
+    if (drv_video_ext_in_config->cap_hs_pos <= 100) {
+        ceu_cap.hofst = drv_video_ext_in_config->cap_hs_pos * 4;
+    } else {
+        ceu_cap.hofst = 0;
+    }
+    if (drv_video_ext_in_config->cap_vs_pos >= 10) {
+        ceu_cap.vofst = drv_video_ext_in_config->cap_vs_pos * 4;
+    } else {
+        ceu_cap.vofst = 0;
+    }
+    ceu_cap.hwdth = video_write_buff_hw * 2;
+    ceu_cap.vwdth = video_write_buff_vw;
+    ceu_config.cap = &ceu_cap;
+
+    /* Capture Filter Size (Set this param if Image capture mode.) */
+    ceu_config.clp = NULL;
+
+    /* Data bus */
+    ceu_config.dtif = CEU_8BIT_DATA_PINS; /* Data pin 8bit  */
+
+    /* Write Data Swap */
+    switch (wr_rd_swa) {
+        default:
+        case DRV_WR_RD_WRSWA_NON:               /* Not swapped: 1-2-3-4-5-6-7-8 */
+            ceu_config.cols = CEU_OFF;
+            ceu_config.cows = CEU_OFF;
+            ceu_config.cobs = CEU_OFF;
+            break;
+        case DRV_WR_RD_WRSWA_8BIT:              /* Swapped in 8-bit units: 2-1-4-3-6-5-8-7 */
+            ceu_config.cols = CEU_OFF;
+            ceu_config.cows = CEU_OFF;
+            ceu_config.cobs = CEU_ON;
+            break;
+        case DRV_WR_RD_WRSWA_16BIT:             /* Swapped in 16-bit units: 3-4-1-2-7-8-5-6 */
+            ceu_config.cols = CEU_OFF;
+            ceu_config.cows = CEU_ON;
+            ceu_config.cobs = CEU_OFF;
+            break;
+        case DRV_WR_RD_WRSWA_16_8BIT:           /* Swapped in 16-bit units + 8-bit units: 4-3-2-1-8-7-6-5 */
+            ceu_config.cols = CEU_OFF;
+            ceu_config.cows = CEU_ON;
+            ceu_config.cobs = CEU_ON;
+            break;
+        case DRV_WR_RD_WRSWA_32BIT:             /* Swapped in 32-bit units: 5-6-7-8-1-2-3-4 */
+            ceu_config.cols = CEU_ON;
+            ceu_config.cows = CEU_OFF;
+            ceu_config.cobs = CEU_OFF;
+            break;
+        case DRV_WR_RD_WRSWA_32_8BIT:           /* Swapped in 32-bit units + 8-bit units: 6-5-8-7-2-1-4-3 */
+            ceu_config.cols = CEU_ON;
+            ceu_config.cows = CEU_OFF;
+            ceu_config.cobs = CEU_ON;
+            break;
+        case DRV_WR_RD_WRSWA_32_16BIT:          /* Swapped in 32-bit units + 16-bit units: 7-8-5-6-3-4-1-2 */
+            ceu_config.cols = CEU_ON;
+            ceu_config.cows = CEU_ON;
+            ceu_config.cobs = CEU_OFF;
+            break;
+        case DRV_WR_RD_WRSWA_32_16_8BIT:        /* Swapped in 32-bit units + 16-bit units + 8-bit units: 8-7-6-5-4-3-2-1 */
+            ceu_config.cols = CEU_ON;
+            ceu_config.cows = CEU_ON;
+            ceu_config.cobs = CEU_ON;
+            break;
+    }
+
+    /* input order */
+    switch (drv_video_ext_in_config->inp_h_pos) {
+        default:
+        case DRV_EXTIN_H_POS_CBYCRY:        /*!< Cb/Y/Cr/Y (BT656/601), Cb/Cr (YCbCr422) */
+            ceu_config.dtary = CEU_CB0_Y0_CR0_Y1;
+            if (ceu_config.cows == CEU_ON) {
+                ceu_config.cows = CEU_OFF;
+            } else {
+                ceu_config.cows = CEU_ON;
+            }
+            break;
+        case DRV_EXTIN_H_POS_YCRYCB:        /*!< Y/Cr/Y/Cb (BT656/601), setting prohibited (YCbCr422) */
+            ceu_config.dtary = CEU_Y0_CR0_Y1_CB0;
+            if (ceu_config.cobs == CEU_ON) {
+                ceu_config.cobs = CEU_OFF;
+            } else {
+                ceu_config.cobs = CEU_ON;
+            }
+            if (ceu_config.cows == CEU_ON) {
+                ceu_config.cows = CEU_OFF;
+            } else {
+                ceu_config.cows = CEU_ON;
+            }
+            break;
+        case DRV_EXTIN_H_POS_CRYCBY:        /*!< Cr/Y/Cb/Y (BT656/601), setting prohibited (YCbCr422) */
+            ceu_config.dtary = CEU_CR0_Y0_CB0_Y1;
+            break;
+        case DRV_EXTIN_H_POS_YCBYCR:        /*!< Y/Cb/Y/Cr (BT656/601), Cr/Cb (YCbCr422) */
+            ceu_config.dtary = CEU_Y0_CB0_Y1_CR0;
+            if (ceu_config.cobs == CEU_ON) {
+                ceu_config.cobs = CEU_OFF;
+            } else {
+                ceu_config.cobs = CEU_ON;
+            }
+            break;
+    }
+
+    /* Signal polarity */
+    /* Hsync */
+    if (drv_video_ext_in_config->inp_hs_inv == DRV_SIG_POL_NOT_INVERTED) {
+        ceu_config.hdpol = CEU_HIGH_ACTIVE;
+    } else {
+        ceu_config.hdpol = CEU_LOW_ACTIVE;
+    }
+    if (drv_video_ext_in_config->cap_hs_pos >= 100) {
+        /* inverted */
+        if (ceu_config.hdpol == CEU_HIGH_ACTIVE) {
+            ceu_config.hdpol = CEU_LOW_ACTIVE;
+        } else {
+            ceu_config.hdpol = CEU_HIGH_ACTIVE;
+        }
+    }
+
+    /* Vsync */
+    if (drv_video_ext_in_config->inp_vs_inv == DRV_SIG_POL_NOT_INVERTED) {
+        ceu_config.vdpol = CEU_HIGH_ACTIVE;
+    } else {
+        ceu_config.vdpol = CEU_LOW_ACTIVE;
+    }
+
+    R_CEU_Open(&ceu_config);
+    R_CEU_Execute_Setting(framebuff, (void *)NULL, fb_stride, CEU_ON);
+
+    return drv_error;
+}
 
 /**************************************************************************//**
  * @brief       Video surface write buffer change process

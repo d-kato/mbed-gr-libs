@@ -205,7 +205,8 @@ public:
      */
     typedef enum {
         INPUT_SEL_VDEC     = 0,            /*!< Video decoder output signals */
-        INPUT_SEL_EXT      = 1             /*!< Signals supplied via the external input pins */
+        INPUT_SEL_EXT      = 1,            /*!< Signals supplied via the external input pins */
+        INPUT_SEL_CEU      = 2             /*!< Signals supplied via the CEU input pins */
     } video_input_sel_t;
 
     /*! @enum video_extin_format_t
@@ -347,6 +348,13 @@ public:
      *  @retval       Error code
      */
     graphics_error_t Graphics_Dvinput_Port_Init( PinName *pin, unsigned int pin_count );
+
+    /** CEU input port initialization processing
+     *  @param[in]    pin                 : Pin assign for CEU input port
+     *  @param[in]    pin_count           : Total number of pin assign
+     *  @retval       Error code
+     */
+    graphics_error_t Graphics_Ceu_Port_Init( PinName *pin, unsigned int pin_count );
 
     /**  Interrupt callback setup
      *  This function performs the following processing:

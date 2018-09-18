@@ -17,6 +17,11 @@
   #define SHIELD_AUDIO_CAMERA         1
   #define SHIELD_WIRELESS_CAMERA      2
 
+  // camera module
+  #define MODULE_VDC                  0
+  #define MODULE_CEU                  1
+
+  #define CAMERA_MODULE               MODULE_VDC
 
   #ifndef MBED_CONF_APP_SHIELD_TYPE
     #if defined(TARGET_RZ_A1H)
@@ -31,10 +36,10 @@
   #endif
 
   #ifndef MBED_CONF_APP_CAMERA_TYPE
-    #if defined(TARGET_RZ_A1H)
-      #define MBED_CONF_APP_CAMERA_TYPE    CAMERA_MT9V111
-    #elif defined(TARGET_GR_LYCHEE)
+    #if defined(TARGET_GR_LYCHEE)
       #define MBED_CONF_APP_CAMERA_TYPE    CAMERA_OV7725
+    #else
+      #define MBED_CONF_APP_CAMERA_TYPE    CAMERA_MT9V111
     #endif
   #endif
 
@@ -72,10 +77,10 @@
     #endif
   #endif
 
-  #if defined(TARGET_RZ_A1H) && ((MBED_CONF_APP_LCD_TYPE & 0xFF00) != 0x0000)
+  #if defined(TARGET_RZ_A1H) && ((MBED_CONF_APP_LCD_TYPE & 0xF000) != 0x0000)
     #error "MBED_CONF_APP_LCD_TYPE is not supported in this target."
   #endif
-  #if defined(TARGET_GR_LYCHEE) && ((MBED_CONF_APP_LCD_TYPE & 0xFF00) != 0x1000)
+  #if defined(TARGET_GR_LYCHEE) && ((MBED_CONF_APP_LCD_TYPE & 0xF000) != 0x1000)
     #error "MBED_CONF_APP_LCD_TYPE is not supported in this target."
   #endif
 

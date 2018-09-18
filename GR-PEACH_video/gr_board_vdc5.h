@@ -37,7 +37,13 @@ Includes   <System Includes> , "Project Includes"
 #include    <stdlib.h>
 
 #include    "r_typedefs.h"
+#if defined(TARGET_RZ_A1XX)
 #include    "r_vdc5.h"
+#else
+#include    "r_vdc.h"
+#define vdc5_irq_handler      vdc_irq_handler
+#define vdc5_int_type_t       vdc_int_type_t
+#endif
 #include    "pinmap.h"
 
 #ifdef  __cplusplus
@@ -175,7 +181,8 @@ typedef enum {
 /* External Input select */
 typedef enum {
     DRV_INPUT_SEL_VDEC     = 0,            /*!< Video decoder output signals */
-    DRV_INPUT_SEL_EXT      = 1             /*!< Signals supplied via the external input pins */
+    DRV_INPUT_SEL_EXT      = 1,            /*!< Signals supplied via the external input pins */
+    DRV_INPUT_SEL_CEU      = 2             /*!< Signals supplied via the CEU input pins */
 } drv_video_input_sel_t;
 
 /* External input format select  */
@@ -258,6 +265,10 @@ typedef struct {
     drv_sig_pol_t                inp_hs_inv;    /*!< External Input Hsync Signal DV_HSYNC Inversion Control      */
     drv_extin_input_line_t       inp_f525_625;  /*!< Number of lines for BT.656 external input */
     drv_extin_h_pos_t            inp_h_pos;     /*!< Y/Cb/Y/Cr data string start timing to Hsync reference */
+    unsigned short               cap_vs_pos;    /*!< Capture start position from Vsync */
+    unsigned short               cap_hs_pos;    /*!< Capture start position form Hsync */
+    unsigned short               cap_width;     /*!< Capture width  */
+    unsigned short               cap_height;    /*!< Capture height should be a multiple of 4.*/
 } drv_video_ext_in_config_t;
 
 /******************************************************************************
@@ -273,6 +284,7 @@ drv_graphics_error_t DRV_Graphics_Video_init( drv_video_input_sel_t drv_video_in
 drv_graphics_error_t DRV_Graphics_Lcd_Port_Init( PinName *pin, uint32_t pin_count );
 drv_graphics_error_t DRV_Graphics_Lvds_Port_Init( PinName *pin, uint32_t pin_count );
 drv_graphics_error_t DRV_Graphics_Dvinput_Port_Init( PinName *pin, uint32_t pin_count );
+drv_graphics_error_t DRV_Graphics_CEU_Port_Init( PinName *pin, uint32_t pin_count );
 
 drv_graphics_error_t DRV_Graphics_Irq_Handler_Set( vdc5_int_type_t irq, uint16_t num, void (* callback)(vdc5_int_type_t)  );
 
@@ -312,6 +324,15 @@ drv_graphics_error_t DRV_Video_Write_Setting_Digital (
     uint16_t                        video_write_buff_vw,
     uint16_t                        video_write_buff_hw,
     drv_rect_t                    * cap_area );
+
+drv_graphics_error_t DRV_Video_Write_Setting_Ceu (
+    void                          * framebuff,
+    uint32_t                        fb_stride,
+    drv_video_format_t              video_format,
+    drv_wr_rd_swa_t                 wr_rd_swa,
+    uint16_t                        video_write_buff_vw,
+    uint16_t                        video_write_buff_hw,
+    drv_video_ext_in_config_t     * drv_video_ext_in_config);
 
 drv_graphics_error_t DRV_Video_Write_Change (
     drv_video_input_channel_t    video_input_ch,
