@@ -5,7 +5,7 @@
 #include "mbed.h"
 #include "camera_config.h"
 
-class MT9V111_config {
+class MT9V111_config : public camera_config {
 
 public:
 

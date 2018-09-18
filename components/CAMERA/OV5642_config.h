@@ -12,7 +12,7 @@
 
 #define OV5642_SIZE SIZE_640x480
 
-class OV5642_config {
+class OV5642_config : public camera_config {
 
 public:
 
@@ -138,7 +138,9 @@ public:
         I2C mI2c_(I2C_SDA, I2C_SCL);
         mI2c_.frequency(150000);
 
-        mI2c_.write(0x78, sw_reset_cmd, 3);
+        if (mI2c_.write(0x78, sw_reset_cmd, 3) != 0) {
+            return false;
+        }
         Thread::wait(1);
 
         for (uint32_t i = 0; i < (sizeof(OV5642_InitRegTable) / 3) ; i++) {

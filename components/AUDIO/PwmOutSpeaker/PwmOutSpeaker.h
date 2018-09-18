@@ -32,6 +32,8 @@ public:
      */
     PwmOutSpeaker(PinName pwm_l, PinName pwm_r);
 
+    virtual ~PwmOutSpeaker() {}
+
     virtual void power(bool type = true) {
         return;
     }

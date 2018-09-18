@@ -12,7 +12,7 @@
 #endif
 
 /* LCD Parameter */
-#define LCD_INPUT_CLOCK                     (66.67)
+#define LCD_INPUT_CLOCK                     (66.67)  /* not use */
 #if ( LCD_SIZE == SVGA )
 #define LCD_OUTPUT_CLOCK                    (40.0003)
 #define LCD_PIXEL_WIDTH                     (800u)

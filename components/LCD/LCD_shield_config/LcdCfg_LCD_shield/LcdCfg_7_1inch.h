@@ -5,7 +5,7 @@
 #include "DisplayBace.h"
 
 /* LCD Parameter */
-#define LCD_INPUT_CLOCK                     (66.67)
+#define LCD_INPUT_CLOCK                     (66.67)  /* not use */
 #define LCD_OUTPUT_CLOCK                    (33.26)
 #define LCD_PIXEL_WIDTH                     (800u)
 #define LCD_PIXEL_HEIGHT                    (480u)
