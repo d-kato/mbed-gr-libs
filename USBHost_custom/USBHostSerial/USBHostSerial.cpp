@@ -273,7 +273,7 @@ void USBHostSerialPort::rxHandler() {
         if (bulk_in->getState() == USB_TYPE_IDLE) {
             for (int i = 0; i < len; i++) {
                 while (p_circ_buf->isFull()) {
-                    Thread::wait(1);
+                    ThisThread::sleep_for(1);
                 }
                 p_circ_buf->queue(p_buf[i]);
             }
@@ -331,7 +331,7 @@ int USBHostSerialPort::_getc() {
         if (dev_connected == false) {
             return -1;
         }
-        Thread::wait(1);
+        ThisThread::sleep_for(1);
     }
     p_circ_buf->dequeue(&c);
     return c;
@@ -366,7 +366,7 @@ int USBHostSerialPort::readBuf(char* b, int s, int timeout) {
                     if (timeout > 0) {
                         timeout--;
                     }
-                    Thread::wait(1);
+                    ThisThread::sleep_for(1);
                 }
             }
             if (!p_circ_buf->dequeue((uint8_t *)&b[i])) {

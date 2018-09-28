@@ -322,7 +322,7 @@ int USBHostMSD::init() {
     getMaxLun();
 
     for (i = 0; i < timeout; i++) {
-        Thread::wait(100);
+        ThisThread::sleep_for(100);
         if (!testUnitReady())
             break;
     }

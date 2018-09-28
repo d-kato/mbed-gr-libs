@@ -85,7 +85,7 @@ public:
 
     storage_type_t wait_connect(storage_type_t type = STORAGE_NON) {
         while (connect(type) == STORAGE_NON) {
-            Thread::wait(100);
+            ThisThread::sleep_for(100);
         }
         return storage_type;
     }

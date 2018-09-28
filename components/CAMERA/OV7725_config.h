@@ -89,7 +89,7 @@ public:
         if (mI2c_.write(0x42, sw_reset_cmd, 2) != 0) {
             return false;
         }
-        Thread::wait(1);
+        ThisThread::sleep_for(1);
 
         for (uint32_t i = 0; i < (sizeof(OV7725_InitRegTable) / 2) ; i++) {
             ret = mI2c_.write(0x42, OV7725_InitRegTable[i], 2);

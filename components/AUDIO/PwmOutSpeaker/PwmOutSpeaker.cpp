@@ -97,7 +97,7 @@ int PwmOutSpeaker::write(void * const p_data, uint32_t data_size, const rbsp_dat
         } else {
             _data_cnt = 0;
             while (((_bottom + 2) & MSK_RING_BUFF) == _top) {
-                Thread::wait(1);
+                ThisThread::sleep_for(1);
             }
             wk_vol_l = _speaker_vol_l;
             wk_ofs_l = (1.0f - wk_vol_l) / 2;

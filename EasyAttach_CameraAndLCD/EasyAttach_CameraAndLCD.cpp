@@ -29,7 +29,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     DigitalOut lcd_blon(P8_1);
     lcd_pwon = 0;
     lcd_blon = 0;
-    Thread::wait(100);
+    ThisThread::sleep_for(100);
     lcd_pwon = 1;
     lcd_blon = 1;
   #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0100) /* GR-PEACH RGB */
@@ -52,7 +52,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     DigitalOut lcd_pwon(P5_12);
     lcd_pwon = 0;
     lcd_cntrst.period_us(500);
-    Thread::wait(100);
+    ThisThread::sleep_for(100);
     lcd_pwon = 1;
   #endif
     return &LcdCfgTbl_LCD_shield;
@@ -89,15 +89,15 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
    #if MBED_CONF_APP_SHIELD_TYPE == SHIELD_AUDIO_CAMERA
     DigitalOut pwdn(P3_12);
     pwdn = 0;
-    Thread::wait(1 + 1);
+    ThisThread::sleep_for(1 + 1);
    #elif MBED_CONF_APP_SHIELD_TYPE == SHIELD_WIRELESS_CAMERA
     DigitalOut pwdn(P3_15);
     DigitalOut rstb(P3_14);
     pwdn = 0;
     rstb = 0;
-    Thread::wait(10 + 1);
+    ThisThread::sleep_for(10 + 1);
     rstb = 1;
-    Thread::wait(1 + 1);
+    ThisThread::sleep_for(1 + 1);
    #endif
   #elif defined(TARGET_GR_LYCHEE)
     PinName cmos_camera_pin[11] = {
@@ -113,9 +113,9 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
 
     pwdn = 0;
     rstb = 0;
-    Thread::wait(10 + 1);
+    ThisThread::sleep_for(10 + 1);
     rstb = 1;
-    Thread::wait(1 + 1);
+    ThisThread::sleep_for(1 + 1);
   #endif
 
     /* camera input port setting */

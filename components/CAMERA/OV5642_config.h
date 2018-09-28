@@ -141,7 +141,7 @@ public:
         if (mI2c_.write(0x78, sw_reset_cmd, 3) != 0) {
             return false;
         }
-        Thread::wait(1);
+        ThisThread::sleep_for(1);
 
         for (uint32_t i = 0; i < (sizeof(OV5642_InitRegTable) / 3) ; i++) {
             ret = mI2c_.write(0x78, OV5642_InitRegTable[i], 3);
