@@ -8,7 +8,7 @@ void DisplayApp::display_app_process() {
     int pos_wk;
 
     while (!PcApp.configured()) {
-        Thread::wait(100);
+        ThisThread::sleep_for(100);
     }
 
     while (1) {
@@ -80,7 +80,7 @@ void DisplayApp::display_app_process() {
                 pos_seq = POS_SEQ_INIT;
             }
         } else {
-            Thread::wait(10);
+            ThisThread::sleep_for(10);
         }
     }
 }

@@ -163,7 +163,7 @@ bool EasyPlayback::play(const char* filename)
 
         while (true) {
             while ((_pause) && (!_skip)) {
-                Thread::wait(100);
+                ThisThread::sleep_for(100);
             }
             if (_skip) {
                 break;
@@ -218,7 +218,7 @@ bool EasyPlayback::play(const char* filename)
                 }
             }
         }
-        Thread::wait(500);
+        ThisThread::sleep_for(500);
         ret = true;
     }
     delete decoder;
