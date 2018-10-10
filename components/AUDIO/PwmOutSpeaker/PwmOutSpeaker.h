@@ -32,7 +32,7 @@ public:
      */
     PwmOutSpeaker(PinName pwm_l, PinName pwm_r);
 
-    virtual ~PwmOutSpeaker() {}
+    virtual ~PwmOutSpeaker();
 
     virtual void power(bool type = true) {
         return;
@@ -83,8 +83,8 @@ private:
     #define WRITE_BUFF_SIZE    (1024 * 4)
     #define MSK_RING_BUFF      (WRITE_BUFF_SIZE - 1)
 
-    PwmOut   _speaker_l;
-    PwmOut   _speaker_r;
+    PwmOut  *_speaker_l;
+    PwmOut  *_speaker_r;
     Ticker   _timer;
     int      _length;
     int      _hz_multi;
@@ -95,8 +95,11 @@ private:
     float    _speaker_vol_l;
     float    _speaker_vol_r;
     float    _pwm_duty_buf[WRITE_BUFF_SIZE];
+    Thread   _audioThread;
+    Semaphore _sound_out_req;
 
     void sound_out(void);
+    void audio_process();
 };
 
 #endif // PWMOUT_SPEAKER_H

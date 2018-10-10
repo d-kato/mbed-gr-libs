@@ -15,21 +15,31 @@
  */
 
 #include "PwmOutSpeaker.h"
-#if defined(TARGET_RZ_A1H) || defined(TARGET_VK_RZ_A1H) || defined(TARGET_GR_LYCHEE)
-#include "vfp_neon_push_pop.h"
-#else
-static void dummy_func(void) {}
-#define __vfp_neon_push    dummy_func
-#define __vfp_neon_pop     dummy_func
-#endif
 
-PwmOutSpeaker::PwmOutSpeaker(PinName pwm_l, PinName pwm_r) : _speaker_l(pwm_l), _speaker_r(pwm_r) {
+PwmOutSpeaker::PwmOutSpeaker(PinName pwm_l, PinName pwm_r) : 
+ _speaker_l(NULL), _speaker_r(NULL), _audioThread(osPriorityHigh), _sound_out_req(0) {
     _bottom = 0;
     _top = 0;
     _playing = false;
+    if (pwm_l != NC) {
+        _speaker_l = new PwmOut(pwm_l);
+    }
+    if (pwm_r != NC) {
+        _speaker_r = new PwmOut(pwm_r);
+    }
+    _audioThread.start(callback(this, &PwmOutSpeaker::audio_process));
     outputVolume(1.0f, 1.0f);
     format(16);
     frequency(44100);
+}
+
+PwmOutSpeaker::~PwmOutSpeaker() {
+    if (_speaker_l != NULL) {
+        delete _speaker_l;
+    }
+    if (_speaker_r != NULL) {
+        delete _speaker_r;
+    }
 }
 
 bool PwmOutSpeaker::format(char length) {
@@ -65,11 +75,15 @@ bool PwmOutSpeaker::frequency(int hz) {
         default:
             return false;
     }
-    _speaker_l.write(0.5f);
-    _speaker_r.write(0.5f);
     _playing = false;
-    _speaker_l.period_us(10);  // 100kHz
-    _speaker_r.period_us(10);  // 100kHz
+    if (_speaker_l != NULL) {
+        _speaker_l->write(0.5f);
+        _speaker_l->period_us(10);  // 100kHz
+    }
+    if (_speaker_r != NULL) {
+        _speaker_r->write(0.5f);
+        _speaker_r->period_us(10);  // 100kHz
+    }
     wk_us = (int)(1000000.0f / hz * _hz_multi + 0.5f);
     _timer.attach_us(Callback<void()>(this, &PwmOutSpeaker::sound_out), wk_us);
     _data_cnt = 0;
@@ -99,6 +113,7 @@ int PwmOutSpeaker::write(void * const p_data, uint32_t data_size, const rbsp_dat
             while (((_bottom + 2) & MSK_RING_BUFF) == _top) {
                 ThisThread::sleep_for(1);
             }
+
             wk_vol_l = _speaker_vol_l;
             wk_ofs_l = (1.0f - wk_vol_l) / 2;
             wk_vol_r = _speaker_vol_r;
@@ -138,20 +153,32 @@ bool PwmOutSpeaker::outputVolume(float leftVolumeOut, float rightVolumeOut) {
 }
 
 void PwmOutSpeaker::sound_out(void) {
-    if (_top != _bottom) {
-        __vfp_neon_push();
-        _speaker_l.write(_pwm_duty_buf[_top + 0]);
-        _speaker_r.write(_pwm_duty_buf[_top + 1]);
-        __vfp_neon_pop();
-        _top = (_top + 2) & MSK_RING_BUFF;
-        _playing = true;
-    } else if (_playing) {
-        __vfp_neon_push();
-        _speaker_l.write(0.5f);
-        _speaker_r.write(0.5f);
-        __vfp_neon_pop();
-        _playing = false;
-    } else {
-        // do nothing
+    _sound_out_req.release();
+}
+
+void PwmOutSpeaker::audio_process() {
+    while (true) {
+        _sound_out_req.wait();
+        if (_top != _bottom) {
+            if (_speaker_l != NULL) {
+                _speaker_l->write(_pwm_duty_buf[_top + 0]);
+            }
+            if (_speaker_r != NULL) {
+                _speaker_r->write(_pwm_duty_buf[_top + 1]);
+            }
+            _top = (_top + 2) & MSK_RING_BUFF;
+            _playing = true;
+        } else if (_playing) {
+            if (_speaker_l != NULL) {
+                _speaker_l->write(0.5f);
+            }
+            if (_speaker_r != NULL) {
+                _speaker_r->write(0.5f);
+            }
+            _playing = false;
+        } else {
+            // do nothing
+        }
     }
 }
+
