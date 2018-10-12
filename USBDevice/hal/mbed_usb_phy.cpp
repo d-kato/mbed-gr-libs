@@ -18,6 +18,7 @@
 #include "usb_phy_api.h"
 #include "mbed_error.h"
 
+#if(0)
 #if !defined(DEVICE_USBDEVICE) || !DEVICE_USBDEVICE
 
 USBPhy *get_usb_phy()
@@ -26,4 +27,5 @@ USBPhy *get_usb_phy()
     return NULL;
 }
 
+#endif
 #endif

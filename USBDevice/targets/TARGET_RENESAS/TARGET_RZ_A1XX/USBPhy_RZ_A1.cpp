@@ -15,7 +15,7 @@
  */
 
 
-#if defined(DEVICE_USBDEVICE) && DEVICE_USBDEVICE
+//#if defined(DEVICE_USBDEVICE) && DEVICE_USBDEVICE
 
 extern "C"
 {
@@ -1299,4 +1299,4 @@ void USBPhyHw::detach_usb(void)
     USB_MX.NRDYENB = 0;
     USB_MX.BEMPENB = 0;
 }
-#endif
+//#endif
