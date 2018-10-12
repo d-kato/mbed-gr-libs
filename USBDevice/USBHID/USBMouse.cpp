@@ -1,45 +1,93 @@
-/* Copyright (c) 2010-2011 mbed.org, MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-* and associated documentation files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or
-* substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+/* mbed Microcontroller Library
+ * Copyright (c) 2018-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "stdint.h"
 #include "USBMouse.h"
+#include "PlatformMutex.h"
+#include "usb_phy_api.h"
 
-bool USBMouse::update(int16_t x, int16_t y, uint8_t button, int8_t z) {
-    switch (mouse_type) {
+
+USBMouse::USBMouse(bool connect_blocking, MOUSE_TYPE mouse_type, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+    USBHID(get_usb_phy(), 0, 0, vendor_id, product_id, product_release)
+{
+    _button = 0;
+    _mouse_type = mouse_type;
+
+    if (connect_blocking) {
+        USBDevice::connect();
+        wait_ready();
+    } else {
+        init();
+    }
+}
+
+USBMouse::USBMouse(USBPhy *phy, MOUSE_TYPE mouse_type, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+    USBHID(get_usb_phy(), 0, 0, vendor_id, product_id, product_release)
+{
+    _button = 0;
+    _mouse_type = mouse_type;
+}
+
+USBMouse::~USBMouse()
+{
+    deinit();
+}
+
+bool USBMouse::update(int16_t x, int16_t y, uint8_t button, int8_t z)
+{
+    bool ret;
+    switch (_mouse_type) {
         case REL_MOUSE:
+            _mutex.lock();
+
             while (x > 127) {
-                if (!mouseSend(127, 0, button, z)) return false;
+                if (!mouse_send(127, 0, button, z)) {
+                    _mutex.unlock();
+                    return false;
+                }
                 x = x - 127;
             }
             while (x < -128) {
-                if (!mouseSend(-128, 0, button, z)) return false;
+                if (!mouse_send(-128, 0, button, z)) {
+                    _mutex.unlock();
+                    return false;
+                }
                 x = x + 128;
             }
             while (y > 127) {
-                if (!mouseSend(0, 127, button, z)) return false;
+                if (!mouse_send(0, 127, button, z)) {
+                    _mutex.unlock();
+                    return false;
+                }
                 y = y - 127;
             }
             while (y < -128) {
-                if (!mouseSend(0, -128, button, z)) return false;
+                if (!mouse_send(0, -128, button, z)) {
+                    _mutex.unlock();
+                    return false;
+                }
                 y = y + 128;
             }
-            return mouseSend(x, y, button, z);
+            ret = mouse_send(x, y, button, z);
+
+            _mutex.unlock();
+            return ret;
         case ABS_MOUSE:
+            _mutex.lock();
+
             HID_REPORT report;
 
             report.data[0] = x & 0xff;
@@ -51,13 +99,19 @@ bool USBMouse::update(int16_t x, int16_t y, uint8_t button, int8_t z) {
 
             report.length = 6;
 
-            return send(&report);
+            ret = send(&report);
+
+            _mutex.unlock();
+            return ret;
         default:
             return false;
     }
 }
 
-bool USBMouse::mouseSend(int8_t x, int8_t y, uint8_t buttons, int8_t z) {
+bool USBMouse::mouse_send(int8_t x, int8_t y, uint8_t buttons, int8_t z)
+{
+    _mutex.lock();
+
     HID_REPORT report;
     report.data[0] = buttons & 0x07;
     report.data[1] = x;
@@ -66,47 +120,91 @@ bool USBMouse::mouseSend(int8_t x, int8_t y, uint8_t buttons, int8_t z) {
 
     report.length = 4;
 
-    return send(&report);
+    bool ret = send(&report);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouse::move(int16_t x, int16_t y) {
-    return update(x, y, button, 0);
+bool USBMouse::move(int16_t x, int16_t y)
+{
+    _mutex.lock();
+
+    bool ret = update(x, y, _button, 0);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouse::scroll(int8_t z) {
-    return update(0, 0, button, z);
+bool USBMouse::scroll(int8_t z)
+{
+    _mutex.lock();
+
+    bool ret = update(0, 0, _button, z);
+
+    _mutex.unlock();
+    return ret;
 }
 
 
-bool USBMouse::doubleClick() {
-    if (!click(MOUSE_LEFT))
+bool USBMouse::double_click()
+{
+    _mutex.lock();
+
+    if (!click(MOUSE_LEFT)) {
+        _mutex.unlock();
         return false;
+    }
     wait(0.1);
-    return click(MOUSE_LEFT);
+    bool ret = click(MOUSE_LEFT);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouse::click(uint8_t button) {
-    if (!update(0, 0, button, 0))
+bool USBMouse::click(uint8_t button)
+{
+    _mutex.lock();
+
+    if (!update(0, 0, button, 0)) {
+        _mutex.unlock();
         return false;
+    }
     wait(0.01);
-    return update(0, 0, 0, 0);
+    bool ret = update(0, 0, 0, 0);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouse::press(uint8_t button_) {
-    button = button_ & 0x07;
-    return update(0, 0, button, 0);
+bool USBMouse::press(uint8_t button)
+{
+    _mutex.lock();
+
+    _button = button & 0x07;
+    bool ret = update(0, 0, _button, 0);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouse::release(uint8_t button_) {
-    button = (button & (~button_)) & 0x07;
-    return update(0, 0, button, 0);
+bool USBMouse::release(uint8_t button)
+{
+    _mutex.lock();
+
+    _button = (_button & (~button)) & 0x07;
+    bool ret = update(0, 0, _button, 0);
+
+    _mutex.unlock();
+    return ret;
 }
 
 
-uint8_t * USBMouse::reportDesc() {
+const uint8_t *USBMouse::report_desc()
+{
 
-    if (mouse_type == REL_MOUSE) {
-        static uint8_t reportDescriptor[] = {
+    if (_mouse_type == REL_MOUSE) {
+        static const uint8_t report_descriptor[] = {
             USAGE_PAGE(1),      0x01,       // Genric Desktop
             USAGE(1),           0x02,       // Mouse
             COLLECTION(1),      0x01,       // Application
@@ -138,10 +236,10 @@ uint8_t * USBMouse::reportDesc() {
             END_COLLECTION(0),
             END_COLLECTION(0),
         };
-        reportLength = sizeof(reportDescriptor);
-        return reportDescriptor;
-    } else if (mouse_type == ABS_MOUSE) {
-        static uint8_t reportDescriptor[] = {
+        reportLength = sizeof(report_descriptor);
+        return report_descriptor;
+    } else if (_mouse_type == ABS_MOUSE) {
+        static const uint8_t report_descriptor[] = {
             USAGE_PAGE(1), 0x01,           // Generic Desktop
             USAGE(1), 0x02,                // Mouse
             COLLECTION(1), 0x01,           // Application
@@ -180,8 +278,8 @@ uint8_t * USBMouse::reportDesc() {
             END_COLLECTION(0),
             END_COLLECTION(0)
         };
-        reportLength = sizeof(reportDescriptor);
-        return reportDescriptor;
+        reportLength = sizeof(report_descriptor);
+        return report_descriptor;
     }
     return NULL;
 }
@@ -192,8 +290,12 @@ uint8_t * USBMouse::reportDesc() {
                                + (1 * HID_DESCRIPTOR_LENGTH) \
                                + (2 * ENDPOINT_DESCRIPTOR_LENGTH))
 
-uint8_t * USBMouse::configurationDesc() {
-    const uint8_t config_descriptor_temp[41] = {
+const uint8_t *USBMouse::configuration_desc(uint8_t index)
+{
+    if (index != 0) {
+        return NULL;
+    }
+    uint8_t configuration_descriptor_temp[] = {
         CONFIGURATION_DESCRIPTOR_LENGTH,    // bLength
         CONFIGURATION_DESCRIPTOR,           // bDescriptorType
         LSB(TOTAL_DESCRIPTOR_LENGTH),       // wTotalLength (LSB)
@@ -221,26 +323,26 @@ uint8_t * USBMouse::configurationDesc() {
         0x00,                               // bCountryCode
         0x01,                               // bNumDescriptors
         REPORT_DESCRIPTOR,                  // bDescriptorType
-        (uint8_t)(LSB(reportDescLength())), // wDescriptorLength (LSB)
-        (uint8_t)(MSB(reportDescLength())), // wDescriptorLength (MSB)
+        (uint8_t)(LSB(report_desc_length())), // wDescriptorLength (LSB)
+        (uint8_t)(MSB(report_desc_length())), // wDescriptorLength (MSB)
 
         ENDPOINT_DESCRIPTOR_LENGTH,         // bLength
         ENDPOINT_DESCRIPTOR,                // bDescriptorType
-        PHY_TO_DESC(EPINT_IN),              // bEndpointAddress
+        _int_in,                            // bEndpointAddress
         E_INTERRUPT,                        // bmAttributes
-        LSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (LSB)
-        MSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (MSB)
+        LSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (LSB)
+        MSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (MSB)
         1,                                  // bInterval (milliseconds)
 
         ENDPOINT_DESCRIPTOR_LENGTH,         // bLength
         ENDPOINT_DESCRIPTOR,                // bDescriptorType
-        PHY_TO_DESC(EPINT_OUT),             // bEndpointAddress
+        _int_out,                           // bEndpointAddress
         E_INTERRUPT,                        // bmAttributes
-        LSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (LSB)
-        MSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (MSB)
+        LSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (LSB)
+        MSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (MSB)
         1,                                  // bInterval (milliseconds)
     };
-    MBED_ASSERT(sizeof(config_descriptor_temp) == sizeof(_config_descriptor));
-    memcpy(_config_descriptor, config_descriptor_temp, sizeof(_config_descriptor));
-    return _config_descriptor;
+    MBED_ASSERT(sizeof(configuration_descriptor_temp) == sizeof(_configuration_descriptor));
+    memcpy(_configuration_descriptor, configuration_descriptor_temp, sizeof(_configuration_descriptor));
+    return _configuration_descriptor;
 }

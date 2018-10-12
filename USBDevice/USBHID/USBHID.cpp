@@ -1,80 +1,288 @@
-/* Copyright (c) 2010-2011 mbed.org, MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-* and associated documentation files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or
-* substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+/* mbed Microcontroller Library
+ * Copyright (c) 2018-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "stdint.h"
-#include "USBHAL.h"
 #include "USBHID.h"
+#include "EndpointResolver.h"
+#include "usb_phy_api.h"
 
+class USBHID::AsyncSend: public AsyncOp {
+public:
+    AsyncSend(USBHID *hid, const HID_REPORT *report): hid(hid), report(report), result(false)
+    {
 
-USBHID::USBHID(uint8_t output_report_length, uint8_t input_report_length, uint16_t vendor_id, uint16_t product_id, uint16_t product_release, bool connect): USBDevice(vendor_id, product_id, product_release)
-{
-    output_length = output_report_length;
-    input_length = input_report_length;
-    if(connect) {
-        USBDevice::connect();
     }
-}
 
+    virtual ~AsyncSend()
+    {
 
-bool USBHID::send(HID_REPORT *report)
+    }
+
+    virtual bool process()
+    {
+        if (!hid->configured()) {
+            result = false;
+            return true;
+        }
+
+        if (hid->send_nb(report)) {
+            result = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    USBHID *hid;
+    const HID_REPORT *report;
+    bool result;
+};
+
+class USBHID::AsyncRead: public AsyncOp {
+public:
+    AsyncRead(USBHID *hid, HID_REPORT *report): hid(hid), report(report), result(false)
+    {
+
+    }
+
+    virtual ~AsyncRead()
+    {
+
+    }
+
+    virtual bool process()
+    {
+        if (!hid->configured()) {
+            result = false;
+            return true;
+        }
+
+        if (hid->read_nb(report)) {
+            result = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    USBHID *hid;
+    HID_REPORT *report;
+    bool result;
+};
+
+class USBHID::AsyncWait: public AsyncOp {
+public:
+    AsyncWait(USBHID *hid): hid(hid)
+    {
+
+    }
+
+    virtual ~AsyncWait()
+    {
+
+    }
+
+    virtual bool process()
+    {
+        if (hid->configured()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    USBHID *hid;
+};
+
+USBHID::USBHID(bool connect_blocking, uint8_t output_report_length, uint8_t input_report_length, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
+    : USBDevice(get_usb_phy(), vendor_id, product_id, product_release)
 {
-    return write(EPINT_IN, report->data, report->length, MAX_HID_REPORT_SIZE);
+    _init(output_report_length, input_report_length);
+    if (connect_blocking) {
+        connect();
+        wait_ready();
+    } else {
+        init();
+    }
+
 }
 
-bool USBHID::sendNB(HID_REPORT *report)
+USBHID::USBHID(USBPhy *phy, uint8_t output_report_length, uint8_t input_report_length, uint16_t vendor_id, uint16_t product_id, uint16_t product_release)
+    : USBDevice(phy, vendor_id, product_id, product_release)
 {
-    return writeNB(EPINT_IN, report->data, report->length, MAX_HID_REPORT_SIZE);
+    _init(output_report_length, input_report_length);
 }
 
+USBHID::~USBHID()
+{
+    deinit();
+}
+
+void USBHID::_init(uint8_t output_report_length, uint8_t input_report_length)
+{
+    EndpointResolver resolver(endpoint_table());
+
+    resolver.endpoint_ctrl(64);
+    _int_in = resolver.endpoint_in(USB_EP_TYPE_INT, MAX_HID_REPORT_SIZE);
+    _int_out = resolver.endpoint_out(USB_EP_TYPE_INT, MAX_HID_REPORT_SIZE);
+    MBED_ASSERT(resolver.valid());
+
+    _send_idle = true;
+    _read_idle = true;
+    _output_length = output_report_length;
+    _input_length = input_report_length;
+}
+
+bool USBHID::ready()
+{
+    return configured();
+}
+
+void USBHID::wait_ready()
+{
+    lock();
+
+    AsyncWait wait_op(this);
+    _connect_list.add(&wait_op);
+
+    unlock();
+
+    wait_op.wait(NULL);
+}
+
+
+bool USBHID::send(const HID_REPORT *report)
+{
+    lock();
+
+    AsyncSend send_op(this, report);
+    _send_list.add(&send_op);
+
+    unlock();
+
+    send_op.wait(NULL);
+    return send_op.result;
+}
+
+bool USBHID::send_nb(const HID_REPORT *report)
+{
+    lock();
+
+    if (!configured()) {
+        unlock();
+        return false;
+    }
+
+    bool success = false;
+    if (_send_idle) {
+        memcpy(&_input_report, report, sizeof(_input_report));
+        write_start(_int_in, _input_report.data, _input_report.length);
+        _send_idle = false;
+        success = true;
+    }
+
+    unlock();
+    return success;
+}
 
 bool USBHID::read(HID_REPORT *report)
 {
-    uint32_t bytesRead = 0;
-    bool result;
-    result = USBDevice::readEP(EPINT_OUT, report->data, &bytesRead, MAX_HID_REPORT_SIZE);
-    if(!readStart(EPINT_OUT, MAX_HID_REPORT_SIZE))
-        return false;
-    report->length = bytesRead;
-    return result;
+    lock();
+
+    AsyncRead read_op(this, report);
+    _read_list.add(&read_op);
+
+    unlock();
+
+    read_op.wait(NULL);
+    return read_op.result;
 }
 
 
-bool USBHID::readNB(HID_REPORT *report)
+bool USBHID::read_nb(HID_REPORT *report)
 {
-    uint32_t bytesRead = 0;
-    bool result;
-    result = USBDevice::readEP_NB(EPINT_OUT, report->data, &bytesRead, MAX_HID_REPORT_SIZE);
-    // if readEP_NB did not succeed, does not issue a readStart
-    if (!result)
+    lock();
+
+    if (!configured()) {
+        unlock();
         return false;
-    report->length = bytesRead;
-    if(!readStart(EPINT_OUT, MAX_HID_REPORT_SIZE))
-        return false;
-    return result;
+    }
+
+    bool success = false;
+    if (_read_idle) {
+        memcpy(report, &_output_report, sizeof(_output_report));
+        read_start(_int_out, _output_report.data, MAX_HID_REPORT_SIZE);
+        _read_idle = false;
+        success = true;
+    }
+
+    unlock();
+    return success;
 }
 
+void USBHID::_send_isr()
+{
+    assert_locked();
 
-uint16_t USBHID::reportDescLength() {
-    reportDesc();
+    write_finish(_int_in);
+    _send_idle = true;
+
+    _send_list.process();
+    if (_send_idle) {
+        report_tx();
+    }
+
+}
+
+void USBHID::_read_isr()
+{
+    assert_locked();
+
+    _output_report.length = read_finish(_int_out);
+    _read_idle = true;
+
+    _read_list.process();
+    if (_read_idle) {
+        report_rx();
+    }
+}
+
+uint16_t USBHID::report_desc_length()
+{
+    report_desc();
     return reportLength;
 }
 
 
+void USBHID::callback_state_change(DeviceState new_state)
+{
+    if (new_state != Configured) {
+        if (!_send_idle) {
+            endpoint_abort(_int_in);
+            _send_idle = true;
+        }
+        if (!_read_idle) {
+            endpoint_abort(_int_out);
+            _read_idle = true;
+        }
+    }
+    _send_list.process();
+    _read_list.process();
+    _connect_list.process();
+}
 
 //
 //  Route callbacks from lower layers to class(es)
@@ -86,41 +294,36 @@ uint16_t USBHID::reportDescLength() {
 // This is used to handle extensions to standard requests
 // and class specific requests
 // Return true if class handles this request
-bool USBHID::USBCallback_request() {
-    bool success = false;
-    CONTROL_TRANSFER * transfer = getTransferPtr();
+void USBHID::callback_request(const setup_packet_t *setup)
+{
     uint8_t *hidDescriptor;
+    RequestResult result = PassThrough;
+    uint8_t *data = NULL;
+    uint32_t size = 0;
 
     // Process additional standard requests
 
-    if ((transfer->setup.bmRequestType.Type == STANDARD_TYPE))
-    {
-        switch (transfer->setup.bRequest)
-        {
+    if ((setup->bmRequestType.Type == STANDARD_TYPE)) {
+        switch (setup->bRequest) {
             case GET_DESCRIPTOR:
-                switch (DESCRIPTOR_TYPE(transfer->setup.wValue))
-                {
+                switch (DESCRIPTOR_TYPE(setup->wValue)) {
                     case REPORT_DESCRIPTOR:
-                        if ((reportDesc() != NULL) \
-                            && (reportDescLength() != 0))
-                        {
-                            transfer->remaining = reportDescLength();
-                            transfer->ptr = reportDesc();
-                            transfer->direction = DEVICE_TO_HOST;
-                            success = true;
+                        if ((report_desc() != NULL) \
+                                && (report_desc_length() != 0)) {
+                            size = report_desc_length();
+                            data = (uint8_t *)report_desc();
+                            result = Send;
                         }
                         break;
                     case HID_DESCRIPTOR:
-                            // Find the HID descriptor, after the configuration descriptor
-                            hidDescriptor = findDescriptor(HID_DESCRIPTOR);
-                            if (hidDescriptor != NULL)
-                            {
-                                transfer->remaining = HID_DESCRIPTOR_LENGTH;
-                                transfer->ptr = hidDescriptor;
-                                transfer->direction = DEVICE_TO_HOST;
-                                success = true;
-                            }
-                            break;
+                        // Find the HID descriptor, after the configuration descriptor
+                        hidDescriptor = find_descriptor(HID_DESCRIPTOR);
+                        if (hidDescriptor != NULL) {
+                            size = HID_DESCRIPTOR_LENGTH;
+                            data = hidDescriptor;
+                            result = Send;
+                        }
+                        break;
 
                     default:
                         break;
@@ -133,26 +336,29 @@ bool USBHID::USBCallback_request() {
 
     // Process class-specific requests
 
-    if (transfer->setup.bmRequestType.Type == CLASS_TYPE)
-    {
-        switch (transfer->setup.bRequest)
-        {
-             case SET_REPORT:
+    if (setup->bmRequestType.Type == CLASS_TYPE) {
+        switch (setup->bRequest) {
+            case SET_REPORT:
                 // First byte will be used for report ID
-                outputReport.data[0] = transfer->setup.wValue & 0xff;
-                outputReport.length = transfer->setup.wLength + 1;
+                _output_report.data[0] = setup->wValue & 0xff;
+                _output_report.length = setup->wLength + 1;
 
-                transfer->remaining = sizeof(outputReport.data) - 1;
-                transfer->ptr = &outputReport.data[1];
-                transfer->direction = HOST_TO_DEVICE;
-                transfer->notify = true;
-                success = true;
+                size = sizeof(_output_report.data) - 1;
+                data = &_output_report.data[1];
+                result = Send;
+                break;
             default:
                 break;
         }
     }
 
-    return success;
+    complete_request(result, data, size);
+}
+
+void USBHID::callback_request_xfer_done(const setup_packet_t *setup, bool aborted)
+{
+    (void)aborted;
+    complete_request_xfer_done(true);
 }
 
 
@@ -162,43 +368,56 @@ bool USBHID::USBCallback_request() {
 // Called in ISR context
 // Set configuration. Return false if the
 // configuration is not supported
-bool USBHID::USBCallback_setConfiguration(uint8_t configuration) {
-    if (configuration != DEFAULT_CONFIGURATION) {
-        return false;
+void USBHID::callback_set_configuration(uint8_t configuration)
+{
+    if (configuration == DEFAULT_CONFIGURATION) {
+        complete_set_configuration(false);
     }
 
     // Configure endpoints > 0
-    addEndpoint(EPINT_IN, MAX_PACKET_SIZE_EPINT);
-    addEndpoint(EPINT_OUT, MAX_PACKET_SIZE_EPINT);
+    endpoint_add(_int_in, MAX_HID_REPORT_SIZE, USB_EP_TYPE_INT, &USBHID::_send_isr);
+    endpoint_add(_int_out, MAX_HID_REPORT_SIZE, USB_EP_TYPE_INT, &USBHID::_read_isr);
 
     // We activate the endpoint to be able to recceive data
-    readStart(EPINT_OUT, MAX_PACKET_SIZE_EPINT);
-    return true;
+    read_start(_int_out, (uint8_t *)&_output_report, MAX_HID_REPORT_SIZE);
+    _read_idle = false;
+
+
+    complete_set_configuration(true);
+}
+
+void USBHID::callback_set_interface(uint16_t interface, uint8_t alternate)
+{
+    assert_locked();
+    complete_set_interface(true);
 }
 
 
-uint8_t * USBHID::stringIinterfaceDesc() {
-    static uint8_t stringIinterfaceDescriptor[] = {
+const uint8_t *USBHID::string_iinterface_desc()
+{
+    static const uint8_t stringIinterfaceDescriptor[] = {
         0x08,               //bLength
         STRING_DESCRIPTOR,  //bDescriptorType 0x03
-        'H',0,'I',0,'D',0,  //bString iInterface - HID
+        'H', 0, 'I', 0, 'D', 0, //bString iInterface - HID
     };
     return stringIinterfaceDescriptor;
 }
 
-uint8_t * USBHID::stringIproductDesc() {
-    static uint8_t stringIproductDescriptor[] = {
+const uint8_t *USBHID::string_iproduct_desc()
+{
+    static const uint8_t stringIproductDescriptor[] = {
         0x16,                                                       //bLength
         STRING_DESCRIPTOR,                                          //bDescriptorType 0x03
-        'H',0,'I',0,'D',0,' ',0,'D',0,'E',0,'V',0,'I',0,'C',0,'E',0 //bString iProduct - HID device
+        'H', 0, 'I', 0, 'D', 0, ' ', 0, 'D', 0, 'E', 0, 'V', 0, 'I', 0, 'C', 0, 'E', 0 //bString iProduct - HID device
     };
     return stringIproductDescriptor;
 }
 
 
 
-uint8_t * USBHID::reportDesc() {
-    static uint8_t reportDescriptor[] = {
+const uint8_t *USBHID::report_desc()
+{
+    uint8_t reportDescriptorTemp[] = {
         USAGE_PAGE(2), LSB(0xFFAB), MSB(0xFFAB),
         USAGE(2), LSB(0x0200), MSB(0x0200),
         COLLECTION(1), 0x01, // Collection (Application)
@@ -207,17 +426,19 @@ uint8_t * USBHID::reportDesc() {
         LOGICAL_MINIMUM(1), 0x00,
         LOGICAL_MAXIMUM(1), 0xFF,
 
-        REPORT_COUNT(1), input_length,
+        REPORT_COUNT(1), _input_length,
         USAGE(1), 0x01,
         INPUT(1), 0x02, // Data, Var, Abs
 
-        REPORT_COUNT(1), output_length,
+        REPORT_COUNT(1), _output_length,
         USAGE(1), 0x02,
         OUTPUT(1), 0x02, // Data, Var, Abs
 
         END_COLLECTION(0),
     };
     reportLength = sizeof(reportDescriptor);
+    MBED_ASSERT(sizeof(reportDescriptorTemp) == sizeof(reportDescriptor));
+    memcpy(reportDescriptor, reportDescriptorTemp, sizeof(reportDescriptor));
     return reportDescriptor;
 }
 
@@ -227,9 +448,13 @@ uint8_t * USBHID::reportDesc() {
                                + (1 * HID_DESCRIPTOR_LENGTH) \
                                + (2 * ENDPOINT_DESCRIPTOR_LENGTH))
 
-uint8_t * USBHID::configurationDesc() {
+const uint8_t *USBHID::configuration_desc(uint8_t index)
+{
+    if (index != 0) {
+        return NULL;
+    }
 
-    const uint8_t config_descriptor_temp[41] = {
+    uint8_t configurationDescriptorTemp[] = {
         CONFIGURATION_DESCRIPTOR_LENGTH,    // bLength
         CONFIGURATION_DESCRIPTOR,           // bDescriptorType
         LSB(TOTAL_DESCRIPTOR_LENGTH),       // wTotalLength (LSB)
@@ -257,26 +482,26 @@ uint8_t * USBHID::configurationDesc() {
         0x00,                               // bCountryCode
         0x01,                               // bNumDescriptors
         REPORT_DESCRIPTOR,                  // bDescriptorType
-        (uint8_t)(LSB(reportDescLength())), // wDescriptorLength (LSB)
-        (uint8_t)(MSB(reportDescLength())), // wDescriptorLength (MSB)
+        (uint8_t)(LSB(report_desc_length())),   // wDescriptorLength (LSB)
+        (uint8_t)(MSB(report_desc_length())),   // wDescriptorLength (MSB)
 
         ENDPOINT_DESCRIPTOR_LENGTH,         // bLength
         ENDPOINT_DESCRIPTOR,                // bDescriptorType
-        PHY_TO_DESC(EPINT_IN),              // bEndpointAddress
+        _int_in,                            // bEndpointAddress
         E_INTERRUPT,                        // bmAttributes
-        LSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (LSB)
-        MSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (MSB)
+        LSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (LSB)
+        MSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (MSB)
         1,                                  // bInterval (milliseconds)
 
         ENDPOINT_DESCRIPTOR_LENGTH,         // bLength
         ENDPOINT_DESCRIPTOR,                // bDescriptorType
-        PHY_TO_DESC(EPINT_OUT),             // bEndpointAddress
+        _int_out,                           // bEndpointAddress
         E_INTERRUPT,                        // bmAttributes
-        LSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (LSB)
-        MSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (MSB)
+        LSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (LSB)
+        MSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (MSB)
         1,                                  // bInterval (milliseconds)
     };
-    MBED_ASSERT(sizeof(config_descriptor_temp) == sizeof(_config_descriptor));
-    memcpy(_config_descriptor, config_descriptor_temp, sizeof(_config_descriptor));
-    return _config_descriptor;
+    MBED_ASSERT(sizeof(configurationDescriptorTemp) == sizeof(_configuration_descriptor));
+    memcpy(_configuration_descriptor, configurationDescriptorTemp, sizeof(_configuration_descriptor));
+    return _configuration_descriptor;
 }

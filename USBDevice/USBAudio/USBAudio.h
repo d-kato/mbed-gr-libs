@@ -1,31 +1,31 @@
-/* Copyright (c) 2010-2011 mbed.org, MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-* and associated documentation files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or
-* substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+/* mbed Microcontroller Library
+ * Copyright (c) 2018-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef USBAudio_H
 #define USBAudio_H
 
 /* These headers are included for child class. */
-#include "USBEndpoints.h"
 #include "USBDescriptor.h"
 #include "USBDevice_Types.h"
 
 #include "USBDevice.h"
 #include "Callback.h"
+#include "OperationList.h"
+#include "ByteBuffer.h"
+#include "rtos/EventFlags.h"
 
 /**
 * USBAudio example
@@ -34,301 +34,341 @@
 * #include "mbed.h"
 * #include "USBAudio.h"
 *
-* Serial pc(USBTX, USBRX);
-*
-* // frequency: 48 kHz
-* #define FREQ 48000
-*
-* // 1 channel: mono
-* #define NB_CHA 1
-*
-* // length of an audio packet: each ms, we receive 48 * 16bits ->48 * 2 bytes. as there is one channel, the length will be 48 * 2 * 1
-* #define AUDIO_LENGTH_PACKET 48 * 2 * 1
-*
-* // USBAudio
-* USBAudio audio(FREQ, NB_CHA);
+* // Audio loopback example use:
+* // 1. Select "Mbed Audio" as your sound device
+* // 2. Play a song or audio file
+* // 3. Record the output using a program such as Audacity
 *
 * int main() {
-*    int16_t buf[AUDIO_LENGTH_PACKET/2];
 *
-*    while (1) {
-*        // read an audio packet
-*        audio.read((uint8_t *)buf);
+*     USBAudio audio(true, 44100, 2, 44100, 2);
 *
-*
-*        // print packet received
-*        pc.printf("recv: ");
-*        for(int i = 0; i < AUDIO_LENGTH_PACKET/2; i++) {
-*            pc.printf("%d ", buf[i]);
-*        }
-*        pc.printf("\r\n");
-*    }
+*     printf("Looping audio\r\n");
+*     static uint8_t buf[128];
+*     while (true) {
+*         if (!audio.read(buf, sizeof(buf))) {
+*             memset(buf, 0, sizeof(buf));
+*         }
+*         audio.write(buf, sizeof(buf));
+*     }
 * }
 * @endcode
 */
-class USBAudio: public USBDevice {
+class USBAudio: protected USBDevice {
 public:
 
+    enum AudioEvent {
+        Start,
+        Transfer,
+        End
+    };
+
     /**
-    * Constructor
+    * Basic constructor
     *
-    * @param frequency_in frequency in Hz (default: 48000)
-    * @param channel_nb_in channel number (1 or 2) (default: 1)
-    * @param frequency_out frequency in Hz (default: 8000)
-    * @param channel_nb_out_in channel number (1 or 2) (default: 1)
+    * Construct this object optionally connecting.
+    *
+    * @note Do not use this constructor in derived classes.
+    *
+    * @param connect Call connect on initialization
+    * @param frequency_rx frequency in Hz (default: 48000)
+    * @param channel_count_rx channel number (1 or 2) (default: 1)
+    * @param frequency_tx frequency in Hz (default: 8000)
+    * @param channel_count_tx channel number (1 or 2) (default: 1)
+    * @param buffer_ms time audio can be buffered without overflowing in milliseconds
     * @param vendor_id Your vendor_id
     * @param product_id Your product_id
-    * @param product_release Your preoduct_release
+    * @param product_release Your product_release
     */
-    USBAudio(uint32_t frequency_in = 48000, uint8_t channel_nb_in = 1, uint32_t frequency_out = 8000, uint8_t channel_nb_out = 1, uint16_t vendor_id = 0x7bb8, uint16_t product_id = 0x1111, uint16_t product_release = 0x0100);
+    USBAudio(bool connect=true, uint32_t frequency_rx = 48000, uint8_t channel_count_rx = 1, uint32_t frequency_tx = 8000, uint8_t channel_count_tx = 1, uint32_t buffer_ms=10, uint16_t vendor_id = 0x7bb8, uint16_t product_id = 0x1111, uint16_t product_release = 0x0100);
+
+    /**
+    * Fully featured constructor
+    *
+    * Construct this object with the supplied USBPhy and parameters. The user
+    * this object is responsible for calling connect() or init().
+    *
+    * @note Derived classes must use this constructor and call init() or
+    * connect() themselves. Derived classes should also call deinit() in
+    * their destructor. This ensures that no interrupts can occur when the
+    * object is partially constructed or destroyed.
+    *
+    * @param phy USB phy to use
+    * @param frequency_rx frequency in Hz (default: 48000)
+    * @param channel_count_rx channel number (1 or 2) (default: 1)
+    * @param frequency_tx frequency in Hz (default: 8000)
+    * @param channel_count_tx channel number (1 or 2) (default: 1)
+    * @param buffer_ms time audio can be buffered without overflowing in milliseconds
+    * @param vendor_id Your vendor_id
+    * @param product_id Your product_id
+    * @param product_release Your product_release
+    */
+    USBAudio(USBPhy *phy, uint32_t frequency_rx, uint8_t channel_count_rx, uint32_t frequency_tx, uint8_t channel_count_tx, uint32_t buffer_ms, uint16_t vendor_id, uint16_t product_id, uint16_t product_release);
+
+    /**
+     * Destroy this object
+     *
+     * Any classes which inherit from this class must call deinit
+     * before this destructor runs.
+     */
+    virtual ~USBAudio();
+
+    /**
+    * Connect USBAudio
+    */
+    void connect();
+
+    /**
+    * Disconnect USBAudio
+    *
+    * This unblocks all calls to read_ready and write_ready.
+    */
+    void disconnect();
+
+    /**
+    * Read audio data
+    *
+    * @param buf pointer on a buffer which will be filled with audio data
+    * @param size size to read
+    *
+    * @returns true if successful
+    */
+    bool read(uint8_t *buf, uint32_t size);
+
+    /**
+    * Nonblocking audio data read
+    *
+    * Read the available audio data.
+    *
+    * @param buf pointer on a buffer which will be filled with audio data
+    * @param size size to read
+    * @param actual size actually read
+    * @note This function is safe to call from USBAudio callbacks.
+    */
+    void read_nb(uint8_t *buf, uint32_t size, uint32_t *actual);
+
+    /**
+     * Return the number read packets dropped due to overflow
+     *
+     * @param clear Reset the overflow count back to 0
+     * @return Number of packets dropped due to overflow
+     */
+    uint32_t read_overflows(bool clear=false);
+
+    /**
+     * Check if the audio read channel is open
+     *
+     * @return true if the audio read channel open, false otherwise
+     */
+    bool read_ready();
+
+    /**
+     * Wait until the audio read channel is open
+     */
+    void read_wait_ready();
+
+    /**
+    * Write audio data
+    *
+    * @param buf pointer to audio data to write
+    * @param size size to write
+    *
+    * @returns true if successful
+    */
+    bool write(uint8_t *buf, uint32_t size);
+
+    /**
+    * Nonblocking audio data write
+    *
+    * Write the available audio data.
+    *
+    * @param buf pointer to audio data to write
+    * @param size size to write
+    * @param actual actual size written
+    * @note This function is safe to call from USBAudio callbacks.
+    */
+    void write_nb(uint8_t *buf, uint32_t size, uint32_t *actual);
+
+    /**
+     * Return the number write packets not sent due to underflow
+     *
+     * @param clear Reset the underflow count back to 0
+     * @return Number of packets that should have been
+     *         sent but weren't due to overflow
+     */
+    uint32_t write_underflows(bool clear=false);
+
+    /**
+     * Check if the audio write channel is open
+     *
+     * @return true if the audio write channel open, false otherwise
+     */
+    bool write_ready();
+
+    /**
+     * Wait until the audio write channel is open
+     */
+    void write_wait_ready();
 
     /**
     * Get current volume between 0.0 and 1.0
     *
     * @returns volume
     */
-    float getVolume();
+    float get_volume();
 
-    /**
-    * Read an audio packet. During a frame, only a single reading (you can't write and read an audio packet during the same frame)can be done using this method. Warning: Blocking
-    *
-    * @param buf pointer on a buffer which will be filled with an audio packet
-    *
-    * @returns true if successfull
-    */
-    bool read(uint8_t * buf);
-
-    /**
-    * Try to read an audio packet. During a frame, only a single reading (you can't write and read an audio packet during the same frame)can be done using this method. Warning: Non Blocking
-    *
-    * @param buf pointer on a buffer which will be filled if an audio packet is available
-    *
-    * @returns true if successfull
-    */
-    bool readNB(uint8_t * buf);
-
-    /**
-     * read last received packet if some.
-     * @param buf pointer on a buffer which will be filled if an audio packet is available
+    /** Attach a Callback to update the volume
      *
-     * @returns the packet length
-     */
-    uint32_t readSync(uint8_t *buf);
-
-    /**
-    * Write an audio packet. During a frame, only a single writing (you can't write and read an audio packet during the same frame)can be done using this method.
-    *
-    * @param buf pointer on the audio packet which will be sent
-    * @returns true if successful
-    */
-    bool write(uint8_t * buf);
-
-    /**
-     * Write packet in endpoint fifo. assuming tx fifo is empty
-     * @param buf pointer on the audio packet which will be sent
-     */
-    void writeSync(uint8_t *buf);
-
-    /**
-    * Write and read an audio packet at the same time (on the same frame)
-    *
-    * @param buf_read pointer on a buffer which will be filled with an audio packet
-    * @param buf_write pointer on the audio packet which will be sent
-    * @returns true if successful
-    */
-    bool readWrite(uint8_t * buf_read, uint8_t * buf_write);
-
-
-    /** attach a handler to update the volume
-     *
-     * @param function Function to attach
+     * @param cb Callback to attach
      *
      */
-    void attach(Callback<void()> fptr) {
-        updateVol = fptr;
-    }
-    /** attach a handler to Tx Done
-     *
-     * @param function Function to attach
-     *
-     */
-    void attachTx(Callback<void()> fptr) {
-        txDone = fptr;
-    }
-    /** attach a handler to Rx Done
-     *
-     * @param function Function to attach
-     *
-     */
-    void attachRx(Callback<void()> fptr) {
-        rxDone = fptr;
-    }
+    void attach(Callback<void()> &cb);
 
-    /** Attach a nonstatic void/void member function to update the volume
+    /** attach a Callback to Tx Done
      *
-     * @param obj pointer to the object to call the member function on
-     * @param method pointer to the member function to be called
+     * @param cb Callback to attach
      *
      */
-    template<typename T>
-    void attach(T *obj, void(T::*method)()) {
-        // Underlying call thread safe
-        attach(callback(obj, method));
-    }
-    template<typename T>
-    void attachTx(T *obj, void(T::*method)()) {
-        // Underlying call thread safe
-        attachTx(callback(obj, method));
-    }
-    template<typename T>
-    void attachRx(T *obj, void(T::*method)()) {
-        // Underlying call thread safe
-        attachRx(callback(obj, method));
-    }
+    void attach_tx(Callback<void(AudioEvent)> &cb);
 
+    /** attach a Callback to Rx Done
+     *
+     * @param cb Callback to attach
+     *
+     */
+    void attach_rx(Callback<void(AudioEvent)> &cb);
 
 protected:
 
-    /*
-    * Called by USBDevice layer. Set configuration of the device.
-    * For instance, you can add all endpoints that you need on this function.
-    *
-    * @param configuration Number of the configuration
-    * @returns true if class handles this request
-    */
-    virtual bool USBCallback_setConfiguration(uint8_t configuration);
+    virtual void callback_state_change(DeviceState new_state);
+    virtual void callback_request(const setup_packet_t *setup);
+    virtual void callback_request_xfer_done(const setup_packet_t *setup, bool aborted);
+    virtual void callback_set_configuration(uint8_t configuration);
+    virtual void callback_set_interface(uint16_t interface, uint8_t alternate);
 
-    /*
-    * Called by USBDevice on Endpoint0 request. Warning: Called in ISR context
-    * This is used to handle extensions to standard requests
-    * and class specific requests
-    *
-    * @returns true if class handles this request
-    */
-    virtual bool USBCallback_request();
-
-    /*
-    * Get string product descriptor
-    *
-    * @returns pointer to the string product descriptor
-    */
-    virtual uint8_t * stringIproductDesc();
-
-    /*
-    * Get string interface descriptor
-    *
-    * @returns pointer to the string interface descriptor
-    */
-    virtual uint8_t * stringIinterfaceDesc();
-
-    /*
-    * Get configuration descriptor
-    *
-    * @returns pointer to the configuration descriptor
-    */
-    virtual uint8_t * configurationDesc();
-
-    /*
-     * Called by USBDevice layer. Set interface/alternate of the device.
-     *
-     * @param interface Number of the interface to be configured
-     * @param alternate Number of the alternate to be configured
-     * @returns true if class handles this request
-     */
-    virtual bool USBCallback_setInterface(uint16_t interface, uint8_t alternate);
-
-    /*
-    * Called by USBDevice on Endpoint0 request completion
-    * if the 'notify' flag has been set to true. Warning: Called in ISR context
-    *
-    * In this case it is used to indicate that a HID report has
-    * been received from the host on endpoint 0
-    *
-    * @param buf buffer received on endpoint 0
-    * @param length length of this buffer
-    */
-    virtual void USBCallback_requestCompleted(uint8_t * buf, uint32_t length);
-
-    /*
-    * Callback called on each Start of Frame event
-    */
-    virtual void SOF(int frameNumber);
-
-    /*
-    * Callback called when a packet is received
-    */
-    virtual bool EPISO_OUT_callback();
-
-    /*
-    * Callback called when a packet has been sent
-    */
-    virtual bool EPISO_IN_callback();
+    virtual const uint8_t *string_iproduct_desc();
+    virtual const uint8_t *string_iinterface_desc();
+    virtual const uint8_t *configuration_desc(uint8_t index);
 
 private:
 
-    // stream available ?
-    volatile bool available;
+    class AsyncWrite;
+    class AsyncRead;
 
-    // interrupt OUT has been received
-    volatile bool interruptOUT;
+    enum ChannelState {
+        Powerdown,
+        Closed,
+        Opened
+    };
 
-    // interrupt IN has been received
-    volatile bool interruptIN;
+    void _init(uint32_t frequency_rx, uint8_t channel_count_rx, uint32_t frequency_tx, uint8_t channel_count_tx, uint32_t buffer_ms);
 
-    // audio packet has been written
-    volatile bool writeIN;
+    /*
+    * Call to rebuild the configuration descriptor
+    *
+    * This function should be called on creation or when any
+    * value that is part of the configuration descriptor
+    * changes.
+    * @note This function uses ~200 bytes of stack so
+    * make sure your stack is big enough for it.
+    */
+    void _build_configuration_desc();
 
-    // FREQ
-    uint32_t FREQ_OUT;
-    uint32_t FREQ_IN;
+    void _receive_change(ChannelState new_state);
+    void _receive_isr();
+    void _send_change(ChannelState new_state);
+    void _send_isr_start();
+    void _send_isr_next_sync();
+    void _send_isr();
 
-    // size of the maximum packet for the isochronous endpoint
-    uint32_t PACKET_SIZE_ISO_IN;
-    uint32_t PACKET_SIZE_ISO_OUT;
+    // has connect been called
+    bool _connected;
 
-    // mono, stereo,...
-    uint8_t channel_nb_in;
-    uint8_t channel_nb_out;
-
-    // channel config: master, left, right
-    uint8_t channel_config_in;
-    uint8_t channel_config_out;
+    // audio volume
+    float _volume;
 
     // mute state
-    uint8_t mute;
+    uint8_t _mute;
 
     // Volume Current Value
-    uint16_t volCur;
+    uint16_t _vol_cur;
 
     // Volume Minimum Value
-    uint16_t volMin;
+    uint16_t _vol_min;
 
     // Volume Maximum Value
-    uint16_t volMax;
+    uint16_t _vol_max;
 
     // Volume Resolution
-    uint16_t volRes;
-
-    // Buffer containing one audio packet (to be read)
-    volatile uint8_t * buf_stream_in;
-
-    // Buffer containing one audio packet (to be written)
-    volatile uint8_t * buf_stream_out;
+    uint16_t _vol_res;
 
     // callback to update volume
-    Callback<void()> updateVol;
+    Callback<void()> _update_vol;
 
     // callback transmit Done
-    Callback<void()> txDone;
-    // callback transmit Done
-    Callback<void()> rxDone;
+    Callback<void(AudioEvent)> _tx_done;
 
-    // boolean showing that the SOF handler has been called. Useful for readNB.
-    volatile bool SOF_handler;
+    // callback receive Done
+    Callback<void(AudioEvent)> _rx_done;
 
-    volatile float volume;
+    // Number of times data was dropped due to an overflow
+    uint32_t _rx_overflow;
 
-    uint8_t _config_descriptor[184];
+    // Number of times data was not sent due to an underflow
+    uint32_t _tx_underflow;
+
+    // frequency in Hz
+    uint32_t _tx_freq;
+    uint32_t _rx_freq;
+
+    // mono, stereo,...
+    uint8_t _rx_channel_count;
+    uint8_t _tx_channel_count;
+
+    bool _tx_idle;
+    uint16_t _tx_frame_fract;
+    uint16_t _tx_whole_frames_per_xfer;
+    uint16_t _tx_fract_frames_per_xfer;
+
+    // size of the maximum packet for the isochronous endpoint
+    uint16_t _tx_packet_size_max;
+    uint16_t _rx_packet_size_max;
+
+    // Buffer used for the isochronous transfer
+    uint8_t *_tx_packet_buf;
+    uint8_t *_rx_packet_buf;
+
+    // Holding buffer
+    ByteBuffer _tx_queue;
+    ByteBuffer _rx_queue;
+
+    // State of the audio channels
+    ChannelState _tx_state;
+    ChannelState _rx_state;
+
+
+    // sample - a single PCM audio sample
+    // frame    - a group of samples from each channel
+    // packet   - a group of frames sent over USB in one transfer
+
+    // Blocking primitives
+    OperationList<AsyncWrite> _write_list;
+    OperationList<AsyncRead> _read_list;
+    rtos::EventFlags _flags;
+
+    // endpoint numbers
+    usb_ep_t _episo_out;    // rx endpoint
+    usb_ep_t _episo_in;     // tx endpoint
+
+    // channel config in the configuration descriptor: master, left, right
+    uint8_t _channel_config_rx;
+    uint8_t _channel_config_tx;
+
+    // configuration descriptor
+    uint8_t _config_descriptor[183];
+
+    // buffer for control requests
+    uint8_t _control_receive[2];
 
 };
 

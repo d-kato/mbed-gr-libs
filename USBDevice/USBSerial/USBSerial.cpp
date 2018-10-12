@@ -1,65 +1,91 @@
-/* Copyright (c) 2010-2011 mbed.org, MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-* and associated documentation files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or
-* substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+/* mbed Microcontroller Library
+ * Copyright (c) 2018-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "stdint.h"
 #include "USBSerial.h"
+#include "usb_phy_api.h"
 
-int USBSerial::_putc(int c) {
-    if (!terminal_connected) {
-        return 0;
+
+USBSerial::USBSerial(bool connect_blocking, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+        USBCDC(get_usb_phy(), vendor_id, product_id, product_release)
+{
+    _settings_changed_callback = 0;
+
+    if (connect_blocking) {
+        connect();
+        wait_ready();
+    } else {
+        init();
     }
-    send((uint8_t *)&c, 1);
-    return 1;
 }
 
-int USBSerial::_getc() {
+USBSerial::USBSerial(USBPhy *phy, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+        USBCDC(phy, vendor_id, product_id, product_release)
+{
+    _settings_changed_callback = 0;
+}
+
+USBSerial::~USBSerial()
+{
+    deinit();
+}
+
+int USBSerial::_putc(int c)
+{
+    if (send((uint8_t *)&c, 1)) {
+        return c;
+    } else {
+        return -1;
+    }
+}
+
+int USBSerial::_getc()
+{
     uint8_t c = 0;
-    while (p_circ_buf->isEmpty());
-    p_circ_buf->dequeue(&c);
-    return c;
+    if (receive(&c, sizeof(c))) {
+        return c;
+    } else {
+        return -1;
+    }
 }
 
-bool USBSerial::writeBlock(uint8_t * buf, uint16_t size) {
-    if (size > MAX_PACKET_SIZE_EPBULK) {
-        return false;
-    }
-    if (!send(buf, size)) {
-        return false;
-    }
-    return true;
-}
+void USBSerial::data_rx()
+{
+    assert_locked();
 
-bool USBSerial::EPBULK_OUT_callback() {
-    uint32_t size = 0;
-
-    //we read the packet received and put it on the circular buffer
-    readEP(p_wk_buf, &size);
-    for (uint32_t i = 0; i < size; i++) {
-        p_circ_buf->queue(p_wk_buf[i]);
-    }
-
-    //call a potential handlenr
-    if (rx)
+    //call a potential handler
+    if (rx) {
         rx.call();
-
-    return true;
+    }
 }
 
-uint32_t USBSerial::available() {
-    return p_circ_buf->available();
+uint8_t USBSerial::available()
+{
+    USBCDC::lock();
+
+    uint8_t size = 0;
+    if (!_rx_in_progress) {
+        size = _rx_size > 0xFF ? 0xFF : _rx_size;
+    }
+
+    USBCDC::unlock();
+    return size;
+}
+
+bool USBSerial::connected()
+{
+    return _terminal_connected;
 }

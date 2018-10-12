@@ -1,23 +1,22 @@
-/* Copyright (c) 2010-2011 mbed.org, MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-* and associated documentation files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or
-* substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+/* mbed Microcontroller Library
+ * Copyright (c) 2018-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "stdint.h"
 #include "USBMouseKeyboard.h"
+#include "usb_phy_api.h"
 
 typedef struct {
     unsigned char usage;
@@ -155,7 +154,7 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
     {0x31, KEY_SHIFT},      /* | */
     {0x30, KEY_SHIFT},      /* } */
     {0x35, KEY_SHIFT},      /* ~ */
-    {0,0},              /* DEL */
+    {0, 0},             /* DEL */
 
     {0x3a, 0},          /* F1 */
     {0x3b, 0},          /* F2 */
@@ -316,7 +315,7 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
     {0x64, KEY_SHIFT},      /* | */
     {0x30, KEY_SHIFT},      /* } */
     {0x32, KEY_SHIFT},      /* ~ */
-    {0,0},             /* DEL */
+    {0, 0},            /* DEL */
 
     {0x3a, 0},          /* F1 */
     {0x3b, 0},          /* F2 */
@@ -347,199 +346,233 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
 };
 #endif
 
+USBMouseKeyboard::USBMouseKeyboard(bool connect_blocking, MOUSE_TYPE mouse_type, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+    USBHID(get_usb_phy(), 0, 0, vendor_id, product_id, product_release)
+{
+    _lock_status = 0;
+    _button = 0;
+    _mouse_type = mouse_type;
 
-uint8_t * USBMouseKeyboard::reportDesc() {
-    if (mouse_type == REL_MOUSE) {
-        static uint8_t reportDescriptor[] = {
-                // Keyboard
-                USAGE_PAGE(1),      0x01,
-                USAGE(1),           0x06,
-                COLLECTION(1),      0x01,
-                REPORT_ID(1),       REPORT_ID_KEYBOARD,
-                USAGE_PAGE(1),      0x07,
-                USAGE_MINIMUM(1),       0xE0,
-                USAGE_MAXIMUM(1),       0xE7,
-                LOGICAL_MINIMUM(1),     0x00,
-                LOGICAL_MAXIMUM(1),     0x01,
-                REPORT_SIZE(1),     0x01,
-                REPORT_COUNT(1),    0x08,
-                INPUT(1),           0x02,
-                REPORT_COUNT(1),    0x01,
-                REPORT_SIZE(1),     0x08,
-                INPUT(1),           0x01,
-                REPORT_COUNT(1),    0x05,
-                REPORT_SIZE(1),     0x01,
-                USAGE_PAGE(1),      0x08,
-                USAGE_MINIMUM(1),       0x01,
-                USAGE_MAXIMUM(1),       0x05,
-                OUTPUT(1),          0x02,
-                REPORT_COUNT(1),    0x01,
-                REPORT_SIZE(1),     0x03,
-                OUTPUT(1),          0x01,
-                REPORT_COUNT(1),    0x06,
-                REPORT_SIZE(1),     0x08,
-                LOGICAL_MINIMUM(1),     0x00,
-                LOGICAL_MAXIMUM(2),     0xff, 0x00,
-                USAGE_PAGE(1),      0x07,
-                USAGE_MINIMUM(1),       0x00,
-                USAGE_MAXIMUM(2),       0xff, 0x00,
-                INPUT(1),           0x00,
-                END_COLLECTION(0),
+    if (connect_blocking) {
+        USBDevice::connect();
+        wait_ready();
+    } else {
+        init();
+    }
+};
 
-                // Mouse
-                USAGE_PAGE(1),      0x01,           // Generic Desktop
-                USAGE(1),           0x02,           // Mouse
-                COLLECTION(1),      0x01,           // Application
-                USAGE(1),           0x01,           // Pointer
-                COLLECTION(1),      0x00,           // Physical
-                REPORT_ID(1),       REPORT_ID_MOUSE,
-                REPORT_COUNT(1),    0x03,
-                REPORT_SIZE(1),     0x01,
-                USAGE_PAGE(1),      0x09,           // Buttons
-                USAGE_MINIMUM(1),       0x1,
-                USAGE_MAXIMUM(1),       0x3,
-                LOGICAL_MINIMUM(1),     0x00,
-                LOGICAL_MAXIMUM(1),     0x01,
-                INPUT(1),           0x02,
-                REPORT_COUNT(1),    0x01,
-                REPORT_SIZE(1),     0x05,
-                INPUT(1),           0x01,
-                REPORT_COUNT(1),    0x03,
-                REPORT_SIZE(1),     0x08,
-                USAGE_PAGE(1),      0x01,
-                USAGE(1),           0x30,           // X
-                USAGE(1),           0x31,           // Y
-                USAGE(1),           0x38,           // scroll
-                LOGICAL_MINIMUM(1),     0x81,
-                LOGICAL_MAXIMUM(1),     0x7f,
-                INPUT(1),           0x06,
-                END_COLLECTION(0),
-                END_COLLECTION(0),
+USBMouseKeyboard::USBMouseKeyboard(USBPhy *phy, MOUSE_TYPE mouse_type, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+    USBHID(phy, 0, 0, vendor_id, product_id, product_release)
+{
+    _lock_status = 0;
+    _button = 0;
+    _mouse_type = mouse_type;
+};
+
+/**
+ * Destroy this object
+ *
+ * Any classes which inherit from this class must call deinit
+ * before this destructor runs.
+ */
+USBMouseKeyboard::~USBMouseKeyboard()
+{
+    deinit();
+}
+
+const uint8_t *USBMouseKeyboard::report_desc()
+{
+    if (_mouse_type == REL_MOUSE) {
+        static const uint8_t reportDescriptor[] = {
+            // Keyboard
+            USAGE_PAGE(1),      0x01,
+            USAGE(1),           0x06,
+            COLLECTION(1),      0x01,
+            REPORT_ID(1),       REPORT_ID_KEYBOARD,
+            USAGE_PAGE(1),      0x07,
+            USAGE_MINIMUM(1),       0xE0,
+            USAGE_MAXIMUM(1),       0xE7,
+            LOGICAL_MINIMUM(1),     0x00,
+            LOGICAL_MAXIMUM(1),     0x01,
+            REPORT_SIZE(1),     0x01,
+            REPORT_COUNT(1),    0x08,
+            INPUT(1),           0x02,
+            REPORT_COUNT(1),    0x01,
+            REPORT_SIZE(1),     0x08,
+            INPUT(1),           0x01,
+            REPORT_COUNT(1),    0x05,
+            REPORT_SIZE(1),     0x01,
+            USAGE_PAGE(1),      0x08,
+            USAGE_MINIMUM(1),       0x01,
+            USAGE_MAXIMUM(1),       0x05,
+            OUTPUT(1),          0x02,
+            REPORT_COUNT(1),    0x01,
+            REPORT_SIZE(1),     0x03,
+            OUTPUT(1),          0x01,
+            REPORT_COUNT(1),    0x06,
+            REPORT_SIZE(1),     0x08,
+            LOGICAL_MINIMUM(1),     0x00,
+            LOGICAL_MAXIMUM(2),     0xff, 0x00,
+            USAGE_PAGE(1),      0x07,
+            USAGE_MINIMUM(1),       0x00,
+            USAGE_MAXIMUM(2),       0xff, 0x00,
+            INPUT(1),           0x00,
+            END_COLLECTION(0),
+
+            // Mouse
+            USAGE_PAGE(1),      0x01,           // Generic Desktop
+            USAGE(1),           0x02,           // Mouse
+            COLLECTION(1),      0x01,           // Application
+            USAGE(1),           0x01,           // Pointer
+            COLLECTION(1),      0x00,           // Physical
+            REPORT_ID(1),       REPORT_ID_MOUSE,
+            REPORT_COUNT(1),    0x03,
+            REPORT_SIZE(1),     0x01,
+            USAGE_PAGE(1),      0x09,           // Buttons
+            USAGE_MINIMUM(1),       0x1,
+            USAGE_MAXIMUM(1),       0x3,
+            LOGICAL_MINIMUM(1),     0x00,
+            LOGICAL_MAXIMUM(1),     0x01,
+            INPUT(1),           0x02,
+            REPORT_COUNT(1),    0x01,
+            REPORT_SIZE(1),     0x05,
+            INPUT(1),           0x01,
+            REPORT_COUNT(1),    0x03,
+            REPORT_SIZE(1),     0x08,
+            USAGE_PAGE(1),      0x01,
+            USAGE(1),           0x30,           // X
+            USAGE(1),           0x31,           // Y
+            USAGE(1),           0x38,           // scroll
+            LOGICAL_MINIMUM(1),     0x81,
+            LOGICAL_MAXIMUM(1),     0x7f,
+            INPUT(1),           0x06,
+            END_COLLECTION(0),
+            END_COLLECTION(0),
 
 
-                // Media Control
-                USAGE_PAGE(1), 0x0C,
-                USAGE(1), 0x01,
-                COLLECTION(1), 0x01,
-                REPORT_ID(1), REPORT_ID_VOLUME,
-                USAGE_PAGE(1), 0x0C,
-                LOGICAL_MINIMUM(1), 0x00,
-                LOGICAL_MAXIMUM(1), 0x01,
-                REPORT_SIZE(1), 0x01,
-                REPORT_COUNT(1), 0x07,
-                USAGE(1), 0xB5,             // Next Track
-                USAGE(1), 0xB6,             // Previous Track
-                USAGE(1), 0xB7,             // Stop
-                USAGE(1), 0xCD,             // Play / Pause
-                USAGE(1), 0xE2,             // Mute
-                USAGE(1), 0xE9,             // Volume Up
-                USAGE(1), 0xEA,             // Volume Down
-                INPUT(1), 0x02,             // Input (Data, Variable, Absolute)
-                REPORT_COUNT(1), 0x01,
-                INPUT(1), 0x01,
-                END_COLLECTION(0),
+            // Media Control
+            USAGE_PAGE(1), 0x0C,
+            USAGE(1), 0x01,
+            COLLECTION(1), 0x01,
+            REPORT_ID(1), REPORT_ID_VOLUME,
+            USAGE_PAGE(1), 0x0C,
+            LOGICAL_MINIMUM(1), 0x00,
+            LOGICAL_MAXIMUM(1), 0x01,
+            REPORT_SIZE(1), 0x01,
+            REPORT_COUNT(1), 0x07,
+            USAGE(1), 0xB5,             // Next Track
+            USAGE(1), 0xB6,             // Previous Track
+            USAGE(1), 0xB7,             // Stop
+            USAGE(1), 0xCD,             // Play / Pause
+            USAGE(1), 0xE2,             // Mute
+            USAGE(1), 0xE9,             // Volume Up
+            USAGE(1), 0xEA,             // Volume Down
+            INPUT(1), 0x02,             // Input (Data, Variable, Absolute)
+            REPORT_COUNT(1), 0x01,
+            INPUT(1), 0x01,
+            END_COLLECTION(0),
         };
         reportLength = sizeof(reportDescriptor);
         return reportDescriptor;
-    } else if (mouse_type == ABS_MOUSE) {
-        static uint8_t reportDescriptor[] = {
+    } else if (_mouse_type == ABS_MOUSE) {
+        static const uint8_t reportDescriptor[] = {
 
-                // Keyboard
-                USAGE_PAGE(1),      0x01,
-                USAGE(1),           0x06,
-                COLLECTION(1),      0x01,
-                REPORT_ID(1),       REPORT_ID_KEYBOARD,
-                USAGE_PAGE(1),      0x07,
-                USAGE_MINIMUM(1),       0xE0,
-                USAGE_MAXIMUM(1),       0xE7,
-                LOGICAL_MINIMUM(1),     0x00,
-                LOGICAL_MAXIMUM(1),     0x01,
-                REPORT_SIZE(1),     0x01,
-                REPORT_COUNT(1),    0x08,
-                INPUT(1),           0x02,
-                REPORT_COUNT(1),    0x01,
-                REPORT_SIZE(1),     0x08,
-                INPUT(1),           0x01,
-                REPORT_COUNT(1),    0x05,
-                REPORT_SIZE(1),     0x01,
-                USAGE_PAGE(1),      0x08,
-                USAGE_MINIMUM(1),       0x01,
-                USAGE_MAXIMUM(1),       0x05,
-                OUTPUT(1),          0x02,
-                REPORT_COUNT(1),    0x01,
-                REPORT_SIZE(1),     0x03,
-                OUTPUT(1),          0x01,
-                REPORT_COUNT(1),    0x06,
-                REPORT_SIZE(1),     0x08,
-                LOGICAL_MINIMUM(1),     0x00,
-                LOGICAL_MAXIMUM(2),     0xff, 0x00,
-                USAGE_PAGE(1),      0x07,
-                USAGE_MINIMUM(1),       0x00,
-                USAGE_MAXIMUM(2),       0xff, 0x00,
-                INPUT(1),           0x00,
-                END_COLLECTION(0),
+            // Keyboard
+            USAGE_PAGE(1),      0x01,
+            USAGE(1),           0x06,
+            COLLECTION(1),      0x01,
+            REPORT_ID(1),       REPORT_ID_KEYBOARD,
+            USAGE_PAGE(1),      0x07,
+            USAGE_MINIMUM(1),       0xE0,
+            USAGE_MAXIMUM(1),       0xE7,
+            LOGICAL_MINIMUM(1),     0x00,
+            LOGICAL_MAXIMUM(1),     0x01,
+            REPORT_SIZE(1),     0x01,
+            REPORT_COUNT(1),    0x08,
+            INPUT(1),           0x02,
+            REPORT_COUNT(1),    0x01,
+            REPORT_SIZE(1),     0x08,
+            INPUT(1),           0x01,
+            REPORT_COUNT(1),    0x05,
+            REPORT_SIZE(1),     0x01,
+            USAGE_PAGE(1),      0x08,
+            USAGE_MINIMUM(1),       0x01,
+            USAGE_MAXIMUM(1),       0x05,
+            OUTPUT(1),          0x02,
+            REPORT_COUNT(1),    0x01,
+            REPORT_SIZE(1),     0x03,
+            OUTPUT(1),          0x01,
+            REPORT_COUNT(1),    0x06,
+            REPORT_SIZE(1),     0x08,
+            LOGICAL_MINIMUM(1),     0x00,
+            LOGICAL_MAXIMUM(2),     0xff, 0x00,
+            USAGE_PAGE(1),      0x07,
+            USAGE_MINIMUM(1),       0x00,
+            USAGE_MAXIMUM(2),       0xff, 0x00,
+            INPUT(1),           0x00,
+            END_COLLECTION(0),
 
-                // Mouse
-                USAGE_PAGE(1), 0x01,               // Generic Desktop
-                USAGE(1), 0x02,                    // Mouse
-                COLLECTION(1), 0x01,               // Application
-                USAGE(1), 0x01,                    // Pointer
-                COLLECTION(1), 0x00,               // Physical
-                REPORT_ID(1),       REPORT_ID_MOUSE,
+            // Mouse
+            USAGE_PAGE(1), 0x01,               // Generic Desktop
+            USAGE(1), 0x02,                    // Mouse
+            COLLECTION(1), 0x01,               // Application
+            USAGE(1), 0x01,                    // Pointer
+            COLLECTION(1), 0x00,               // Physical
+            REPORT_ID(1),       REPORT_ID_MOUSE,
 
-                USAGE_PAGE(1), 0x01,                // Generic Desktop
-                USAGE(1), 0x30,                     // X
-                USAGE(1), 0x31,                     // Y
-                LOGICAL_MINIMUM(1), 0x00,           // 0
-                LOGICAL_MAXIMUM(2), 0xff, 0x7f,     // 32767
-                REPORT_SIZE(1), 0x10,
-                REPORT_COUNT(1), 0x02,
-                INPUT(1), 0x02,                     // Data, Variable, Absolute
+            USAGE_PAGE(1), 0x01,                // Generic Desktop
+            USAGE(1), 0x30,                     // X
+            USAGE(1), 0x31,                     // Y
+            LOGICAL_MINIMUM(1), 0x00,           // 0
+            LOGICAL_MAXIMUM(2), 0xff, 0x7f,     // 32767
+            REPORT_SIZE(1), 0x10,
+            REPORT_COUNT(1), 0x02,
+            INPUT(1), 0x02,                     // Data, Variable, Absolute
 
-                USAGE_PAGE(1), 0x01,                // Generic Desktop
-                USAGE(1), 0x38,                     // scroll
-                LOGICAL_MINIMUM(1), 0x81,           // -127
-                LOGICAL_MAXIMUM(1), 0x7f,           // 127
-                REPORT_SIZE(1), 0x08,
-                REPORT_COUNT(1), 0x01,
-                INPUT(1), 0x06,                     // Data, Variable, Relative
+            USAGE_PAGE(1), 0x01,                // Generic Desktop
+            USAGE(1), 0x38,                     // scroll
+            LOGICAL_MINIMUM(1), 0x81,           // -127
+            LOGICAL_MAXIMUM(1), 0x7f,           // 127
+            REPORT_SIZE(1), 0x08,
+            REPORT_COUNT(1), 0x01,
+            INPUT(1), 0x06,                     // Data, Variable, Relative
 
-                USAGE_PAGE(1), 0x09,                // Buttons
-                USAGE_MINIMUM(1), 0x01,
-                USAGE_MAXIMUM(1), 0x03,
-                LOGICAL_MINIMUM(1), 0x00,           // 0
-                LOGICAL_MAXIMUM(1), 0x01,           // 1
-                REPORT_COUNT(1), 0x03,
-                REPORT_SIZE(1), 0x01,
-                INPUT(1), 0x02,                     // Data, Variable, Absolute
-                REPORT_COUNT(1), 0x01,
-                REPORT_SIZE(1), 0x05,
-                INPUT(1), 0x01,                     // Constant
+            USAGE_PAGE(1), 0x09,                // Buttons
+            USAGE_MINIMUM(1), 0x01,
+            USAGE_MAXIMUM(1), 0x03,
+            LOGICAL_MINIMUM(1), 0x00,           // 0
+            LOGICAL_MAXIMUM(1), 0x01,           // 1
+            REPORT_COUNT(1), 0x03,
+            REPORT_SIZE(1), 0x01,
+            INPUT(1), 0x02,                     // Data, Variable, Absolute
+            REPORT_COUNT(1), 0x01,
+            REPORT_SIZE(1), 0x05,
+            INPUT(1), 0x01,                     // Constant
 
-                END_COLLECTION(0),
-                END_COLLECTION(0),
+            END_COLLECTION(0),
+            END_COLLECTION(0),
 
-                // Media Control
-                USAGE_PAGE(1), 0x0C,
-                USAGE(1), 0x01,
-                COLLECTION(1), 0x01,
-                REPORT_ID(1), REPORT_ID_VOLUME,
-                USAGE_PAGE(1), 0x0C,
-                LOGICAL_MINIMUM(1), 0x00,
-                LOGICAL_MAXIMUM(1), 0x01,
-                REPORT_SIZE(1), 0x01,
-                REPORT_COUNT(1), 0x07,
-                USAGE(1), 0xB5,             // Next Track
-                USAGE(1), 0xB6,             // Previous Track
-                USAGE(1), 0xB7,             // Stop
-                USAGE(1), 0xCD,             // Play / Pause
-                USAGE(1), 0xE2,             // Mute
-                USAGE(1), 0xE9,             // Volume Up
-                USAGE(1), 0xEA,             // Volume Down
-                INPUT(1), 0x02,             // Input (Data, Variable, Absolute)
-                REPORT_COUNT(1), 0x01,
-                INPUT(1), 0x01,
-                END_COLLECTION(0),
+            // Media Control
+            USAGE_PAGE(1), 0x0C,
+            USAGE(1), 0x01,
+            COLLECTION(1), 0x01,
+            REPORT_ID(1), REPORT_ID_VOLUME,
+            USAGE_PAGE(1), 0x0C,
+            LOGICAL_MINIMUM(1), 0x00,
+            LOGICAL_MAXIMUM(1), 0x01,
+            REPORT_SIZE(1), 0x01,
+            REPORT_COUNT(1), 0x07,
+            USAGE(1), 0xB5,             // Next Track
+            USAGE(1), 0xB6,             // Previous Track
+            USAGE(1), 0xB7,             // Stop
+            USAGE(1), 0xCD,             // Play / Pause
+            USAGE(1), 0xE2,             // Mute
+            USAGE(1), 0xE9,             // Volume Up
+            USAGE(1), 0xEA,             // Volume Down
+            INPUT(1), 0x02,             // Input (Data, Variable, Absolute)
+            REPORT_COUNT(1), 0x01,
+            INPUT(1), 0x01,
+            END_COLLECTION(0),
         };
         reportLength = sizeof(reportDescriptor);
         return reportDescriptor;
@@ -548,64 +581,89 @@ uint8_t * USBMouseKeyboard::reportDesc() {
     return NULL;
 }
 
-bool USBMouseKeyboard::EPINT_OUT_callback() {
-    uint32_t bytesRead = 0;
-    uint8_t led[65];
-    USBDevice::readEP(EPINT_OUT, led, &bytesRead, MAX_HID_REPORT_SIZE);
+void USBMouseKeyboard::report_rx()
+{
+    assert_locked();
 
-    // we take led[1] because led[0] is the report ID
-    lock_status = led[1] & 0x07;
+    HID_REPORT report;
+    read_nb(&report);
 
-    // We activate the endpoint to be able to recceive data
-    if (!readStart(EPINT_OUT, MAX_HID_REPORT_SIZE))
-        return false;
-    return true;
+    // we take [1] because [0] is the report ID
+    _lock_status = report.data[1] & 0x07;
 }
 
-uint8_t USBMouseKeyboard::lockStatus() {
-    return lock_status;
+uint8_t USBMouseKeyboard::lock_status()
+{
+    return _lock_status;
 }
 
-bool USBMouseKeyboard::update(int16_t x, int16_t y, uint8_t button, int8_t z) {
-    switch (mouse_type) {
-    case REL_MOUSE:
-        while (x > 127) {
-            if (!mouseSend(127, 0, button, z)) return false;
-            x = x - 127;
-        }
-        while (x < -128) {
-            if (!mouseSend(-128, 0, button, z)) return false;
-            x = x + 128;
-        }
-        while (y > 127) {
-            if (!mouseSend(0, 127, button, z)) return false;
-            y = y - 127;
-        }
-        while (y < -128) {
-            if (!mouseSend(0, -128, button, z)) return false;
-            y = y + 128;
-        }
-        return mouseSend(x, y, button, z);
-    case ABS_MOUSE:
-        HID_REPORT report;
+bool USBMouseKeyboard::update(int16_t x, int16_t y, uint8_t button, int8_t z)
+{
+    bool ret;
+    switch (_mouse_type) {
+        case REL_MOUSE:
+            _mutex.lock();
 
-        report.data[0] = REPORT_ID_MOUSE;
-        report.data[1] = x & 0xff;
-        report.data[2] = (x >> 8) & 0xff;
-        report.data[3] = y & 0xff;
-        report.data[4] = (y >> 8) & 0xff;
-        report.data[5] = -z;
-        report.data[6] = button & 0x07;
+            while (x > 127) {
+                if (!_mouse_send(127, 0, button, z)) {
+                    _mutex.unlock();
+                    return false;
+                }
+                x = x - 127;
+            }
+            while (x < -128) {
+                if (!_mouse_send(-128, 0, button, z)) {
+                    _mutex.unlock();
+                    return false;
+                }
+                x = x + 128;
+            }
+            while (y > 127) {
+                if (!_mouse_send(0, 127, button, z)) {
+                    _mutex.unlock();
+                    return false;
+                }
+                y = y - 127;
+            }
+            while (y < -128) {
+                if (!_mouse_send(0, -128, button, z)) {
+                    _mutex.unlock();
+                    return false;
+                }
+                y = y + 128;
+            }
+            ret = _mouse_send(x, y, button, z);
 
-        report.length = 7;
+            _mutex.unlock();
+            return ret;
+        case ABS_MOUSE:
+            _mutex.lock();
 
-        return send(&report);
-    default:
-        return false;
+            HID_REPORT report;
+
+            report.data[0] = REPORT_ID_MOUSE;
+            report.data[1] = x & 0xff;
+            report.data[2] = (x >> 8) & 0xff;
+            report.data[3] = y & 0xff;
+            report.data[4] = (y >> 8) & 0xff;
+            report.data[5] = -z;
+            report.data[6] = button & 0x07;
+
+            report.length = 7;
+
+            ret = send(&report);
+
+            _mutex.unlock();
+            return ret;
+        default:
+            return false;
     }
 }
 
-bool USBMouseKeyboard::mouseSend(int8_t x, int8_t y, uint8_t buttons, int8_t z) {
+bool USBMouseKeyboard::_mouse_send(int8_t x, int8_t y, uint8_t buttons, int8_t z)
+{
+    _mutex.lock();
+
     HID_REPORT report;
     report.data[0] = REPORT_ID_MOUSE;
     report.data[1] = buttons & 0x07;
@@ -615,47 +673,98 @@ bool USBMouseKeyboard::mouseSend(int8_t x, int8_t y, uint8_t buttons, int8_t z) 
 
     report.length = 5;
 
-    return send(&report);
+    bool ret = send(&report);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouseKeyboard::move(int16_t x, int16_t y) {
-    return update(x, y, button, 0);
+bool USBMouseKeyboard::move(int16_t x, int16_t y)
+{
+    _mutex.lock();
+
+    bool ret = update(x, y, _button, 0);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouseKeyboard::scroll(int8_t z) {
-    return update(0, 0, button, z);
+bool USBMouseKeyboard::scroll(int8_t z)
+{
+    _mutex.lock();
+
+    bool ret = update(0, 0, _button, z);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouseKeyboard::doubleClick() {
-    if (!click(MOUSE_LEFT))
+bool USBMouseKeyboard::doubleClick()
+{
+    _mutex.lock();
+
+    if (!click(MOUSE_LEFT)) {
+        _mutex.unlock();
         return false;
+    }
     wait(0.1);
-    return click(MOUSE_LEFT);
+    bool ret = click(MOUSE_LEFT);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouseKeyboard::click(uint8_t button) {
-    if (!update(0, 0, button, 0))
+bool USBMouseKeyboard::click(uint8_t button)
+{
+    _mutex.lock();
+
+    if (!update(0, 0, button, 0)) {
+        _mutex.unlock();
         return false;
+    }
     wait(0.01);
-    return update(0, 0, 0, 0);
+    bool ret = update(0, 0, 0, 0);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouseKeyboard::press(uint8_t button_) {
-    button = button_ & 0x07;
-    return update(0, 0, button, 0);
+bool USBMouseKeyboard::press(uint8_t button)
+{
+    _mutex.lock();
+
+    _button = button & 0x07;
+    bool ret = update(0, 0, button, 0);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouseKeyboard::release(uint8_t button_) {
-    button = (button & (~button_)) & 0x07;
-    return update(0, 0, button, 0);
+bool USBMouseKeyboard::release(uint8_t button)
+{
+    _mutex.lock();
+
+    _button = (_button & (~button)) & 0x07;
+    bool ret = update(0, 0, _button, 0);
+
+    _mutex.unlock();
+    return ret;
 }
 
-int USBMouseKeyboard::_putc(int c) {
-    return keyCode(c, keymap[c].modifier);
+int USBMouseKeyboard::_putc(int c)
+{
+    _mutex.lock();
+
+    bool ret = key_code(c, keymap[c].modifier);
+
+    _mutex.unlock();
+    return ret;
 }
 
-bool USBMouseKeyboard::keyCode(uint8_t key, uint8_t modifier) {
+bool USBMouseKeyboard::key_code(uint8_t key, uint8_t modifier)
+{
     // Send a simulated keyboard keypress. Returns true if successful.
+    _mutex.lock();
 
     HID_REPORT report;
 
@@ -672,6 +781,7 @@ bool USBMouseKeyboard::keyCode(uint8_t key, uint8_t modifier) {
     report.length = 9;
 
     if (!send(&report)) {
+        _mutex.unlock();
         return false;
     }
 
@@ -679,15 +789,19 @@ bool USBMouseKeyboard::keyCode(uint8_t key, uint8_t modifier) {
     report.data[3] = 0;
 
     if (!send(&report)) {
+        _mutex.unlock();
         return false;
     }
 
+    _mutex.unlock();
     return true;
-
 }
 
 
-bool USBMouseKeyboard::mediaControl(MEDIA_KEY key) {
+bool USBMouseKeyboard::media_control(MEDIA_KEY key)
+{
+    _mutex.lock();
+
     HID_REPORT report;
 
     report.data[0] = REPORT_ID_VOLUME;
@@ -702,5 +816,13 @@ bool USBMouseKeyboard::mediaControl(MEDIA_KEY key) {
 
     report.length = 2;
 
-    return send(&report);
+    bool ret = send(&report);
+
+    _mutex.unlock();
+    return ret;
+}
+
+int USBMouseKeyboard::_getc()
+{
+    return -1;
 }

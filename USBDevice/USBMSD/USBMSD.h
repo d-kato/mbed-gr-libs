@@ -1,29 +1,30 @@
-/* Copyright (c) 2010-2011 mbed.org, MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-* and associated documentation files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or
-* substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
+/* mbed Microcontroller Library
+ * Copyright (c) 2018-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef USBMSD_H
 #define USBMSD_H
 
 /* These headers are included for child class. */
-#include "USBEndpoints.h"
 #include "USBDescriptor.h"
 #include "USBDevice_Types.h"
+#include "platform/Callback.h"
+#include "events/PolledQueue.h"
+#include "events/Task.h"
+#include "BlockDevice.h"
+#include "Mutex.h"
 
 #include "USBDevice.h"
 
@@ -32,28 +33,26 @@
  *
  * Introduction
  *
- * The USBMSD implements the MSD protocol. It permits to access a memory chip (flash, sdcard,...)
- * from a computer over USB. But this class doesn't work standalone, you need to subclass this class
- * and define virtual functions which are called in USBMSD.
+ * USBMSD implements the MSD protocol. It permits to access a block device (flash, sdcard,...)
+ * from a computer over USB.
  *
- * How to use this class with your chip ?
+ * @code
+ * #include "mbed.h"
+ * #include "SDBlockDevice.h"
+ * #include "USBMSD.h"
  *
- * You have to inherit and define some pure virtual functions (mandatory step):
- *   - virtual int disk_read(char * data, int block): function to read a block
- *   - virtual int disk_write(const char * data, int block): function to write a block
- *   - virtual int disk_initialize(): function to initialize the memory
- *   - virtual int disk_sectors(): return the number of blocks
- *   - virtual int disk_size(): return the memory size
- *   - virtual int disk_status(): return the status of the storage chip (0: OK, 1: not initialized, 2: no medium in the drive, 4: write protection)
+ * SDBlockDevice sd(PTE3, PTE1, PTE2, PTE4);
+ * USBMSD usb(&sd);
  *
- * All functions names are compatible with the fat filesystem library. So you can imagine using your own class with
- * USBMSD and the fat filesystem library in the same program. Just be careful because there are two different parts which
- * will access the sd card. You can do a master/slave system using the disk_status method.
+ * int main() {
  *
- * Once these functions defined, you can call connect() (at the end of the constructor of your class for instance)
- * of USBMSD to connect your mass storage device. connect() will first call disk_status() to test the status of the disk.
- * If disk_status() returns 1 (disk not initialized), then disk_initialize() is called. After this step, connect() will collect information
- * such as the number of blocks and the memory size.
+ *     while(true) {
+ *         usb.process();
+ *     }
+ *
+ *     return 0;
+ * }
+ * @endcode
  */
 class USBMSD: public USBDevice {
 public:
@@ -61,19 +60,50 @@ public:
     /**
     * Constructor
     *
+    * This creates a new USBMSD object with the given block device. Connect must be called
+    * for the block device to connect.
+    *
+    * @param bd BlockDevice to mount as a USB drive
+    * @param connect_blocking true to perform a blocking connect, false to start in a disconnected state
     * @param vendor_id Your vendor_id
     * @param product_id Your product_id
     * @param product_release Your preoduct_release
     */
-    USBMSD(uint16_t vendor_id = 0x0703, uint16_t product_id = 0x0104, uint16_t product_release = 0x0001);
+    USBMSD(BlockDevice *bd, bool connect_blocking = true, uint16_t vendor_id = 0x0703, uint16_t product_id = 0x0104, uint16_t product_release = 0x0001);
 
     /**
-    * Connect the USB MSD device. Establish disk initialization before really connect the device.
+    * Fully featured constructor
     *
-    * @param blocking if not configured
+    * Construct this object with the supplied USBPhy and parameters. The user
+    * this object is responsible for calling connect() or init().
+    *
+    * @note Derived classes must use this constructor and call init() or
+    * connect() themselves. Derived classes should also call deinit() in
+    * their destructor. This ensures that no interrupts can occur when the
+    * object is partially constructed or destroyed.
+    *
+    * @param phy USB phy to use
+    * @param bd BlockDevice to mount as a USB drive
+    * @param vendor_id Your vendor_id
+    * @param product_id Your product_id
+    * @param product_release Your preoduct_release
+    */
+    USBMSD(USBPhy *phy, BlockDevice *bd, uint16_t vendor_id, uint16_t product_id, uint16_t product_release);
+
+    /**
+     * Destroy this object
+     *
+     * Any classes which inherit from this class must call disconnect
+     * before this destructor runs.
+     */
+    virtual ~USBMSD();
+
+    /**
+    * Connect the USB MSD device.
+    *
     * @returns true if successful
     */
-    bool connect(bool blocking = true);
+    bool connect();
 
     /**
     * Disconnect the USB MSD device.
@@ -81,9 +111,16 @@ public:
     void disconnect();
 
     /**
-    * Destructor
+    * Perform USB processing
     */
-    ~USBMSD();
+    void process();
+
+    /**
+     * Called when USBMSD needs to perform processing
+     *
+     * @param cb Callback called when USBMSD needs process() to be called
+     */
+    void attach(mbed::Callback<void()> cb);
 
 protected:
 
@@ -95,7 +132,7 @@ protected:
     * @param count number of blocks to read
     * @returns 0 if successful
     */
-    virtual int disk_read(uint8_t* data, uint64_t block, uint8_t count) = 0;
+    virtual int disk_read(uint8_t *data, uint64_t block, uint8_t count);
 
     /*
     * write one or more blocks on a storage chip
@@ -105,76 +142,33 @@ protected:
     * @param count number of blocks to write
     * @returns 0 if successful
     */
-    virtual int disk_write(const uint8_t* data, uint64_t block, uint8_t count) = 0;
+    virtual int disk_write(const uint8_t *data, uint64_t block, uint8_t count);
 
     /*
     * Disk initilization
     */
-    virtual int disk_initialize() = 0;
+    virtual int disk_initialize();
 
     /*
     * Return the number of blocks
     *
     * @returns number of blocks
     */
-    virtual uint64_t disk_sectors() = 0;
+    virtual uint64_t disk_sectors();
 
     /*
     * Return memory size
     *
     * @returns memory size
     */
-    virtual uint64_t disk_size() = 0;
-
+    virtual uint64_t disk_size();
 
     /*
     * To check the status of the storage chip
     *
     * @returns status: 0: OK, 1: disk not initialized, 2: no medium in the drive, 4: write protected
     */
-    virtual int disk_status() = 0;
-
-    /*
-    * Get string product descriptor
-    *
-    * @returns pointer to the string product descriptor
-    */
-    virtual uint8_t * stringIproductDesc();
-
-    /*
-    * Get string interface descriptor
-    *
-    * @returns pointer to the string interface descriptor
-    */
-    virtual uint8_t * stringIinterfaceDesc();
-
-    /*
-    * Get configuration descriptor
-    *
-    * @returns pointer to the configuration descriptor
-    */
-    virtual uint8_t * configurationDesc();
-
-    /*
-    * Callback called when a packet is received
-    */
-    virtual bool EPBULK_OUT_callback();
-
-    /*
-    * Callback called when a packet has been sent
-    */
-    virtual bool EPBULK_IN_callback();
-
-    /*
-    * Set configuration of device. Add endpoints
-    */
-    virtual bool USBCallback_setConfiguration(uint8_t configuration);
-
-    /*
-    * Callback called to process class specific requests
-    */
-    virtual bool USBCallback_request();
-
+    virtual int disk_status();
 
 private:
 
@@ -184,11 +178,10 @@ private:
         ERROR,        // error
         PROCESS_CBW,  // process a CBW request
         SEND_CSW,     // send a CSW
-        WAIT_CSW,     // wait that a CSW has been effectively sent
     };
 
     // Bulk-only CBW
-    typedef struct {
+    typedef MBED_PACKED(struct) {
         uint32_t Signature;
         uint32_t Tag;
         uint32_t DataLength;
@@ -196,56 +189,105 @@ private:
         uint8_t  LUN;
         uint8_t  CBLength;
         uint8_t  CB[16];
-    } PACKED CBW;
+    } CBW;
 
     // Bulk-only CSW
-    typedef struct {
+    typedef MBED_PACKED(struct) {
         uint32_t Signature;
         uint32_t Tag;
         uint32_t DataResidue;
         uint8_t  Status;
-    } PACKED CSW;
+    } CSW;
+
+    // If this class has been initialized
+    bool _initialized;
 
     //state of the bulk-only state machine
-    Stage stage;
+    Stage _stage;
 
     // current CBW
-    CBW cbw;
+    CBW _cbw;
 
     // CSW which will be sent
-    CSW csw;
+    CSW _csw;
 
     // addr where will be read or written data
-    uint32_t addr;
+    uint32_t _addr;
 
     // length of a reading or writing
-    uint32_t length;
+    uint32_t _length;
 
     // memory OK (after a memoryVerify)
-    bool memOK;
+    bool _mem_ok;
 
     // cache in RAM before writing in memory. Useful also to read a block.
-    uint8_t * page;
+    uint8_t *_page;
 
-    int BlockSize;
-    uint64_t MemorySize;
-    uint64_t BlockCount;
-    uint8_t _config_descriptor[32];
+    int _block_size;
+    uint64_t _memory_size;
+    uint64_t _block_count;
 
-    void CBWDecode(uint8_t * buf, uint16_t size);
-    void sendCSW (void);
-    bool inquiryRequest (void);
-    bool write (uint8_t * buf, uint16_t size);
+    // endpoints
+    usb_ep_t _bulk_in;
+    usb_ep_t _bulk_out;
+    uint8_t _bulk_in_buf[64];
+    uint8_t _bulk_out_buf[64];
+    bool _out_ready;
+    bool _in_ready;
+    uint32_t _bulk_out_size;
+
+    // Interrupt to thread deferral
+    PolledQueue _queue;
+    Task<void()> _in_task;
+    Task<void()> _out_task;
+    Task<void()> _reset_task;
+    Task<void(const setup_packet_t *)> _control_task;
+    Task<void()> _configure_task;
+
+    BlockDevice *_bd;
+    rtos::Mutex _mutex_init;
+    rtos::Mutex _mutex;
+
+    // space for config descriptor
+    uint8_t _configuration_descriptor[32];
+
+    virtual const uint8_t *string_iproduct_desc();
+    virtual const uint8_t *string_iinterface_desc();
+    virtual const uint8_t *configuration_desc(uint8_t index);
+    virtual void callback_set_configuration(uint8_t configuration);
+    virtual void callback_set_interface(uint16_t interface, uint8_t alternate);
+    virtual void callback_state_change(DeviceState new_state);
+    virtual void callback_request(const setup_packet_t *setup);
+    virtual void callback_request_xfer_done(const setup_packet_t *setup, bool aborted);
+
+    void _isr_out();
+    void _isr_in();
+
+    void _out();
+    void _in();
+    void _reset();
+    void _control(const setup_packet_t *request);
+    void _configure();
+
+    void _init();
+    void _process();
+    void _write_next(uint8_t *data, uint32_t size);
+    void _read_next();
+
+    void CBWDecode(uint8_t *buf, uint16_t size);
+    void sendCSW(void);
+    bool inquiryRequest(void);
+    bool write(uint8_t *buf, uint16_t size);
     bool readFormatCapacity();
-    bool readCapacity (void);
-    bool infoTransfer (void);
-    void memoryRead (void);
-    bool modeSense6 (void);
-    void testUnitReady (void);
-    bool requestSense (void);
-    void memoryVerify (uint8_t * buf, uint16_t size);
-    void memoryWrite (uint8_t * buf, uint16_t size);
-    void reset();
+    bool readCapacity(void);
+    bool infoTransfer(void);
+    void memoryRead(void);
+    bool modeSense6(void);
+    void testUnitReady(void);
+    bool requestSense(void);
+    void memoryVerify(uint8_t *buf, uint16_t size);
+    void memoryWrite(uint8_t *buf, uint16_t size);
+    void msd_reset();
     void fail();
 };
 

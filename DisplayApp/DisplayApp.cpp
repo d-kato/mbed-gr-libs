@@ -7,6 +7,8 @@ void DisplayApp::display_app_process() {
     int pos_x_wk;
     int pos_wk;
 
+    PcApp.connect();
+
     while (!PcApp.configured()) {
         ThisThread::sleep_for(100);
     }
@@ -86,7 +88,7 @@ void DisplayApp::display_app_process() {
 }
 
 DisplayApp::DisplayApp(osPriority tsk_pri, uint32_t stack_size) : 
-  PcApp(0x1f00, 0x2012, 0x0001, false), displayThread(tsk_pri, stack_size) {
+  PcApp(false), displayThread(tsk_pri, stack_size) {
     displayThread.start(callback(this, &DisplayApp::display_app_process));
 }
 
@@ -97,23 +99,11 @@ void DisplayApp::SendHeader(uint32_t size) {
     headder_data[9]  = (uint8_t)((uint32_t)size >> 8);
     headder_data[10] = (uint8_t)((uint32_t)size >> 16);
     headder_data[11] = (uint8_t)((uint32_t)size >> 24);
-    PcApp.writeBlock((uint8_t *)headder_data, sizeof(headder_data));
+    PcApp.send((uint8_t *)headder_data, sizeof(headder_data));
 }
 
 void DisplayApp::SendData(uint8_t * buf, uint32_t size) {
-    int send_size;
-    int send_index = 0;
-
-    while (size > 0) {
-        if (size > MAX_PACKET_SIZE_EPBULK) {
-            send_size = MAX_PACKET_SIZE_EPBULK;
-        } else {
-            send_size = size;
-        }
-        PcApp.writeBlock(&buf[send_index], send_size);
-        send_index += send_size;
-        size -= send_size;
-    }
+    PcApp.send(buf, size);
 }
 
 int DisplayApp::SendRgb888(uint8_t * buf, uint32_t pic_width, uint32_t pic_height) {
@@ -125,9 +115,6 @@ int DisplayApp::SendRgb888(uint8_t * buf, uint32_t pic_width, uint32_t pic_heigh
     int wk_idx = 0;
 
     if (!PcApp.configured()) {
-        return 0;
-    }
-    if (PcApp._putc(0) == 0) {  // terminal connect check
         return 0;
     }
     SendHeader(total_size);
@@ -191,7 +178,7 @@ int DisplayApp::SendRgb888(uint8_t * buf, uint32_t pic_width, uint32_t pic_heigh
     wk_bitmap_buf[wk_idx++] = 0;  /* biCirImportant */
     wk_bitmap_buf[wk_idx++] = 0;  /* biCirImportant */
     wk_bitmap_buf[wk_idx++] = 0;  /* biCirImportant */
-    PcApp.writeBlock(wk_bitmap_buf, wk_idx);
+    PcApp.send(wk_bitmap_buf, wk_idx);
 
     SendData(buf, pic_size);
     wk_idx += pic_size;
@@ -205,9 +192,6 @@ void DisplayApp::SetCallback(Callback<void()> func) {
 
 int DisplayApp::SendJpeg(uint8_t * buf, uint32_t size) {
     if (!PcApp.configured()) {
-        return 0;
-    }
-    if (PcApp._putc(0) == 0) {  // terminal connect check
         return 0;
     }
     SendHeader(size);

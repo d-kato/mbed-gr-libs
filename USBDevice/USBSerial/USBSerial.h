@@ -1,27 +1,24 @@
-/* Copyright (c) 2010-2011 mbed.org, MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-* and associated documentation files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or
-* substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+/* mbed Microcontroller Library
+ * Copyright (c) 2018-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef USBSERIAL_H
 #define USBSERIAL_H
 
 #include "USBCDC.h"
 #include "Stream.h"
-#include "CircBuffer.h"
 #include "Callback.h"
 
 /**
@@ -48,24 +45,46 @@ class USBSerial: public USBCDC, public Stream {
 public:
 
     /**
-    *   Constructor
+    * Basic constructor
     *
+    * Construct this object optionally connecting and blocking until it is ready.
+    *
+    * @note Do not use this constructor in derived classes.
+    *
+    * @param connect_blocking true to perform a blocking connect, false to start in a disconnected state
     * @param vendor_id Your vendor_id (default: 0x1f00)
     * @param product_id Your product_id (default: 0x2012)
-    * @param product_release Your preoduct_release (default: 0x0001)
-    * @param connect_blocking define if the connection must be blocked if USB not plugged in
+    * @param product_release Your product_release (default: 0x0001)
     *
     */
-    USBSerial(uint16_t vendor_id = 0x1f00, uint16_t product_id = 0x2012, uint16_t product_release = 0x0001, bool connect_blocking = true, uint32_t buf_size = (MAX_PACKET_SIZE_EPBULK * 2)): USBCDC(vendor_id, product_id, product_release, connect_blocking){
-        p_circ_buf = new CircBuffer<uint8_t>(buf_size);
-        p_wk_buf = new uint8_t[MAX_PACKET_SIZE_EPBULK + 1];
-        settingsChangedCallback = 0;
-    };
+    USBSerial(bool connect_blocking=true, uint16_t vendor_id=0x1f00, uint16_t product_id=0x2012, uint16_t product_release=0x0001);
 
-    virtual ~USBSerial() {
-        delete p_circ_buf;
-        delete [] p_wk_buf;
-    }
+    /**
+    * Fully featured constructor
+    *
+    * Construct this object with the supplied USBPhy and parameters. The user
+    * this object is responsible for calling connect() or init().
+    *
+    * @note Derived classes must use this constructor and call init() or
+    * connect() themselves. Derived classes should also call deinit() in
+    * their destructor. This ensures that no interrupts can occur when the
+    * object is partially constructed or destroyed.
+    *
+    * @param phy USB phy to use
+    * @param vendor_id Your vendor_id (default: 0x1f00)
+    * @param product_id Your product_id (default: 0x2012)
+    * @param product_release Your product_release (default: 0x0001)
+    *
+    */
+    USBSerial(USBPhy *phy, uint16_t vendor_id=0x1f00, uint16_t product_id=0x2012, uint16_t product_release=0x0001);
+
+    /**
+     * Destroy this object
+     *
+     * Any classes which inherit from this class must call deinit
+     * before this destructor runs.
+     */
+    virtual ~USBSerial();
 
     /**
     * Send a character. You can use puts, printf.
@@ -87,7 +106,14 @@ public:
     *
     * @returns the number of bytes available
     */
-    uint32_t available();
+    uint8_t available();
+
+    /**
+    * Check if the terminal is connected.
+    *
+    * @returns connection status
+    */
+    bool connected();
 
     /** Determine if there is a character available to read
      *
@@ -95,7 +121,10 @@ public:
      *    1 if there is a character available to read,
      *    0 otherwise
      */
-    int readable() { return available() ? 1 : 0; }
+    int readable()
+    {
+        return available() ? 1 : 0;
+    }
 
     /** Determine if there is space available to write a character
      *
@@ -103,51 +132,57 @@ public:
      *    1 if there is space to write a character,
      *    0 otherwise
      */
-    int writeable() { return 1; } // always return 1, for write operation is blocking
+    int writeable()
+    {
+        return 1;    // always return 1, for write operation is blocking
+    }
 
     /**
-    * Write a block of data.
-    *
-    * For more efficiency, a block of size 64 (maximum size of a bulk endpoint) has to be written.
-    *
-    * @param buf pointer on data which will be written
-    * @param size size of the buffer. The maximum size of a block is limited by the size of the endpoint (64 bytes)
-    *
-    * @returns true if successfull
-    */
-    bool writeBlock(uint8_t * buf, uint16_t size);
-
-    /** 
      *  Attach a member function to call when a packet is received.
      *
-     *  @param func A pointer to a void function, or 0 to set as none
+     *  @param tptr pointer to the object to call the member function on
+     *  @param mptr pointer to the member function to be called
      */
-    void attach(Callback<void()> func) {
-        rx = func;
+    template<typename T>
+    void attach(T *tptr, void (T::*mptr)(void))
+    {
+        USBCDC::lock();
+
+        if ((mptr != NULL) && (tptr != NULL)) {
+            rx = Callback<void()>(mptr, tptr);
+        }
+
+        USBCDC::unlock();
     }
 
-   /**
-    *  Attach a member function to call when a packet is received.
-    *
-    *  @param obj pointer to the object to call the member function on
-    *  @param method pointer to the member function to be called
-    */
-    template<typename T>
-    void attach(T* obj, void (T::*method)()) {
-        // Underlying call thread safe
-        attach(Callback<void()>(obj, method));
+    /**
+     * Attach a callback called when a packet is received
+     *
+     * @param fptr function pointer
+     */
+    void attach(void (*fptr)(void))
+    {
+        USBCDC::lock();
+
+        if (fptr != NULL) {
+            rx = Callback<void()>(fptr);
+        }
+
+        USBCDC::unlock();
     }
 
-   /**
-    *  Attach a member function to call when a packet is received.
-    *
-    *  @param obj pointer to the object to call the member function on
-    *  @param method pointer to the member function to be called
-    */
-    template<typename T>
-    void attach(T* obj, void (*method)(T*)) {
-        // Underlying call thread safe
-        attach(Callback<void()>(obj, method));
+    /**
+     * Attach a Callback called when a packet is received
+     *
+     * @param cb Callback to attach
+     */
+    void attach(Callback<void()> &cb)
+    {
+        USBCDC::lock();
+
+        rx = cb;
+
+        USBCDC::unlock();
     }
 
     /**
@@ -155,23 +190,29 @@ public:
      *
      * @param fptr function pointer
      */
-    void attach(void (*fptr)(int baud, int bits, int parity, int stop)) {
-        settingsChangedCallback = fptr;
+    void attach(void (*fptr)(int baud, int bits, int parity, int stop))
+    {
+        USBCDC::lock();
+
+        _settings_changed_callback = fptr;
+
+        USBCDC::unlock();
     }
 
 protected:
-    virtual bool EPBULK_OUT_callback();
-    virtual void lineCodingChanged(int baud, int bits, int parity, int stop){
-        if (settingsChangedCallback) {
-            settingsChangedCallback(baud, bits, parity, stop);
+    virtual void data_rx();
+    virtual void line_coding_changed(int baud, int bits, int parity, int stop)
+    {
+        assert_locked();
+
+        if (_settings_changed_callback) {
+            _settings_changed_callback(baud, bits, parity, stop);
         }
     }
 
 private:
     Callback<void()> rx;
-    CircBuffer<uint8_t> * p_circ_buf;
-    uint8_t * p_wk_buf;
-    void (*settingsChangedCallback)(int baud, int bits, int parity, int stop);
+    void (*_settings_changed_callback)(int baud, int bits, int parity, int stop);
 };
 
 #endif

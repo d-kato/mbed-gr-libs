@@ -1,24 +1,23 @@
-/* Copyright (c) 2010-2011 mbed.org, MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-* and associated documentation files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or
-* substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-* BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-* DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+/* mbed Microcontroller Library
+ * Copyright (c) 2018-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "stdint.h"
 
 #include "USBKeyboard.h"
+#include "usb_phy_api.h"
 
 #define REPORT_ID_KEYBOARD 1
 #define REPORT_ID_VOLUME   3
@@ -160,7 +159,7 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
     {0x31, KEY_SHIFT},      /* | */
     {0x30, KEY_SHIFT},      /* } */
     {0x35, KEY_SHIFT},      /* ~ */
-    {0,0},              /* DEL */
+    {0, 0},             /* DEL */
 
     {0x3a, 0},          /* F1 */
     {0x3b, 0},          /* F2 */
@@ -321,7 +320,7 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
     {0x64, KEY_SHIFT},      /* | */
     {0x30, KEY_SHIFT},      /* } */
     {0x32, KEY_SHIFT},      /* ~ */
-    {0,0},             /* DEL */
+    {0, 0},            /* DEL */
 
     {0x3a, 0},          /* F1 */
     {0x3b, 0},          /* F2 */
@@ -352,8 +351,35 @@ const KEYMAP keymap[KEYMAP_SIZE] = {
 };
 #endif
 
-uint8_t * USBKeyboard::reportDesc() {
-    static uint8_t reportDescriptor[] = {
+
+USBKeyboard::USBKeyboard(bool connect, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+    USBHID(get_usb_phy(), 0, 0, vendor_id, product_id, product_release)
+{
+    _lock_status = 0;
+    if (connect) {
+        USBDevice::connect();
+        wait_ready();
+    } else {
+        init();
+    }
+}
+
+USBKeyboard::USBKeyboard(USBPhy *phy, uint16_t vendor_id, uint16_t product_id, uint16_t product_release):
+    USBHID(phy, 0, 0, vendor_id, product_id, product_release)
+{
+    _lock_status = 0;
+
+    // User or child responsible for calling connect or init
+}
+
+USBKeyboard::~USBKeyboard()
+{
+    deinit();
+}
+
+const uint8_t *USBKeyboard::report_desc()
+{
+    static const uint8_t reportDescriptor[] = {
         USAGE_PAGE(1), 0x01,                    // Generic Desktop
         USAGE(1), 0x06,                         // Keyboard
         COLLECTION(1), 0x01,                    // Application
@@ -420,29 +446,31 @@ uint8_t * USBKeyboard::reportDesc() {
 }
 
 
-bool USBKeyboard::EPINT_OUT_callback() {
-    uint32_t bytesRead = 0;
-    uint8_t led[65];
-    USBDevice::readEP(EPINT_OUT, led, &bytesRead, MAX_HID_REPORT_SIZE);
+void USBKeyboard::report_rx()
+{
+    assert_locked();
 
-    // we take led[1] because led[0] is the report ID
-    lock_status = led[1] & 0x07;
+    HID_REPORT report;
+    read_nb(&report);
 
-    // We activate the endpoint to be able to recceive data
-    if (!readStart(EPINT_OUT, MAX_HID_REPORT_SIZE))
-        return false;
-    return true;
+    // we take [1] because [0] is the report ID
+    _lock_status = report.data[1] & 0x07;
 }
 
-uint8_t USBKeyboard::lockStatus() {
-    return lock_status;
+uint8_t USBKeyboard::lock_status()
+{
+    return _lock_status;
 }
 
-int USBKeyboard::_putc(int c) {
-    return keyCode(c, keymap[c].modifier);
+int USBKeyboard::_putc(int c)
+{
+    return key_code(c, keymap[c].modifier);
 }
 
-bool USBKeyboard::keyCode(uint8_t key, uint8_t modifier) {
+bool USBKeyboard::key_code(uint8_t key, uint8_t modifier)
+{
+    _mutex.lock();
+
     // Send a simulated keyboard keypress. Returns true if successful.
     HID_REPORT report;
 
@@ -459,6 +487,7 @@ bool USBKeyboard::keyCode(uint8_t key, uint8_t modifier) {
     report.length = 9;
 
     if (!send(&report)) {
+        _mutex.unlock();
         return false;
     }
 
@@ -466,15 +495,20 @@ bool USBKeyboard::keyCode(uint8_t key, uint8_t modifier) {
     report.data[3] = 0;
 
     if (!send(&report)) {
+        _mutex.unlock();
         return false;
     }
 
+    _mutex.unlock();
     return true;
 
 }
 
 
-bool USBKeyboard::mediaControl(MEDIA_KEY key) {
+bool USBKeyboard::media_control(MEDIA_KEY key)
+{
+    _mutex.lock();
+
     HID_REPORT report;
 
     report.data[0] = REPORT_ID_VOLUME;
@@ -483,6 +517,7 @@ bool USBKeyboard::mediaControl(MEDIA_KEY key) {
     report.length = 2;
 
     if (!send(&report)) {
+        _mutex.unlock();
         return false;
     }
 
@@ -491,9 +526,14 @@ bool USBKeyboard::mediaControl(MEDIA_KEY key) {
 
     report.length = 2;
 
-    return send(&report);
-}
+    if (!send(&report)) {
+        _mutex.unlock();
+        return false;
+    }
 
+    _mutex.unlock();
+    return true;
+}
 
 #define DEFAULT_CONFIGURATION (1)
 #define TOTAL_DESCRIPTOR_LENGTH ((1 * CONFIGURATION_DESCRIPTOR_LENGTH) \
@@ -501,8 +541,12 @@ bool USBKeyboard::mediaControl(MEDIA_KEY key) {
                                + (1 * HID_DESCRIPTOR_LENGTH) \
                                + (2 * ENDPOINT_DESCRIPTOR_LENGTH))
 
-uint8_t * USBKeyboard::configurationDesc() {
-    const uint8_t config_descriptor_temp[41] = {
+const uint8_t *USBKeyboard::configuration_desc(uint8_t index)
+{
+    if (index != 0) {
+        return NULL;
+    }
+    uint8_t configuration_descriptor_temp[] = {
         CONFIGURATION_DESCRIPTOR_LENGTH,    // bLength
         CONFIGURATION_DESCRIPTOR,           // bDescriptorType
         LSB(TOTAL_DESCRIPTOR_LENGTH),       // wTotalLength (LSB)
@@ -530,26 +574,31 @@ uint8_t * USBKeyboard::configurationDesc() {
         0x00,                               // bCountryCode
         0x01,                               // bNumDescriptors
         REPORT_DESCRIPTOR,                  // bDescriptorType
-        (uint8_t)(LSB(reportDescLength())), // wDescriptorLength (LSB)
-        (uint8_t)(MSB(reportDescLength())), // wDescriptorLength (MSB)
+        (uint8_t)(LSB(report_desc_length())), // wDescriptorLength (LSB)
+        (uint8_t)(MSB(report_desc_length())), // wDescriptorLength (MSB)
 
         ENDPOINT_DESCRIPTOR_LENGTH,         // bLength
         ENDPOINT_DESCRIPTOR,                // bDescriptorType
-        PHY_TO_DESC(EPINT_IN),              // bEndpointAddress
+        _int_in,                            // bEndpointAddress
         E_INTERRUPT,                        // bmAttributes
-        LSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (LSB)
-        MSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (MSB)
+        LSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (LSB)
+        MSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (MSB)
         1,                                  // bInterval (milliseconds)
 
         ENDPOINT_DESCRIPTOR_LENGTH,         // bLength
         ENDPOINT_DESCRIPTOR,                // bDescriptorType
-        PHY_TO_DESC(EPINT_OUT),             // bEndpointAddress
+        _int_out,                           // bEndpointAddress
         E_INTERRUPT,                        // bmAttributes
-        LSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (LSB)
-        MSB(MAX_PACKET_SIZE_EPINT),         // wMaxPacketSize (MSB)
+        LSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (LSB)
+        MSB(MAX_HID_REPORT_SIZE),           // wMaxPacketSize (MSB)
         1,                                  // bInterval (milliseconds)
     };
-    MBED_ASSERT(sizeof(config_descriptor_temp) == sizeof(_config_descriptor));
-    memcpy(_config_descriptor, config_descriptor_temp, sizeof(_config_descriptor));
-    return _config_descriptor;
+    MBED_ASSERT(sizeof(configuration_descriptor_temp) == sizeof(_configuration_descriptor));
+    memcpy(_configuration_descriptor, configuration_descriptor_temp, sizeof(_configuration_descriptor));
+    return _configuration_descriptor;
+}
+
+int USBKeyboard::_getc()
+{
+    return -1;
 }
