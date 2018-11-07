@@ -54,7 +54,7 @@ Add the following to your ``mbed_app.json`` file:
 | CAMERA_MT9V111             | GR-PEACH MT9V111                   |
 | CAMERA_OV7725              | GR-LYHCEE included camera          |
 | CAMERA_OV5642              | GR-PEACH OV5642                    |
-| CAMERA_WIRELESS_CAMERA     | GR-PEACH Wireless/Camera shield (MT9V111) |
+| CAMERA_WIRELESS_CAMERA     | GR-PEACH Wireless/Camera shield (OV7725) |
 
 | lcd-type "value"           | Description                        |
 |:---------------------------|:-----------------------------------|
