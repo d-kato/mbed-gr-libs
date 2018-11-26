@@ -75,26 +75,35 @@ private:
     uint16_t setup_buffer[32];
 
     static void _usbisr(void);
+    void chg_curpipe(uint16_t pipe, uint16_t isel);
+    uint16_t is_set_frdy(uint16_t pipe, uint16_t isel);
+    uint8_t * read_fifo(uint16_t pipe, uint16_t count, uint8_t *read_p);
+    uint16_t read_data(uint16_t pipe);
+    void fifo_to_buf(uint16_t pipe);
+    uint8_t * write_fifo(uint16_t pipe, uint16_t count, uint8_t *write_p);
+    uint16_t write_data(uint16_t pipe);
+    void buf_to_fifo(uint16_t pipe);
+    uint16_t * get_pipectr_reg(uint16_t pipe);
+    uint16_t * get_pipetre_reg(uint16_t pipe);
+    uint16_t * get_pipetrn_reg(uint16_t pipe);
+    uint16_t * get_fifoctr_reg(uint16_t pipe);
+    uint16_t * get_fifosel_reg(uint16_t pipe);
+    uint32_t * get_fifo_reg(uint16_t pipe);
+    uint16_t get_pid(uint16_t pipe);
+    void set_mbw(uint16_t pipe, uint16_t data);
+    void set_pid(uint16_t pipe, uint16_t new_pid);
     void cpu_delay_1us(uint16_t time);
     uint16_t EP2PIPE(uint16_t endpoint);
     uint16_t PIPE2EP(uint16_t pipe);
-    void chg_curpipe(uint16_t pipe, uint16_t isel);
-    uint16_t * get_pipectr_reg(uint16_t pipe);
-    void set_pid(uint16_t pipe, uint16_t data);
-    uint16_t get_pid(uint16_t pipe);
-    void set_mbw(uint16_t data);
-    uint16_t is_set_frdy(uint16_t pipe, uint16_t isel);
-    uint16_t write_data(uint16_t pipe);
-    void buf_to_fifo(uint16_t pipe);
+    uint16_t PIPE2FIFO(uint16_t pipe);
+    void reset_usb(uint16_t clockmode);
     bool chk_vbsts(void);
+    void attach_usb(void);
+    void detach_usb(void);
     void ctrl_end(uint16_t status);
     void data_end(uint16_t pipe, uint16_t status);
     void forced_termination(uint16_t pipe, uint16_t status);
-    uint8_t * read_fifo(uint16_t count, uint8_t *read_p);
-    uint16_t read_data(uint16_t pipe);
-    void fifo_to_buf(uint16_t pipe);
-    void attach_usb(void);
-    void detach_usb(void);
+
 };
 
 #endif

@@ -6,8 +6,6 @@
  Macro definitions
  ******************************************************************************/
 
-// r_usb_basic_define.h
-
 /* H/W function type */
 #define USB_BIT0                ((uint16_t)0x0001)
 #define USB_BIT1                ((uint16_t)0x0002)
@@ -31,61 +29,61 @@
 #define USB_MIN_PIPE_NO         (1u)
 
 /* Pipe configuration table define */
-#define USB_EPL                             (6u)        /* Pipe configuration table length */
-#define USB_TYPFIELD                        (0xC000u)   /* Transfer type */
-#define USB_PERIODIC                        (0x8000u)   /* Periodic pipe */
-#define USB_TYPFIELD_ISO                    (0xC000u)   /* Isochronous */
-#define USB_TYPFIELD_INT                    (0x8000u)   /* Interrupt */
-#define USB_TYPFIELD_BULK                   (0x4000u)   /* Bulk */
-#define USB_NOUSE                           (0x0000u)   /* Not configuration */
-#define USB_BFREFIELD                       (0x0400u)   /* Buffer ready interrupt mode select */
-#define USB_BFREON                          (0x0400u)
-#define USB_BFREOFF                         (0x0000u)
-#define USB_DBLBFIELD                       (0x0200u)   /* Double buffer mode select */
-#define USB_CFG_DBLBON                      (0x0200u)
-#define USB_CFG_DBLBOFF                     (0x0000u)
-#define USB_CNTMDFIELD                      (0x0100u)   /* Continuous transfer mode select */
-#define USB_CFG_CNTMDON                     (0x0100u)
-#define USB_CFG_CNTMDOFF                    (0x0000u)
-#define USB_SHTNAKFIELD                     (0x0080u)   /* Transfer end NAK */
-#define USB_DIRFIELD                        (0x0010u)   /* Transfer direction select */
-#define USB_DIR_H_OUT                       (0x0010u)   /* HOST OUT */
-#define USB_DIR_P_IN                        (0x0010u)   /* PERI IN */
-#define USB_DIR_H_IN                        (0x0000u)   /* HOST IN */
-#define USB_DIR_P_OUT                       (0x0000u)   /* PERI OUT */
-#define USB_BUF2FIFO                        (0x0010u)   /* Buffer --> FIFO */
-#define USB_FIFO2BUF                        (0x0000u)   /* FIFO --> buffer */
-#define USB_EPNUMFIELD                      (0x000Fu)   /* Endpoint number select */
-#define USB_MAX_EP_NO                       (15u)       /* EP0 EP1 ... EP15 */
+#define USB_EPL                 (6u)        /* Pipe configuration table length */
+#define USB_TYPFIELD            (0xC000u)   /* Transfer type */
+#define USB_PERIODIC            (0x8000u)   /* Periodic pipe */
+#define USB_TYPFIELD_ISO        (0xC000u)   /* Isochronous */
+#define USB_TYPFIELD_INT        (0x8000u)   /* Interrupt */
+#define USB_TYPFIELD_BULK       (0x4000u)   /* Bulk */
+#define USB_NOUSE               (0x0000u)   /* Not configuration */
+#define USB_BFREFIELD           (0x0400u)   /* Buffer ready interrupt mode select */
+#define USB_BFREON              (0x0400u)
+#define USB_BFREOFF             (0x0000u)
+#define USB_DBLBFIELD           (0x0200u)   /* Double buffer mode select */
+#define USB_CFG_DBLBON          (0x0200u)
+#define USB_CFG_DBLBOFF         (0x0000u)
+#define USB_CNTMDFIELD          (0x0100u)   /* Continuous transfer mode select */
+#define USB_CFG_CNTMDON         (0x0100u)
+#define USB_CFG_CNTMDOFF        (0x0000u)
+#define USB_SHTNAKFIELD         (0x0080u)   /* Transfer end NAK */
+#define USB_DIRFIELD            (0x0010u)   /* Transfer direction select */
+#define USB_DIR_H_OUT           (0x0010u)   /* HOST OUT */
+#define USB_DIR_P_IN            (0x0010u)   /* PERI IN */
+#define USB_DIR_H_IN            (0x0000u)   /* HOST IN */
+#define USB_DIR_P_OUT           (0x0000u)   /* PERI OUT */
+#define USB_BUF2FIFO            (0x0010u)   /* Buffer --> FIFO */
+#define USB_FIFO2BUF            (0x0000u)   /* FIFO --> buffer */
+#define USB_EPNUMFIELD          (0x000Fu)   /* Endpoint number select */
+#define USB_MAX_EP_NO           (15u)       /* EP0 EP1 ... EP15 */
 
-#define USB_BUF_SIZE(x)                     ((uint16_t)(((x) / 64u) - 1u) << 10u)
-#define USB_BUF_NUMB(x)                     (x)
+#define USB_BUF_SIZE(x)         ((uint16_t)(((x) / 64u) - 1u) << 10u)
+#define USB_BUF_NUMB(x)         (x)
 
 /* FIFO read / write result */
-#define USB_FIFOERROR                       (0x00ffu)     /* FIFO not ready */
-#define USB_WRITEEND                        (0x0000u)     /* End of write (but packet may not be outputting) */
-#define USB_WRITESHRT                       (0x0001u)     /* End of write (send short packet) */
-#define USB_WRITING                         (0x0002u)     /* Write continues */
-#define USB_READEND                         (0x0000u)     /* End of read */
-#define USB_READSHRT                        (0x0001u)     /* Insufficient (receive short packet) */
-#define USB_READING                         (0x0002u)     /* Read continues */
-#define USB_READOVER                        (0x0003u)     /* Buffer size over */
+#define USB_FIFOERROR           (0x00ffu)   /* FIFO not ready */
+#define USB_WRITEEND            (0x0000u)   /* End of write (but packet may not be outputting) */
+#define USB_WRITESHRT           (0x0001u)   /* End of write (send short packet) */
+#define USB_WRITING             (0x0002u)   /* Write continues */
+#define USB_READEND             (0x0000u)   /* End of read */
+#define USB_READSHRT            (0x0001u)   /* Insufficient (receive short packet) */
+#define USB_READING             (0x0002u)   /* Read continues */
+#define USB_READOVER            (0x0003u)   /* Buffer size over */
 
 /* Transfer status Type */
-#define USB_CTRL_END                        (0u)
-#define USB_DATA_NONE                       (1u)
-#define USB_DATA_WAIT                       (2u)
-#define USB_DATA_OK                         (3u)
-#define USB_DATA_SHT                        (4u)
-#define USB_DATA_OVR                        (5u)
-#define USB_DATA_STALL                      (6u)
-#define USB_DATA_ERR                        (7u)
-#define USB_DATA_STOP                       (8u)
-#define USB_DATA_TMO                        (9u)
-#define USB_CTRL_READING                    (17u)
-#define USB_CTRL_WRITING                    (18u)
-#define USB_DATA_READING                    (19u)
-#define USB_DATA_WRITING                    (20u)
+#define USB_CTRL_END            (0u)
+#define USB_DATA_NONE           (1u)
+#define USB_DATA_WAIT           (2u)
+#define USB_DATA_OK             (3u)
+#define USB_DATA_SHT            (4u)
+#define USB_DATA_OVR            (5u)
+#define USB_DATA_STALL          (6u)
+#define USB_DATA_ERR            (7u)
+#define USB_DATA_STOP           (8u)
+#define USB_DATA_TMO            (9u)
+#define USB_CTRL_READING        (17u)
+#define USB_CTRL_WRITING        (18u)
+#define USB_DATA_READING        (19u)
+#define USB_DATA_WRITING        (20u)
 
 
 /* System Configuration Control Register */
@@ -94,11 +92,14 @@
 #define USB_DRPD                (0x0020u)   /* b5: D+/D- pull down control */
 #define USB_DPRPU               (0x0010u)   /* b4: D+ pull up control */
 #define USB_DMRPU               (0x0008u)   /* b3: D- pull up control */ /* For low speed */
+#define USB_UCKSEL              (0x0004u)   /* b2: USB clock select */
+#define USB_EXTAL_12MHZ         (0x0004u)   /* EXTAL 12MHz */
+#define USB_X1_48MHZ            (0x0000u)   /* USB_X1 48MHz */
 #define USB_UPLLE               (0x0002u)   /* b1: USB internal PLL enable */
 #define USB_USBE                (0x0001u)   /* b0: USB module enable */
 
 /* CPU Bus Wait Register */
-#define USB_BWAIT               (0x000Fu)   /* b3-0: Bus wait bit */
+#define USB_BWAIT               (0x003Fu)   /* b5-0: Bus wait bit */
 #define USB_BWAIT_15            (0x000Fu)   /* 15 wait (access cycle 17) */
 #define USB_BWAIT_14            (0x000Eu)   /* 14 wait (access cycle 16) */
 #define USB_BWAIT_13            (0x000Du)   /* 13 wait (access cycle 15) */
@@ -176,6 +177,8 @@
 #define USB_FIFO_BIG            (0x0100u)   /* Big endian */
 #define USB_FIFO_LITTLE         (0x0000u)   /* Little endian */
 #define USB_ISEL                (0x0020u)   /* b5: DCP FIFO port direction select */
+#define USB_ISEL_WRITE          (0x0020u)   /* write */
+#define USB_ISEL_READ           (0x0000u)   /* read */
 #define USB_CURPIPE             (0x000Fu)   /* b2-0: PIPE select */
 
 /* CFIFO/DxFIFO Port Control Register */
@@ -381,6 +384,7 @@
 #define USB_PINGE               (0x0010u)   /* b4: ping enable */
 #define USB_CCPL                (0x0004u)   /* b2: Enable control transfer complete */
 #define USB_PID                 (0x0003u)   /* b1-0: Response PID */
+#define USB_PID_STALL2          (0x0003u)   /* STALL2 */
 #define USB_PID_STALL           (0x0002u)   /* STALL */
 #define USB_PID_BUF             (0x0001u)   /* BUF */
 #define USB_PID_NAK             (0x0000u)   /* NAK */
@@ -534,148 +538,144 @@
 #define USB_OBUS                (0x0004u)   /* b2: OUTbus mode */
 
 /* USB IO Register Reserved bit mask */
-#define INTSTS1_MASK            (0xD870u)   /* INTSTS1 Reserved bit mask */
-#define BRDYSTS_MASK            (0x03FFu)   /* BRDYSTS Reserved bit mask */
-#define NRDYSTS_MASK            (0x03FFu)   /* NRDYSTS Reserved bit mask */
-#define BEMPSTS_MASK            (0x03FFu)   /* BEMPSTS Reserved bit mask */
+#define INTSTS1_MASK            (0x5870u)   /* INTSTS1 Reserved bit mask */
+#define BRDYSTS_MASK            (0xFFFFu)   /* BRDYSTS Reserved bit mask */
+#define NRDYSTS_MASK            (0xFFFFu)   /* NRDYSTS Reserved bit mask */
+#define BEMPSTS_MASK            (0xFFFFu)   /* BEMPSTS Reserved bit mask */
 
 
 
-// r_usb_basic_if.h
 /* USB Request Type Register */
-#define     USB_BREQUEST                        (0xFF00u)   /* b15-8 */
+#define USB_BREQUEST            (0xFF00u)   /* b15-8 */
 
 /* USB Standard request */
-#define     USB_GET_STATUS                      (0x0000u)
-#define     USB_CLEAR_FEATURE                   (0x0100u)
-#define     USB_REQRESERVED                     (0x0200u)
-#define     USB_SET_FEATURE                     (0x0300u)
-#define     USB_REQRESERVED1                    (0x0400u)
-#define     USB_SET_ADDRESS                     (0x0500u)
-#define     USB_GET_DESCRIPTOR                  (0x0600u)
-#define     USB_SET_DESCRIPTOR                  (0x0700u)
-#define     USB_GET_CONFIGURATION               (0x0800u)
-#define     USB_SET_CONFIGURATION               (0x0900u)
-#define     USB_GET_INTERFACE                   (0x0A00u)
-#define     USB_SET_INTERFACE                   (0x0B00u)
-#define     USB_SYNCH_FRAME                     (0x0C00u)
+#define USB_GET_STATUS          (0x0000u)
+#define USB_CLEAR_FEATURE       (0x0100u)
+#define USB_REQRESERVED         (0x0200u)
+#define USB_SET_FEATURE         (0x0300u)
+#define USB_REQRESERVED1        (0x0400u)
+#define USB_SET_ADDRESS         (0x0500u)
+#define USB_GET_DESCRIPTOR      (0x0600u)
+#define USB_SET_DESCRIPTOR      (0x0700u)
+#define USB_GET_CONFIGURATION   (0x0800u)
+#define USB_SET_CONFIGURATION   (0x0900u)
+#define USB_GET_INTERFACE       (0x0A00u)
+#define USB_SET_INTERFACE       (0x0B00u)
+#define USB_SYNCH_FRAME         (0x0C00u)
 
 /* USB_BMREQUESTTYPEDIR 0x0080u(b7) */
-#define USB_HOST_TO_DEV                         (0x0000u)
-#define USB_DEV_TO_HOST                         (0x0080u)
+#define USB_HOST_TO_DEV         (0x0000u)
+#define USB_DEV_TO_HOST         (0x0080u)
 
 /* USB_BMREQUESTTYPETYPE    0x0060u(b6-5) */
-#define USB_STANDARD                            (0x0000u)
-#define USB_CLASS                               (0x0020u)
-#define USB_VENDOR                              (0x0040u)
+#define USB_STANDARD            (0x0000u)
+#define USB_CLASS               (0x0020u)
+#define USB_VENDOR              (0x0040u)
 
 /* USB_BMREQUESTTYPERECIP   0x001Fu(b4-0) */
-#define USB_DEVICE                              (0x0000u)
-#define USB_INTERFACE                           (0x0001u)
-#define USB_ENDPOINT                            (0x0002u)
-#define USB_OTHER                               (0x0003u)
+#define USB_DEVICE              (0x0000u)
+#define USB_INTERFACE           (0x0001u)
+#define USB_ENDPOINT            (0x0002u)
+#define USB_OTHER               (0x0003u)
 
-#define USB_NULL                                (0x0u)
+#define USB_NULL                (0x0u)
 
-#define USB_IP0                                 (0)         /* USB0 module */
-#define USB_IP1                                 (1)         /* USB1 module */
+#define USB_IP0                 (0)         /* USB0 module */
+#define USB_IP1                 (1)         /* USB1 module */
 
 /* USB pipe number */
-#define USB_PIPE0                               (0x0u)
-#define USB_PIPE1                               (0x1u)
-#define USB_PIPE2                               (0x2u)
-#define USB_PIPE3                               (0x3u)
-#define USB_PIPE4                               (0x4u)
-#define USB_PIPE5                               (0x5u)
-#define USB_PIPE6                               (0x6u)
-#define USB_PIPE7                               (0x7u)
-#define USB_PIPE8                               (0x8u)
-#define USB_PIPE9                               (0x9u)
-#define USB_PIPE10                              (0xAu)
-#define USB_PIPE11                              (0xBu)
-#define USB_PIPE12                              (0xCu)
-#define USB_PIPE13                              (0xDu)
-#define USB_PIPE14                              (0xEu)
-#define USB_PIPE15                              (0xFu)
+#define USB_PIPE0               (0x0u)
+#define USB_PIPE1               (0x1u)
+#define USB_PIPE2               (0x2u)
+#define USB_PIPE3               (0x3u)
+#define USB_PIPE4               (0x4u)
+#define USB_PIPE5               (0x5u)
+#define USB_PIPE6               (0x6u)
+#define USB_PIPE7               (0x7u)
+#define USB_PIPE8               (0x8u)
+#define USB_PIPE9               (0x9u)
+#define USB_PIPE10              (0xAu)
+#define USB_PIPE11              (0xBu)
+#define USB_PIPE12              (0xCu)
+#define USB_PIPE13              (0xDu)
+#define USB_PIPE14              (0xEu)
+#define USB_PIPE15              (0xFu)
 
-#define USB_EP0                                 (0x0u)
-#define USB_EP1                                 (0x1u)
-#define USB_EP2                                 (0x2u)
-#define USB_EP3                                 (0x3u)
-#define USB_EP4                                 (0x4u)
-#define USB_EP5                                 (0x5u)
-#define USB_EP6                                 (0x6u)
-#define USB_EP7                                 (0x7u)
-#define USB_EP8                                 (0x8u)
-#define USB_EP9                                 (0x9u)
-#define USB_EP10                                (0xAu)
-#define USB_EP11                                (0xBu)
-#define USB_EP12                                (0xCu)
-#define USB_EP13                                (0xDu)
-#define USB_EP14                                (0xEu)
-#define USB_EP15                                (0xFu)
+#define USB_EP0                 (0x0u)
+#define USB_EP1                 (0x1u)
+#define USB_EP2                 (0x2u)
+#define USB_EP3                 (0x3u)
+#define USB_EP4                 (0x4u)
+#define USB_EP5                 (0x5u)
+#define USB_EP6                 (0x6u)
+#define USB_EP7                 (0x7u)
+#define USB_EP8                 (0x8u)
+#define USB_EP9                 (0x9u)
+#define USB_EP10                (0xAu)
+#define USB_EP11                (0xBu)
+#define USB_EP12                (0xCu)
+#define USB_EP13                (0xDu)
+#define USB_EP14                (0xEu)
+#define USB_EP15                (0xFu)
 
 /* Descriptor type  Define */
-#define USB_DT_DEVICE                           (0x01u)   /* Configuration Descriptor */
-#define USB_DT_CONFIGURATION                    (0x02u)   /* Configuration Descriptor */
-#define USB_DT_STRING                           (0x03u)   /* Configuration Descriptor */
-#define USB_DT_INTERFACE                        (0x04u)   /* Interface Descriptor */
-#define USB_DT_ENDPOINT                         (0x05u)   /* Endpoint Descriptor */
-#define USB_DT_DEVICE_QUALIFIER                 (0x06u)   /* Device Qualifier Descriptor */
-#define USB_DT_OTHER_SPEED_CONF                 (0x07u)   /* Other Speed Configuration Descriptor */
-#define USB_DT_INTERFACE_POWER                  (0x08u)   /* Interface Power Descriptor */
-#define USB_DT_OTGDESCRIPTOR                    (0x09u)   /* OTG Descriptor */
-#define USB_DT_HUBDESCRIPTOR                    (0x29u)   /* HUB descriptor */
+#define USB_DT_DEVICE           (0x01u)     /* Configuration Descriptor */
+#define USB_DT_CONFIGURATION    (0x02u)     /* Configuration Descriptor */
+#define USB_DT_STRING           (0x03u)     /* Configuration Descriptor */
+#define USB_DT_INTERFACE        (0x04u)     /* Interface Descriptor */
+#define USB_DT_ENDPOINT         (0x05u)     /* Endpoint Descriptor */
+#define USB_DT_DEVICE_QUALIFIER (0x06u)     /* Device Qualifier Descriptor */
+#define USB_DT_OTHER_SPEED_CONF (0x07u)     /* Other Speed Configuration Descriptor */
+#define USB_DT_INTERFACE_POWER  (0x08u)     /* Interface Power Descriptor */
+#define USB_DT_OTGDESCRIPTOR    (0x09u)     /* OTG Descriptor */
+#define USB_DT_HUBDESCRIPTOR    (0x29u)     /* HUB descriptor */
 
 /* Interface class Define */
-#define USB_IFCLS_NOT                           (0x00u)   /* Un corresponding Class */
-#define USB_IFCLS_AUD                           (0x01u)   /* Audio Class */
-#define USB_IFCLS_CDC                           (0x02u)   /* CDC Class */
-#define USB_IFCLS_CDCC                          (0x02u)   /* CDC-Control Class */
-#define USB_IFCLS_HID                           (0x03u)   /* HID Class */
-#define USB_IFCLS_PHY                           (0x05u)   /* Physical Class */
-#define USB_IFCLS_IMG                           (0x06u)   /* Image Class */
-#define USB_IFCLS_PRN                           (0x07u)   /* Printer Class */
-#define USB_IFCLS_MAS                           (0x08u)   /* Mass Storage Class */
-#define USB_IFCLS_HUB                           (0x09u)   /* HUB Class */
-#define USB_IFCLS_CDCD                          (0x0Au)   /* CDC-Data Class */
-#define USB_IFCLS_CHIP                          (0x0Bu)   /* Chip/Smart Card Class */
-#define USB_IFCLS_CNT                           (0x0Cu)   /* Content-Security Class */
-#define USB_IFCLS_VID                           (0x0Du)   /* Video Class */
-#define USB_IFCLS_DIAG                          (0xDCu)   /* Diagnostic Device */
-#define USB_IFCLS_WIRE                          (0xE0u)   /* Wireless Controller */
-#define USB_IFCLS_APL                           (0xFEu)   /* Application-Specific */
-#define USB_IFCLS_VEN                           (0xFFu)   /* Vendor-Specific Class */
+#define USB_IFCLS_NOT           (0x00u)     /* Un corresponding Class */
+#define USB_IFCLS_AUD           (0x01u)     /* Audio Class */
+#define USB_IFCLS_CDC           (0x02u)     /* CDC Class */
+#define USB_IFCLS_CDCC          (0x02u)     /* CDC-Control Class */
+#define USB_IFCLS_HID           (0x03u)     /* HID Class */
+#define USB_IFCLS_PHY           (0x05u)     /* Physical Class */
+#define USB_IFCLS_IMG           (0x06u)     /* Image Class */
+#define USB_IFCLS_PRN           (0x07u)     /* Printer Class */
+#define USB_IFCLS_MAS           (0x08u)     /* Mass Storage Class */
+#define USB_IFCLS_HUB           (0x09u)     /* HUB Class */
+#define USB_IFCLS_CDCD          (0x0Au)     /* CDC-Data Class */
+#define USB_IFCLS_CHIP          (0x0Bu)     /* Chip/Smart Card Class */
+#define USB_IFCLS_CNT           (0x0Cu)     /* Content-Security Class */
+#define USB_IFCLS_VID           (0x0Du)     /* Video Class */
+#define USB_IFCLS_DIAG          (0xDCu)     /* Diagnostic Device */
+#define USB_IFCLS_WIRE          (0xE0u)     /* Wireless Controller */
+#define USB_IFCLS_APL           (0xFEu)     /* Application-Specific */
+#define USB_IFCLS_VEN           (0xFFu)     /* Vendor-Specific Class */
 
 /* Endpoint Descriptor  Define */
-#define USB_EP_IN                               (0x80u)   /* In Endpoint */
-#define USB_EP_OUT                              (0x00u)   /* Out Endpoint */
-#define USB_EP_ISO                              (0x01u)   /* Isochronous Transfer */
-#define USB_EP_BULK                             (0x02u)   /* Bulk Transfer */
-#define USB_EP_INT                              (0x03u)   /* Interrupt Transfer */
+#define USB_EP_IN               (0x80u)     /* In Endpoint */
+#define USB_EP_OUT              (0x00u)     /* Out Endpoint */
+#define USB_EP_ISO              (0x01u)     /* Isochronous Transfer */
+#define USB_EP_BULK             (0x02u)     /* Bulk Transfer */
+#define USB_EP_INT              (0x03u)     /* Interrupt Transfer */
 
 /* Configuration descriptor bit define */
-#define USB_CF_RESERVED                         (0x80u)   /* Reserved(set to 1) */
-#define USB_CF_SELFP                            (0x40u)   /* Self Powered */
-#define USB_CF_BUSP                             (0x00u)   /* Bus Powered */
-#define USB_CF_RWUPON                           (0x20u)   /* Remote Wake up ON */
-#define USB_CF_RWUPOFF                          (0x00u)   /* Remote Wake up OFF */
+#define USB_CF_RESERVED         (0x80u)     /* Reserved(set to 1) */
+#define USB_CF_SELFP            (0x40u)     /* Self Powered */
+#define USB_CF_BUSP             (0x00u)     /* Bus Powered */
+#define USB_CF_RWUPON           (0x20u)     /* Remote Wake up ON */
+#define USB_CF_RWUPOFF          (0x00u)     /* Remote Wake up OFF */
 
  /* Descriptor length Define */
-#define USB_DD_BLENGTH                          (18u)     /* Device Descriptor Length */
-#define USB_CD_BLENGTH                          (9u)      /* Configuration Descriptor Length */
-#define USB_ID_BLENGTH                          (9u)      /* Interface Descriptor Length */
-#define USB_ED_BLENGTH                          (7u)      /* Endpoint Descriptor Length */
+#define USB_DD_BLENGTH          (18u)       /* Device Descriptor Length */
+#define USB_CD_BLENGTH          (9u)        /* Configuration Descriptor Length */
+#define USB_ID_BLENGTH          (9u)        /* Interface Descriptor Length */
+#define USB_ED_BLENGTH          (7u)        /* Endpoint Descriptor Length */
 
+#define USB_BUFSIZE_BIT         (10u)
 
-// r_usb_reg_access.h
-#define USB_BUFSIZE_BIT   (10u)
-
-
-// other
-#define USB_FUNCTION_CFIFO_USE                      (0x0000)
-#define USB_FUNCTION_D0FIFO_USE                     (0x1000)
-#define USB_FUNCTION_D1FIFO_USE                     (0x2000)
+/* other */
+#define USB_FUNCTION_CFIFO_USE  (0x0000u)
+#define USB_FUNCTION_D0FIFO_USE (0x1000u)
+#define USB_FUNCTION_D1FIFO_USE (0x2000u)
 
 
 #endif
