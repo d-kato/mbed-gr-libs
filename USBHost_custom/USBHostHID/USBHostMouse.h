@@ -33,6 +33,9 @@ public:
     * Constructor
     */
     USBHostMouse();
+#if defined(TARGET_RZ_A2XX)
+    ~USBHostMouse();
+#endif
 
     /**
      * Try to connect a mouse device
@@ -113,7 +116,11 @@ private:
     USBHost * host;
     USBDeviceConnected * dev;
     USBEndpoint * int_in;
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * report;
+#else
     uint8_t report[8];
+#endif
 
     bool dev_connected;
     bool mouse_device_found;

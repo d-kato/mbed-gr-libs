@@ -52,6 +52,9 @@ Macro definitions
 #define STBAK25_BIT (0x20u)
 #define STBRQ24_BIT (0x10u)
 #define STBAK24_BIT (0x10u)
+#define CLUT8_TABLE_NUM         (256u)
+#define CLUT4_TABLE_NUM         (16u)
+#define CLUT1_TABLE_NUM         (2u)
 
 /******************************************************************************
 Typedef definitions
@@ -141,6 +144,50 @@ static const IRQn_Type vdc5_irq_set_tbl[] = {
     IV5_VBUFERR0_IRQn,
     IV6_VBUFERR0_IRQn,
     S0_WLINE0_IRQn,
+};
+
+static const uint32_t color_table256[CLUT8_TABLE_NUM] = {
+  0xFF000000u, 0xFF010101u, 0xFF020202u, 0xFF030303u, 0xFF040404u, 0xFF050505u, 0xFF060606u, 0xFF070707u, /*   0 -   7 */
+  0xFF080808u, 0xFF090909u, 0xFF0A0A0Au, 0xFF0B0B0Bu, 0xFF0C0C0Cu, 0xFF0D0D0Du, 0xFF0E0E0Eu, 0xFF0F0F0Fu, /*   8 -  15 */
+  0xFF101010u, 0xFF111111u, 0xFF121212u, 0xFF131313u, 0xFF141414u, 0xFF151515u, 0xFF161616u, 0xFF171717u, /*  16 -  23 */
+  0xFF181818u, 0xFF191919u, 0xFF1A1A1Au, 0xFF1B1B1Bu, 0xFF1C1C1Cu, 0xFF1E1E1Eu, 0xFF1E1E1Eu, 0xFF1F1F1Fu, /*  24 -  31 */
+  0xFF202020u, 0xFF212121u, 0xFF222222u, 0xFF232323u, 0xFF242424u, 0xFF252525u, 0xFF262626u, 0xFF272727u, /*  32 -  39 */
+  0xFF282828u, 0xFF292929u, 0xFF2A2A2Au, 0xFF2B2B2Bu, 0xFF2C2C2Cu, 0xFF2E2E2Eu, 0xFF2E2E2Eu, 0xFF2F2F2Fu, /*  40 -  47 */
+  0xFF303030u, 0xFF313131u, 0xFF323232u, 0xFF333333u, 0xFF343434u, 0xFF353535u, 0xFF363636u, 0xFF373737u, /*  48 -  55 */
+  0xFF383838u, 0xFF393939u, 0xFF3A3A3Au, 0xFF3B3B3Bu, 0xFF3C3C3Cu, 0xFF3E3E3Eu, 0xFF3E3E3Eu, 0xFF3F3F3Fu, /*  56 -  63 */
+  0xFF404040u, 0xFF414141u, 0xFF424242u, 0xFF434343u, 0xFF444444u, 0xFF454545u, 0xFF464646u, 0xFF474747u, /*  64 -  71 */
+  0xFF484848u, 0xFF494949u, 0xFF4A4A4Au, 0xFF4B4B4Bu, 0xFF4C4C4Cu, 0xFF4E4E4Eu, 0xFF4E4E4Eu, 0xFF4F4F4Fu, /*  72 -  79 */
+  0xFF505050u, 0xFF515151u, 0xFF525252u, 0xFF535353u, 0xFF545454u, 0xFF555555u, 0xFF565656u, 0xFF575757u, /*  80 -  87 */
+  0xFF585858u, 0xFF595959u, 0xFF5A5A5Au, 0xFF5B5B5Bu, 0xFF5C5C5Cu, 0xFF5E5E5Eu, 0xFF5E5E5Eu, 0xFF5F5F5Fu, /*  88 -  95 */
+  0xFF606060u, 0xFF616161u, 0xFF626262u, 0xFF636363u, 0xFF646464u, 0xFF656565u, 0xFF666666u, 0xFF676767u, /*  96 - 103 */
+  0xFF686868u, 0xFF696969u, 0xFF6A6A6Au, 0xFF6B6B6Bu, 0xFF6C6C6Cu, 0xFF6E6E6Eu, 0xFF6E6E6Eu, 0xFF6F6F6Fu, /* 104 - 111 */
+  0xFF707070u, 0xFF717171u, 0xFF727272u, 0xFF737373u, 0xFF747474u, 0xFF757575u, 0xFF767676u, 0xFF777777u, /* 112 - 119 */
+  0xFF787878u, 0xFF797979u, 0xFF7A7A7Au, 0xFF7B7B7Bu, 0xFF7C7C7Cu, 0xFF7E7E7Eu, 0xFF7E7E7Eu, 0xFF7F7F7Fu, /* 120 - 127 */
+  0xFF808080u, 0xFF818181u, 0xFF828282u, 0xFF838383u, 0xFF848484u, 0xFF858585u, 0xFF868686u, 0xFF878787u, /* 128 - 135 */
+  0xFF888888u, 0xFF898989u, 0xFF8A8A8Au, 0xFF8B8B8Bu, 0xFF8C8C8Cu, 0xFF8E8E8Eu, 0xFF8E8E8Eu, 0xFF8F8F8Fu, /* 136 - 143 */
+  0xFF909090u, 0xFF919191u, 0xFF929292u, 0xFF939393u, 0xFF949494u, 0xFF959595u, 0xFF969696u, 0xFF979797u, /* 144 - 151 */
+  0xFF989898u, 0xFF999999u, 0xFF9A9A9Au, 0xFF9B9B9Bu, 0xFF9C9C9Cu, 0xFF9E9E9Eu, 0xFF9E9E9Eu, 0xFF9F9F9Fu, /* 152 - 159 */
+  0xFFA0A0A0u, 0xFFA1A1A1u, 0xFFA2A2A2u, 0xFFA3A3A3u, 0xFFA4A4A4u, 0xFFA5A5A5u, 0xFFA6A6A6u, 0xFFA7A7A7u, /* 160 - 167 */
+  0xFFA8A8A8u, 0xFFA9A9A9u, 0xFFAAAAAAu, 0xFFABABABu, 0xFFACACACu, 0xFFAEAEAEu, 0xFFAEAEAEu, 0xFFAFAFAFu, /* 168 - 175 */
+  0xFFB0B0B0u, 0xFFB1B1B1u, 0xFFB2B2B2u, 0xFFB3B3B3u, 0xFFB4B4B4u, 0xFFB5B5B5u, 0xFFB6B6B6u, 0xFFB7B7B7u, /* 176 - 183 */
+  0xFFB8B8B8u, 0xFFB9B9B9u, 0xFFBABABAu, 0xFFBBBBBBu, 0xFFBCBCBCu, 0xFFBEBEBEu, 0xFFBEBEBEu, 0xFFBFBFBFu, /* 184 - 191 */
+  0xFFC0C0C0u, 0xFFC1C1C1u, 0xFFC2C2C2u, 0xFFC3C3C3u, 0xFFC4C4C4u, 0xFFC5C5C5u, 0xFFC6C6C6u, 0xFFC7C7C7u, /* 192 - 199 */
+  0xFFC8C8C8u, 0xFFC9C9C9u, 0xFFCACACAu, 0xFFCBCBCBu, 0xFFCCCCCCu, 0xFFCECECEu, 0xFFCECECEu, 0xFFCFCFCFu, /* 200 - 207 */
+  0xFFD0D0D0u, 0xFFD1D1D1u, 0xFFD2D2D2u, 0xFFD3D3D3u, 0xFFD4D4D4u, 0xFFD5D5D5u, 0xFFD6D6D6u, 0xFFD7D7D7u, /* 208 - 215 */
+  0xFFD8D8D8u, 0xFFD9D9D9u, 0xFFDADADAu, 0xFFDBDBDBu, 0xFFDCDCDCu, 0xFFDEDEDEu, 0xFFDEDEDEu, 0xFFDFDFDFu, /* 216 - 223 */
+  0xFFE0E0E0u, 0xFFE1E1E1u, 0xFFE2E2E2u, 0xFFE3E3E3u, 0xFFE4E4E4u, 0xFFE5E5E5u, 0xFFE6E6E6u, 0xFFE7E7E7u, /* 224 - 231 */
+  0xFFE8E8E8u, 0xFFE9E9E9u, 0xFFEAEAEAu, 0xFFEBEBEBu, 0xFFECECECu, 0xFFEEEEEEu, 0xFFEEEEEEu, 0xFFEFEFEFu, /* 232 - 239 */
+  0xFFF0F0F0u, 0xFFF1F1F1u, 0xFFF2F2F2u, 0xFFF3F3F3u, 0xFFF4F4F4u, 0xFFF5F5F5u, 0xFFF6F6F6u, 0xFFF7F7F7u, /* 240 - 247 */
+  0xFFF8F8F8u, 0xFFF9F9F9u, 0xFFFAFAFAu, 0xFFFBFBFBu, 0xFFFCFCFCu, 0xFFFEFEFEu, 0xFFFEFEFEu, 0xFFFFFFFFu  /* 248 - 255 */
+};
+
+static const uint32_t color_table16[CLUT4_TABLE_NUM] = {
+  0xFF000000u, 0xFF111111u, 0xFF222222u, 0xFF333333u, 0xFF444444u, 0xFF555555u, 0xFF666666u, 0xFF777777u, /*   0 -   7 */
+  0xFF888888u, 0xFF999999u, 0xFFAAAAAAu, 0xFFBBBBBBu, 0xFFCCCCCCu, 0xFFDDDDDDu, 0xFFEEEEEEu, 0xFFFFFFFFu  /*   8 -  15 */
+};
+
+static const uint32_t color_table2[CLUT1_TABLE_NUM] = {
+  0xFF000000u, 0xFFFFFFFFu
 };
 
 /******************************************************************************
@@ -766,7 +813,8 @@ drv_graphics_error_t DRV_Graphics_Read_Setting (
     uint32_t                    fb_stride,
     drv_graphics_format_t       gr_format,
     drv_wr_rd_swa_t             wr_rd_swa,
-    drv_rect_t                * gr_rect )
+    drv_rect_t                * gr_rect,
+    drv_clut_t                * gr_clut )
 {
     drv_graphics_error_t    drv_error   = DRV_GRAPHICS_OK;
     vdc5_channel_t          ch          = VDC5_CHANNEL_0;
@@ -807,6 +855,15 @@ drv_graphics_error_t DRV_Graphics_Read_Setting (
             case DRV_GRAPHICS_FORMAT_ARGB4444:
                 vdc5_gr_format = VDC5_GR_FORMAT_ARGB4444;
                 break;
+            case DRV_GRAPHICS_FORMAT_CLUT8:
+                vdc5_gr_format = VDC5_GR_FORMAT_CLUT8;
+                break;
+            case DRV_GRAPHICS_FORMAT_CLUT4:
+                vdc5_gr_format = VDC5_GR_FORMAT_CLUT4;
+                break;
+            case DRV_GRAPHICS_FORMAT_CLUT1:
+                vdc5_gr_format = VDC5_GR_FORMAT_CLUT1;
+                break;
             default:
                 drv_error = DRV_GRAPHICS_FORMAT_ERR;
                 break;
@@ -842,6 +899,33 @@ drv_graphics_error_t DRV_Graphics_Read_Setting (
             drv_error = DRV_GRAPHICS_VDC5_ERR;
         }
     }
+
+    if( drv_error == DRV_GRAPHICS_OK ) {
+        if ((vdc5_gr_format == VDC5_GR_FORMAT_CLUT8)
+         || (vdc5_gr_format == VDC5_GR_FORMAT_CLUT4)
+         || (vdc5_gr_format == VDC5_GR_FORMAT_CLUT1)) {
+            vdc5_clut_t vdc5_clut;
+
+            if (gr_clut != NULL) {
+                vdc5_clut.color_num = gr_clut->color_num;
+                vdc5_clut.clut = gr_clut->clut;
+            } else if (vdc5_gr_format == VDC5_GR_FORMAT_CLUT8) {
+                vdc5_clut.color_num = CLUT8_TABLE_NUM;
+                vdc5_clut.clut = color_table256;
+            } else if (vdc5_gr_format == VDC5_GR_FORMAT_CLUT4) {
+                vdc5_clut.color_num = CLUT4_TABLE_NUM;
+                vdc5_clut.clut = color_table16;
+            } else {
+                vdc5_clut.color_num = CLUT1_TABLE_NUM;
+                vdc5_clut.clut = color_table2;
+            }
+            error = R_VDC5_CLUT(ch, vdc5_layer_id, &vdc5_clut);
+            if (error != VDC5_OK) {
+                drv_error = DRV_GRAPHICS_VDC5_ERR;
+            }
+        }
+    }
+
     return drv_error;
 }   /* End of function DRV_Graphics_Read_Setting() */
 

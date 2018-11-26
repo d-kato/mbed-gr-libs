@@ -33,8 +33,19 @@
 
 WANDongleSerialPort::WANDongleSerialPort() : cb_tx_en(false), cb_rx_en(false), listener(NULL)
 {
+#if defined(TARGET_RZ_A2XX)
+  buf_out = (uint8_t *)AllocNonCacheMem(WANDONGLE_MAX_OUTEP_SIZE);
+  buf_in  = (uint8_t *)AllocNonCacheMem(WANDONGLE_MAX_INEP_SIZE);
+#endif
   reset();
 }
+
+#if defined(TARGET_RZ_A2XX)
+WANDongleSerialPort::~WANDongleSerialPort() {
+  FreeNonCacheMem(buf_out);
+  FreeNonCacheMem(buf_in);
+}
+#endif
 
 void WANDongleSerialPort::init(USBHost* pHost)
 {

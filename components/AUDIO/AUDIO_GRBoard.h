@@ -70,6 +70,28 @@ public:
     }
 };
 
+#elif defined(TARGET_RZ_A2M_EVB)
+
+#include "mbed.h"
+#include "WM8978_RBSP.h"
+
+/** AUDIO_GRBoard class
+*
+*/
+class AUDIO_GRBoard : public WM8978_RBSP {
+public:
+
+    /** Create a audio codec class
+     * 
+     * @param int_level     Interupt priority (SSIF)
+     * @param max_write_num The upper limit of write buffer (SSIF)
+     * @param max_read_num  The upper limit of read buffer (SSIF)
+     */
+    AUDIO_GRBoard(uint8_t int_level = 0x80, int32_t max_write_num = 16, int32_t max_read_num = 16) :
+      WM8978_RBSP(P8_6, NC, P8_7, P8_4, P9_6, P9_5, P9_4, P9_3, P6_4, int_level, max_write_num, max_read_num) {
+    }
+};
+
 #endif
 
 #endif

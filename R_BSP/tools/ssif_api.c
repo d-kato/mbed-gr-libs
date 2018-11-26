@@ -169,6 +169,59 @@ static void ssif_power_enable(uint32_t ssif_ch) {
     (void)dummy;
 }
 
+#elif defined(TARGET_RZ_A2XX)
+
+static const PinMap PinMap_SSIF_SCK[] = {
+//   pin      ch     func
+    {P9_6   , 0    , 5},
+    {NC     , NC   , 0}
+};
+
+static const PinMap PinMap_SSIF_WS[] = {
+//   pin      ch     func
+    {P9_5   , 0    , 5},
+    {NC     , NC   , 0}
+};
+
+static const PinMap PinMap_SSIF_TxD[] = {
+//   pin      ch     func
+    {P9_4   , 0    , 5},
+    {NC     , NC   , 0}
+};
+
+static const PinMap PinMap_SSIF_RxD[] = {
+//   pin      ch     func
+    {P9_3   , 0    , 5},
+    {NC     , NC   , 0}
+};
+
+static void ssif_power_enable(uint32_t ssif_ch) {
+    volatile uint8_t dummy;
+
+    switch (ssif_ch) {
+        case 0:
+            CPG.STBCR7.BYTE &= ~(0x08);
+            break;
+        case 1:
+            CPG.STBCR7.BYTE &= ~(0x04);
+            break;
+        case 2:
+            CPG.STBCR7.BYTE &= ~(0x02);
+            break;
+        case 3:
+            CPG.STBCR7.BYTE &= ~(0x01);
+            break;
+    }
+    dummy = CPG.STBCR7.BYTE;
+    (void)dummy;
+}
+
+static const PinMap PinMap_SPDIF_AUDIO_CLK[] = {
+    {P6_4,  0,      4},
+    {PH_0,  0,      1},
+    {NC,    NC,     0}
+};
+
 #endif
 
 int32_t ssif_init(PinName sck, PinName ws, PinName tx, PinName rx, PinName audio_clk) {

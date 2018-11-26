@@ -37,6 +37,9 @@ public:
     * Constructor
     */
     USBHostHub();
+#if defined(TARGET_RZ_A2XX)
+    ~USBHostHub();
+#endif
 
     /**
     * Check if a USB Hub is connected
@@ -104,7 +107,12 @@ private:
 
     void rxHandler();
 
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * buf;
+    uint32_t * p_st;
+#else
     uint8_t buf[sizeof(HubDescriptor)];
+#endif
 
     int hub_intf;
     bool hub_device_found;

@@ -32,6 +32,12 @@
 USBHostMSD::USBHostMSD()
 {
     host = USBHost::getHostInst();
+#if defined(TARGET_RZ_A2XX)
+    trans_buf = (uint8_t *)AllocNonCacheMem(512);
+    result    = (uint8_t *)AllocNonCacheMem(36);
+    p_cbw     = (CBW *)AllocNonCacheMem(sizeof(CBW));
+    p_csw     = (CSW *)AllocNonCacheMem(sizeof(CSW));
+#endif
     msd_init();
 }
 
@@ -40,6 +46,11 @@ USBHostMSD::~USBHostMSD()
     if (_is_initialized) {
         deinit();
     }
+#if defined(TARGET_RZ_A2XX)
+    FreeNonCacheMem(trans_buf);
+    FreeNonCacheMem(p_cbw);
+    FreeNonCacheMem(p_csw);
+#endif
 }
 
 void USBHostMSD::msd_init() {
@@ -138,7 +149,10 @@ int USBHostMSD::testUnitReady() {
 int USBHostMSD::readCapacity() {
     USB_DBG("Read capacity");
     uint8_t cmd[10] = {0x25,0,0,0,0,0,0,0,0,0};
+#if defined(TARGET_RZ_A2XX)
+#else
     uint8_t result[8];
+#endif
     int status = SCSITransfer(cmd, 10, DEVICE_TO_HOST, result, 8);
     if (status == 0) {
         blockCount = (result[0] << 24) | (result[1] << 16) | (result[2] << 8) | result[3];
@@ -152,7 +166,10 @@ int USBHostMSD::readCapacity() {
 int USBHostMSD::SCSIRequestSense() {
     USB_DBG("Request sense");
     uint8_t cmd[6] = {0x03,0,0,0,18,0};
+#if defined(TARGET_RZ_A2XX)
+#else
     uint8_t result[18];
+#endif
     int status = SCSITransfer(cmd, 6, DEVICE_TO_HOST, result, 18);
     return status;
 }
@@ -162,7 +179,10 @@ int USBHostMSD::inquiry(uint8_t lun, uint8_t page_code) {
     USB_DBG("Inquiry");
     uint8_t evpd = (page_code == 0) ? 0 : 1;
     uint8_t cmd[6] = {0x12, uint8_t((lun << 5) | evpd), page_code, 0, 36, 0};
+#if defined(TARGET_RZ_A2XX)
+#else
     uint8_t result[36];
+#endif
     int status = SCSITransfer(cmd, 6, DEVICE_TO_HOST, result, 36);
     if (status == 0) {
         char vid_pid[17];
@@ -205,6 +225,22 @@ int USBHostMSD::SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t 
 
     int res = 0;
 
+#if defined(TARGET_RZ_A2XX)
+    p_cbw->Signature = CBW_SIGNATURE;
+    p_cbw->Tag = 0;
+    p_cbw->DataLength = transfer_len;
+    p_cbw->Flags = flags;
+    p_cbw->LUN = 0;
+    p_cbw->CBLength = cmd_len;
+    memset(p_cbw->CB,0,sizeof(p_cbw->CB));
+    if (cmd) {
+        memcpy(p_cbw->CB,cmd,cmd_len);
+    }
+
+    // send the cbw
+    USB_DBG("Send CBW");
+    res = host->bulkWrite(dev, bulk_out,(uint8_t *)p_cbw, 31);
+#else
     cbw.Signature = CBW_SIGNATURE;
     cbw.Tag = 0;
     cbw.DataLength = transfer_len;
@@ -219,6 +255,7 @@ int USBHostMSD::SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t 
     // send the cbw
     USB_DBG("Send CBW");
     res = host->bulkWrite(dev, bulk_out,(uint8_t *)&cbw, 31);
+#endif
     if (checkResult(res, bulk_out))
         return -1;
 
@@ -240,6 +277,49 @@ int USBHostMSD::SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t 
     }
 
     // status stage
+#if defined(TARGET_RZ_A2XX)
+    p_csw->Signature = 0;
+    USB_DBG("Read CSW");
+    res = host->bulkRead(dev, bulk_in,(uint8_t *)p_csw, 13);
+    if (checkResult(res, bulk_in))
+        return -1;
+
+    if (p_csw->Signature != CSW_SIGNATURE) {
+        return -1;
+    }
+
+    USB_DBG("recv csw: status: %d", p_csw->Status);
+
+    // ModeSense?
+    if ((p_csw->Status == 1) && (cmd[0] != 0x03)) {
+        USB_DBG("request mode sense");
+        return SCSIRequestSense();
+    }
+
+    // perform reset recovery
+    if ((p_csw->Status == 2) && (cmd[0] != 0x03)) {
+
+        // send Bulk-Only Mass Storage Reset request
+        res = host->controlWrite(   dev,
+                                    USB_RECIPIENT_INTERFACE | USB_HOST_TO_DEVICE | USB_REQUEST_TYPE_CLASS,
+                                    BO_MASS_STORAGE_RESET,
+                                    0, msd_intf, NULL, 0);
+
+        // unstall both endpoints
+        res = host->controlWrite(   dev,
+                                    USB_RECIPIENT_ENDPOINT | USB_HOST_TO_DEVICE | USB_REQUEST_TYPE_STANDARD,
+                                    CLEAR_FEATURE,
+                                    0, bulk_in->getAddress(), NULL, 0);
+
+        res = host->controlWrite(   dev,
+                                    USB_RECIPIENT_ENDPOINT | USB_HOST_TO_DEVICE | USB_REQUEST_TYPE_STANDARD,
+                                    CLEAR_FEATURE,
+                                    0, bulk_out->getAddress(), NULL, 0);
+
+    }
+
+    return p_csw->Status;
+#else
     csw.Signature = 0;
     USB_DBG("Read CSW");
     res = host->bulkRead(dev, bulk_in,(uint8_t *)&csw, 13);
@@ -281,6 +361,7 @@ int USBHostMSD::SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t 
     }
 
     return csw.Status;
+#endif
 }
 
 
@@ -301,10 +382,17 @@ int USBHostMSD::dataTransfer(uint8_t * buf, uint32_t block, uint8_t nbBlock, int
 }
 
 int USBHostMSD::getMaxLun() {
+#if defined(TARGET_RZ_A2XX)
+    uint8_t res;
+    res = host->controlRead(    dev, USB_RECIPIENT_INTERFACE | USB_DEVICE_TO_HOST | USB_REQUEST_TYPE_CLASS,
+                                0xfe, 0, msd_intf, trans_buf, 1);
+    USB_DBG("max lun: %d", trans_buf[0]);
+#else
     uint8_t buf[1], res;
     res = host->controlRead(    dev, USB_RECIPIENT_INTERFACE | USB_DEVICE_TO_HOST | USB_REQUEST_TYPE_CLASS,
                                 0xfe, 0, msd_intf, buf, 1);
     USB_DBG("max lun: %d", buf[0]);
+#endif
     return res;
 }
 
@@ -363,7 +451,12 @@ int USBHostMSD::program(const void *b, bd_addr_t addr, bd_size_t size)
         bd_addr_t block = addr / 512;
 
         // send the data block
+#if defined(TARGET_RZ_A2XX)
+        (void)memcpy(trans_buf, buffer, 512);
+        if (dataTransfer((uint8_t*)trans_buf, block, 1, HOST_TO_DEVICE)) {
+#else
         if (dataTransfer((uint8_t*)buffer, block, 1, HOST_TO_DEVICE)) {
+#endif
             _lock.unlock();
             return BD_ERROR_DEVICE_ERROR;
         }
@@ -393,10 +486,18 @@ int USBHostMSD::read(void *b, bd_addr_t addr, bd_size_t size)
         bd_addr_t block = addr / 512;
 
         // receive the data
+#if defined(TARGET_RZ_A2XX)
+        if (dataTransfer((uint8_t*)trans_buf, block, 1, DEVICE_TO_HOST)) {
+            _lock.unlock();
+            return BD_ERROR_DEVICE_ERROR;
+        }
+        (void)memcpy(buffer, trans_buf, 512);
+#else
         if (dataTransfer((uint8_t*)buffer, block, 1, DEVICE_TO_HOST)) {
             _lock.unlock();
             return BD_ERROR_DEVICE_ERROR;
         }
+#endif
         buffer += 512;
         addr += 512;
         size -= 512;

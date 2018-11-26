@@ -34,6 +34,9 @@ public:
      * Constructor
      */
     USBHostMIDI();
+#if defined(TARGET_RZ_A2XX)
+    ~USBHostMIDI();
+#endif
 
     /**
      * Check if a USB MIDI device is connected
@@ -320,7 +323,12 @@ private:
 
     void init();
 
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * buf_in;
+    uint8_t * buf_out;
+#else
     uint8_t buf[64];
+#endif
 
     void rxHandler();
 

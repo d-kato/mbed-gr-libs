@@ -1087,9 +1087,15 @@ jcu_errorcode_t  R_JCU_Set2ndCacheAttribute(
 
     R_OSPL_DisableAllInterrupt();
 
+#if defined(TARGET_RZ_A1XX)
     value = INB.AXIBUSCTL0;
     value = new_value | ( value & ~mask_JCU );  /* Mutual Exclusion from Ether */
     INB.AXIBUSCTL0 = value;
+#elif defined(TARGET_RZ_A2XX)
+    value = PRR.AXIBUSCTL0.LONG;
+    value = new_value | ( value & ~mask_JCU );  /* Mutual Exclusion from Ether */
+    PRR.AXIBUSCTL0.LONG = value;
+#endif
 
     returnValue = JCU_ERROR_OK;
     R_OSPL_EnableAllInterrupt();

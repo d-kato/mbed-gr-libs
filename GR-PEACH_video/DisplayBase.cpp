@@ -73,6 +73,25 @@ DisplayBase::DisplayBase( void )
     _video_ext_in_config.cap_hs_pos     = 302u;                     /* Capture start position form Hsync             */
     _video_ext_in_config.cap_width      = 640u;                     /* Capture width                                 */
     _video_ext_in_config.cap_height     = 468u;                     /* Capture height should be a multiple of 4      */
+
+#if defined(TARGET_RZ_A2XX)
+    /* mipi */
+    _video_mipi_config.mipi_lanenum    = 2;
+    _video_mipi_config.mipi_vc         = 0;
+    _video_mipi_config.mipi_interlace  = 0;
+    _video_mipi_config.mipi_laneswap   = 0; /* Progressive */
+    _video_mipi_config.mipi_frametop   = 0;
+    _video_mipi_config.mipi_outputrate = 80;
+
+    _video_mipi_config.mipi_phy_timing.mipi_ths_prepare  = 0x00000012u;
+    _video_mipi_config.mipi_phy_timing.mipi_ths_settle   = 0x00000019u;
+    _video_mipi_config.mipi_phy_timing.mipi_tclk_prepare = 0x0000000Fu;
+    _video_mipi_config.mipi_phy_timing.mipi_tclk_settle  = 0x0000001Eu;
+    _video_mipi_config.mipi_phy_timing.mipi_tclk_miss    = 0x00000008u;
+    _video_mipi_config.mipi_phy_timing.mipi_t_init_slave = 0x0000338Fu;
+
+    memset(&_video_vin_setup, 0, sizeof(_video_vin_setup));
+#endif
 } /* End of constructor method () */
 
 /**************************************************************************//**
@@ -122,16 +141,13 @@ DisplayBase::Graphics_init( const lcd_config_t * lcd_config )
 DisplayBase::graphics_error_t
 DisplayBase::Graphics_Video_init( video_input_sel_t video_input_sel, video_ext_in_config_t * video_ext_in_config )
 {
-    graphics_error_t error = GRAPHICS_OK;
+    graphics_error_t error;
 
-    if ((video_input_sel == INPUT_SEL_EXT) || (video_input_sel == INPUT_SEL_CEU)) {
+    if ((video_input_sel == INPUT_SEL_EXT)
+     || (video_input_sel == INPUT_SEL_CEU)) {
         _video_input_sel = video_input_sel;
-    } else {
-        error = GRAPHICS_PARAM_RANGE_ERR;
-    }
 
-    if( error == GRAPHICS_OK ) {
-        if( video_ext_in_config != NULL ) {
+        if (video_ext_in_config != NULL) {
             /* Signals supplied via the external input pins        */
             /* if using Video decoder output signals, not using value. */
             _video_ext_in_config.inp_format    = video_ext_in_config->inp_format;
@@ -149,9 +165,45 @@ DisplayBase::Graphics_Video_init( video_input_sel_t video_input_sel, video_ext_i
             _video_ext_in_config.cap_width     = video_ext_in_config->cap_width;
             _video_ext_in_config.cap_height    = video_ext_in_config->cap_height;
         }
+        error = (graphics_error_t)DRV_Graphics_Video_init( (drv_video_input_sel_t)video_input_sel,
+                (drv_video_ext_in_config_t *)&_video_ext_in_config );
+    } else {
+        error = GRAPHICS_PARAM_RANGE_ERR;
     }
-    return (graphics_error_t)DRV_Graphics_Video_init( (drv_video_input_sel_t)video_input_sel,
-            (drv_video_ext_in_config_t *)&_video_ext_in_config );
+
+    return error;
+} /* End of method Graphics_Video_init() */
+
+/**************************************************************************//**
+ * @brief       Graphics Video initialization processing
+ * @param[in]   video_input_sel                : Input select
+ * @param[in]   video_mipi_config              : MIPI configuration
+ * @param[in]   video_vin_setup                : MIPI configuration
+ * @retval      error code
+******************************************************************************/
+DisplayBase::graphics_error_t
+DisplayBase::Graphics_Video_init( video_input_sel_t video_input_sel, video_mipi_param_t * video_mipi_config, video_vin_setup_t * video_vin_setup )
+{
+    graphics_error_t error = GRAPHICS_VDC5_ERR;
+
+#if defined(TARGET_RZ_A2XX)
+    if (video_input_sel == INPUT_SEL_MIPI) {
+        _video_input_sel = video_input_sel;
+
+        if (video_mipi_config != NULL) {
+            memcpy(&_video_mipi_config, video_mipi_config, sizeof(_video_mipi_config));
+        }
+        if (video_vin_setup != NULL) {
+            memcpy(&_video_vin_setup, video_vin_setup, sizeof(_video_vin_setup));
+        }
+        error = (graphics_error_t)DRV_Graphics_Video_init( (drv_video_input_sel_t)video_input_sel,
+                (drv_video_ext_in_config_t *)&_video_ext_in_config );
+    } else {
+        error = GRAPHICS_PARAM_RANGE_ERR;
+    }
+#endif
+
+    return error;
 } /* End of method Graphics_Video_init() */
 
 /**************************************************************************//**
@@ -212,6 +264,11 @@ DisplayBase::Graphics_Ceu_Port_Init( PinName *pin, unsigned int pin_count )
 DisplayBase::graphics_error_t
 DisplayBase::Graphics_Irq_Handler_Set( int_type_t irq, unsigned short num, void (* callback)(int_type_t)  )
 {
+#if defined(TARGET_RZ_A2XX)
+    if (( _video_input_sel == INPUT_SEL_MIPI ) && (irq == DisplayBase::INT_TYPE_S0_VFIELD)) {
+        num = _video_vin_setup.vin_preclip.vin_preclip_endy - _video_vin_setup.vin_preclip.vin_preclip_starty;
+    }
+#endif
     return (graphics_error_t)DRV_Graphics_Irq_Handler_Set( (vdc5_int_type_t)irq, num, (void (*)(vdc5_int_type_t))callback );
 } /* End of method Graphics_Irq_Handler_Set() */
 
@@ -300,6 +357,7 @@ DisplayBase::Video_Stop( video_input_channel_t video_input_channel )
  *      - WR_RD_WRSWA_32_16BIT   : Swapped in 32-bit units + 16-bit units: 7-8-5-6-3-4-1-2
  *      - WR_RD_WRSWA_32_16_8BIT : Swapped in 32-bit units + 16-bit units + 8-bit units: 8-7-6-5-4-3-2-1
  * @param[in]   gr_rect                    : Graphics display area
+ * @param[in]   gr_clut                    : CLUT setup parameter
  * @retval      Error code
 ******************************************************************************/
 DisplayBase::graphics_error_t
@@ -309,7 +367,8 @@ DisplayBase::Graphics_Read_Setting(
     unsigned int        fb_stride,
     graphics_format_t   gr_format,
     wr_rd_swa_t         wr_rd_swa,
-    rect_t            * gr_rect )
+    rect_t            * gr_rect,
+    clut_t            * gr_clut )
 {
     rect_t rect;
 
@@ -324,7 +383,8 @@ DisplayBase::Graphics_Read_Setting(
                fb_stride,
                (drv_graphics_format_t)gr_format,
                (drv_wr_rd_swa_t)wr_rd_swa,
-               (drv_rect_t *)&rect );
+               (drv_rect_t *)&rect,
+               (drv_clut_t *)gr_clut);
 } /* End of method Graphics_Read_Setting() */
 
 /**************************************************************************//**
@@ -439,6 +499,18 @@ DisplayBase::Video_Write_Setting(
                     write_buff_vw,
                     write_buff_hw,
                     (drv_video_ext_in_config_t *)&_video_ext_in_config);
+#if defined(TARGET_RZ_A2XX)
+    } else if( _video_input_sel == INPUT_SEL_MIPI ) {
+        error = (graphics_error_t) DRV_Video_Write_Setting_Mipi(
+                    framebuff,
+                    fb_stride,
+                    (drv_video_format_t)video_format,
+                    (drv_wr_rd_swa_t)wr_rd_swa,
+                    write_buff_vw,
+                    write_buff_hw,
+                    (drv_mipi_param_t *)&_video_mipi_config,
+                    (drv_vin_setup_t *)&_video_vin_setup);
+#endif
     } else {
         error = GRAPHICS_PARAM_RANGE_ERR;
     }

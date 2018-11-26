@@ -79,9 +79,17 @@ static uint8_t keymap[4][0x39] = {
 
 USBHostKeyboard::USBHostKeyboard() {
     host = USBHost::getHostInst();
+#if defined(TARGET_RZ_A2XX)
+    report  = (uint8_t *)AllocNonCacheMem(9);
+#endif
     init();
 }
 
+#if defined(TARGET_RZ_A2XX)
+USBHostKeyboard::~USBHostKeyboard() {
+  FreeNonCacheMem(report);
+}
+#endif
 
 void USBHostKeyboard::init() {
     dev = NULL;

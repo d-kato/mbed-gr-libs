@@ -52,8 +52,19 @@
 
 USBHostHub::USBHostHub() {
     host = NULL;
+#if defined(TARGET_RZ_A2XX)
+    buf = (uint8_t *)AllocNonCacheMem(sizeof(HubDescriptor));
+    p_st = (uint32_t *)AllocNonCacheMem(sizeof(HubDescriptor));
+#endif
     init();
 }
+
+#if defined(TARGET_RZ_A2XX)
+USBHostHub::~USBHostHub() {
+  FreeNonCacheMem(buf);
+  FreeNonCacheMem(p_st);
+}
+#endif
 
 void USBHostHub::init() {
     dev_connected = false;
@@ -260,6 +271,16 @@ void USBHostHub::clearPortFeature(uint32_t feature, uint8_t port) {
 }
 
 uint32_t USBHostHub::getPortStatus(uint8_t port) {
+#if defined(TARGET_RZ_A2XX)
+    host->controlRead(  dev,
+                        USB_DEVICE_TO_HOST | USB_REQUEST_TYPE_CLASS | USB_RECIPIENT_INTERFACE | USB_RECIPIENT_ENDPOINT,
+                        GET_STATUS,
+                        0,
+                        port,
+                        (uint8_t *)p_st,
+                        4);
+    return *p_st;
+#else
     uint32_t st;
     host->controlRead(  dev,
                         USB_DEVICE_TO_HOST | USB_REQUEST_TYPE_CLASS | USB_RECIPIENT_INTERFACE | USB_RECIPIENT_ENDPOINT,
@@ -269,6 +290,7 @@ uint32_t USBHostHub::getPortStatus(uint8_t port) {
                         (uint8_t *)&st,
                         4);
     return st;
+#endif
 }
 
 #endif

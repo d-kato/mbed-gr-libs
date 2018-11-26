@@ -168,9 +168,13 @@ errnum_t  R_JCU_OnInitialize(void)
 
     /* start to suuply the clock for JCU */
     { /* ->QAC 0306 */
+#if defined(TARGET_RZ_A1XX)
         uint32_t cpg_reg;
         cpg_reg = (uint32_t)(CPG.STBCR6) & ~CPG_JCU_CLOCK_POWER_OFF;
         CPG.STBCR6 =(uint8_t)cpg_reg;
+#elif defined(TARGET_RZ_A2XX)
+        CPG.STBCR5.BIT.MSTP51 = 0;
+#endif
     } /* <-QAC 0306 */
 
     e=0;
@@ -189,9 +193,13 @@ errnum_t  R_JCU_OnFinalize( errnum_t e )
 {
     /* stop to suuply the clock for JCU */
     { /* ->QAC 0306 */
+#if defined(TARGET_RZ_A1XX)
         uint32_t cpg_reg;
         cpg_reg = (uint32_t)(CPG.STBCR6) | CPG_JCU_CLOCK_POWER_OFF;
         CPG.STBCR6 = (uint8_t)cpg_reg;
+#elif defined(TARGET_RZ_A2XX)
+        CPG.STBCR5.BIT.MSTP51 = 1;
+#endif
     } /* <-QAC 0306 */
 
     return  e;

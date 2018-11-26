@@ -110,14 +110,18 @@ typedef enum {
     DRV_GRAPHICS_FORMAT_RGB565,         /* RGB565                   */
     DRV_GRAPHICS_FORMAT_RGB888,         /* RGB888                   */
     DRV_GRAPHICS_FORMAT_ARGB8888,       /* ARGB8888                 */
-    DRV_GRAPHICS_FORMAT_ARGB4444        /* ARGB4444                 */
+    DRV_GRAPHICS_FORMAT_ARGB4444,       /* ARGB4444                 */
+    DRV_GRAPHICS_FORMAT_CLUT8,          /* CLUT8                    */
+    DRV_GRAPHICS_FORMAT_CLUT4,          /* CLUT4                    */
+    DRV_GRAPHICS_FORMAT_CLUT1           /* CLUT1                    */
 } drv_graphics_format_t;
 
 /* video writing format select */
 typedef enum {
     DRV_VIDEO_FORMAT_YCBCR422 = 0,      /* YCbCr422                 */
     DRV_VIDEO_FORMAT_RGB565,            /* RGB565                   */
-    DRV_VIDEO_FORMAT_RGB888             /* RGB888                   */
+    DRV_VIDEO_FORMAT_RGB888,            /* RGB888                   */
+    DRV_VIDEO_FORMAT_RAW8               /* RAW8                   */
 } drv_video_format_t;
 
 
@@ -182,7 +186,8 @@ typedef enum {
 typedef enum {
     DRV_INPUT_SEL_VDEC     = 0,            /*!< Video decoder output signals */
     DRV_INPUT_SEL_EXT      = 1,            /*!< Signals supplied via the external input pins */
-    DRV_INPUT_SEL_CEU      = 2             /*!< Signals supplied via the CEU input pins */
+    DRV_INPUT_SEL_CEU      = 2,            /*!< Signals supplied via the CEU input pins */
+    DRV_INPUT_SEL_MIPI     = 3             /*!< Signals supplied via the MIPI input pins */
 } drv_video_input_sel_t;
 
 /* External input format select  */
@@ -223,6 +228,12 @@ typedef struct {
     uint16_t   hs;                  /* Horizontal start pos     */
     uint16_t   hw;                  /* Horizontal width         */
 } drv_rect_t;
+
+/*! CLUT setup parameter */
+typedef struct {
+    uint32_t            color_num;  /*!< The number of colors in CLUT */
+    const uint32_t    * clut;       /*!< Address of the area storing the CLUT data (in ARGB8888 format) */
+} drv_clut_t;
 
 /* lcd configuration  */
 typedef struct {
@@ -271,6 +282,70 @@ typedef struct {
     unsigned short               cap_height;    /*!< Capture height should be a multiple of 4.*/
 } drv_video_ext_in_config_t;
 
+/* mipi phy timing struct */
+typedef struct
+{
+    uint16_t mipi_ths_prepare;  /*!< Setting of the duration of the LP-00 state (immediately before entry to the HS-0 state) */
+    uint16_t mipi_ths_settle;   /*!< Setting of the period in which a transition to the HS state is ignored after the TTHS_PREPARE period begins */
+    uint16_t mipi_tclk_prepare; /*!< Setting of the duration of the LP-00 state (immediately before entry to the HS-0) */
+    uint16_t mipi_tclk_settle;  /*!< Setting of the period in which a transition to the HS state is ignored after the TCLK_PREPARE period begins */
+    uint16_t mipi_tclk_miss;    /*!< Setting of the period in which the absence of the clock is detected, and the HS-RX is disabled */
+    uint16_t mipi_t_init_slave; /*!< Minimum duration of the INIT state */
+} drv_mipi_phy_timing_t;
+
+/* mipi parameter struct */
+typedef struct
+{
+    uint8_t  mipi_lanenum;                 /*!< Mipi Lane Num */
+    uint8_t  mipi_vc;                      /*!< Mipi Virtual Channel */
+    uint8_t  mipi_interlace;               /*!< Interlace or Progressive */
+    uint8_t  mipi_laneswap;                /*!< Mipi Lane Swap Setting */
+    uint16_t mipi_frametop;                /*!< (for Interlace)Top Field Packet ID */
+    uint16_t mipi_outputrate;              /*!< Mipi Data Send Speed(Mbit per sec) */
+    drv_mipi_phy_timing_t mipi_phy_timing;  /*!< Mipi D-PHY timing settings */
+} drv_mipi_param_t;
+
+/*! Vin parameter Struct */
+typedef struct
+{
+    uint16_t vin_preclip_starty;    /*!< Pre Area Clip Start Line */
+    uint16_t vin_preclip_endy;      /*!< Pre Area Clip End Line */
+    uint16_t vin_preclip_startx;    /*!< Pre Area Clip Start Column */
+    uint16_t vin_preclip_endx;      /*!< Pre Area Clip End Column */
+} drv_vin_preclip_t;
+
+typedef struct
+{
+    uint8_t  vin_scaleon;           /*!< Scaling On or OFF */
+    uint8_t  vin_interpolation;     /*!< Scaling Interpolation */
+    uint16_t vin_scale_h;           /*!< Horizontal multiple */
+    uint16_t vin_scale_v;           /*!< vertical multiple */
+} drv_vin_scale_t;
+
+typedef struct
+{
+    uint16_t vin_afterclip_size_x;  /*!< After Area Clip horizontal size */
+    uint16_t vin_afterclip_size_y;  /*!< After Area Clip vertical size */
+} drv_vin_afterclip_t;
+
+typedef struct
+{
+    drv_vin_preclip_t   vin_preclip;     /*!< Pre Area Clip Parameter */
+    drv_vin_scale_t     vin_scale;       /*!< Scale Parameter */
+    drv_vin_afterclip_t vin_afterclip;   /*!< After Area Clip Parameter */
+    uint8_t         vin_yuv_clip;       /*!< YUV Range Clip Parameter */
+    uint8_t         vin_lut;            /*!< LUT Conversion On or OFF */
+    uint8_t         vin_inputformat;    /*!< Input Image Format */
+    uint8_t         vin_outputformat;   /*!< Output Image Format */
+    uint8_t         vin_outputendian;   /*!< Output Data Endian*/
+    uint8_t         vin_dither;         /*!< (for RGB565 or ARGB1555)Output Data Dithering On or Off */
+    uint8_t         vin_interlace;      /*!< (for Interlace input)Capture Method */
+    uint8_t         vin_alpha_val8;     /*!< (for ARGB8888)Alpha Value */
+    uint8_t         vin_alpha_val1;     /*!< (for ARGB1555)Alpha Value */
+    uint16_t        vin_stride;         /*!< Stride (byte) */
+    uint16_t        vin_ycoffset;       /*!< (for YC separate output)Address Offset Value */
+} drv_vin_setup_t;
+
 /******************************************************************************
 Typedef definitions
 ******************************************************************************/
@@ -299,7 +374,8 @@ drv_graphics_error_t DRV_Graphics_Read_Setting (
     uint32_t                fb_stride,
     drv_graphics_format_t   gr_format,
     drv_wr_rd_swa_t         wr_rd_swa,
-    drv_rect_t            * gr_rect );
+    drv_rect_t            * gr_rect,
+    drv_clut_t            * gr_clut );
 
 drv_graphics_error_t DRV_Graphics_Read_Change (
     drv_graphics_layer_t    layer_id,
@@ -333,6 +409,16 @@ drv_graphics_error_t DRV_Video_Write_Setting_Ceu (
     uint16_t                        video_write_buff_vw,
     uint16_t                        video_write_buff_hw,
     drv_video_ext_in_config_t     * drv_video_ext_in_config);
+
+drv_graphics_error_t DRV_Video_Write_Setting_Mipi (
+    void                          * framebuff,
+    uint32_t                        fb_stride,
+    drv_video_format_t              video_format,
+    drv_wr_rd_swa_t                 wr_rd_swa,
+    uint16_t                        video_write_buff_vw,
+    uint16_t                        video_write_buff_hw,
+    drv_mipi_param_t              * mipi_data,
+    drv_vin_setup_t               * vin_setup);
 
 drv_graphics_error_t DRV_Video_Write_Change (
     drv_video_input_channel_t    video_input_ch,

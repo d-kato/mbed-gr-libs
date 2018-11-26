@@ -98,7 +98,11 @@ jcu_errorcode_t JCU_ParaCheckStart(
     jcu_errorcode_t   returnValue;
 
     /* If jcu already start, it cannot update this bit (this is limitation of hardware) */
+#if defined(TARGET_RZ_A1XX)
     IF ( (uint32_t)R_GET_REG_BIT_FIELD( JCU.JCCMD, JSRT ) == REG_F_SET ) {
+#elif defined(TARGET_RZ_A2XX)
+    IF ( (uint32_t)R_GET_REG_BIT_FIELD( JCU.JCCMD.BYTE, JSRT ) == REG_F_SET ) {
+#endif
         returnValue = JCU_ERROR_STATUS;
     }
     else {

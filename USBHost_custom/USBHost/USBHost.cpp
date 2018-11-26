@@ -53,7 +53,11 @@ void USBHost::usb_process() {
     bool interruptListState;
     USBEndpoint * ep;
     uint8_t i, j, res, timeout_set_addr = 10;
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * buf = (uint8_t *)AllocNonCacheMem(8);
+#else
     uint8_t buf[8];
+#endif
     bool too_many_hub;
     int idx;
 
@@ -277,6 +281,10 @@ USBHost::USBHost() : usbThread(osPriorityNormal, USB_THREAD_STACK)
     }
 #endif
 
+#if defined(TARGET_RZ_A2XX)
+    setupPacket = (uint8_t *)AllocNonCacheMem(8);
+    data        = (uint8_t *)AllocNonCacheMem(415);
+#endif
     usbThread.start(callback(this, &USBHost::usb_process));
 }
 
@@ -885,7 +893,7 @@ USB_TYPE USBHost::enumerate(USBDeviceConnected * dev, IUSBEnumerator* pEnumerato
 
       pEnumerator->setVidPid( data[8] | (data[9] << 8), data[10] | (data[11] << 8) );
 
-      res = getConfigurationDescriptor(dev, data, sizeof(data), &total_conf_descr_length);
+      res = getConfigurationDescriptor(dev, data, 415, &total_conf_descr_length);
       if (res != USB_TYPE_OK) {
           return res;
       }

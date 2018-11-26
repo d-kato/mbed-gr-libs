@@ -28,8 +28,19 @@ USBHostMIDI::USBHostMIDI() {
     host = USBHost::getHostInst();
     size_bulk_in = 0;
     size_bulk_out = 0;
+#if defined(TARGET_RZ_A2XX)
+    buf_in  = (uint8_t *)AllocNonCacheMem(64);
+    buf_out  = (uint8_t *)AllocNonCacheMem(64);
+#endif
     init();
 }
+
+#if defined(TARGET_RZ_A2XX)
+USBHostMIDI::~USBHostMIDI() {
+  FreeNonCacheMem(buf_in);
+  FreeNonCacheMem(buf_out);
+}
+#endif
 
 void USBHostMIDI::init() {
     dev = NULL;
@@ -76,7 +87,11 @@ bool USBHostMIDI::connect() {
                 
                 bulk_in->attach(this, &USBHostMIDI::rxHandler);
                 
+#if defined(TARGET_RZ_A2XX)
+                host->bulkRead(dev, bulk_in, buf_in, size_bulk_in, false);
+#else
                 host->bulkRead(dev, bulk_in, buf, size_bulk_in, false);
+#endif
                 dev_connected = true;
                 return true;
             }
@@ -100,7 +115,11 @@ void USBHostMIDI::rxHandler() {
                 }
 
                 // read each four bytes
+#if defined(TARGET_RZ_A2XX)
+                midi = &buf_in[i];
+#else
                 midi = &buf[i];
+#endif
                 // process MIDI message
                 // switch by code index number
                 switch (midi[0] & 0xf) {
@@ -192,14 +211,22 @@ void USBHostMIDI::rxHandler() {
             }
             
             // read another message
+#if defined(TARGET_RZ_A2XX)
+            host->bulkRead(dev, bulk_in, buf_in, size_bulk_in, false);
+#else
             host->bulkRead(dev, bulk_in, buf, size_bulk_in, false);
+#endif
         }
     }
 }
 
 bool USBHostMIDI::sendMidiBuffer(uint8_t data0, uint8_t data1, uint8_t data2, uint8_t data3) {
     if (bulk_out) {
+#if defined(TARGET_RZ_A2XX)
+        uint8_t * midi = buf_out;
+#else
         uint8_t midi[4];
+#endif
 
         midi[0] = data0;
         midi[1] = data1;
@@ -229,7 +256,11 @@ bool USBHostMIDI::sendSystemCommmonThreeBytes(uint8_t data1, uint8_t data2, uint
 }
 
 bool USBHostMIDI::sendSystemExclusive(uint8_t *buffer, int length) {
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * midi = buf_out;
+#else
     uint8_t midi[64];
+#endif
     int midiLength;
     int midiPos;
     if (bulk_out) {

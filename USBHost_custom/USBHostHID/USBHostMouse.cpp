@@ -20,8 +20,17 @@
 
 USBHostMouse::USBHostMouse() {
     host = USBHost::getHostInst();
+#if defined(TARGET_RZ_A2XX)
+    report  = (uint8_t *)AllocNonCacheMem(8);
+#endif
     init();
 }
+
+#if defined(TARGET_RZ_A2XX)
+USBHostMouse::~USBHostMouse() {
+  FreeNonCacheMem(report);
+}
+#endif
 
 void USBHostMouse::init() {
     dev = NULL;
@@ -71,9 +80,15 @@ bool USBHostMouse::connect() {
 
                 int_in->attach(this, &USBHostMouse::rxHandler);
                 len_listen = int_in->getSize();
+#if defined(TARGET_RZ_A2XX)
+                if ((uint32_t)len_listen > 8) {
+                    len_listen = 8;
+                }
+#else
                 if ((uint32_t)len_listen > sizeof(report)) {
                     len_listen = sizeof(report);
                 }
+#endif
                 host->interruptRead(dev, int_in, report, len_listen, false);
 
                 dev_connected = true;
@@ -170,9 +185,15 @@ void USBHostMouse::rxHandler() {
         z = report[3];
     }
 
+#if defined(TARGET_RZ_A2XX)
+    if ((uint32_t)len_listen > 8) {
+        len_listen = 8;
+    }
+#else
     if ((uint32_t)len_listen > sizeof(report)) {
         len_listen = sizeof(report);
     }
+#endif
 
     if (dev)
         host->interruptRead(dev, int_in, report, len_listen, false);

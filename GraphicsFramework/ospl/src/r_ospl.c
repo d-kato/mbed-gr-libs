@@ -35,7 +35,9 @@ Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
 #include  "r_ospl.h"
 #include  "iodefine.h"
+#if defined(TARGET_RZ_A1XX)
 #include  "iobitmasks/cpg_iobitmask.h"
+#endif
 #include  "r_ospl_private.h"
 #include  "r_ospl_os_less_private.h"
 #include  "mbed_critical.h"
@@ -545,6 +547,7 @@ void  R_OSPL_CALLER_Initialize( r_ospl_caller_t *const  self,  r_ospl_async_t *c
 }
 
 
+#if defined(TARGET_RZ_A1XX)
 /***********************************************************************
 * Implement: R_OSPL_FTIMER_InitializeIfNot
 ************************************************************************/
@@ -698,7 +701,7 @@ uint32_t  R_OSPL_FTIMER_Get(void)
 
 #endif
 }
-
+#endif /* TARGET_RZ_A1XX */
 
 /***********************************************************************
 * Implement: R_OSPL_FTIMER_IsPast

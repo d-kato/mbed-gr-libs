@@ -33,6 +33,9 @@ public:
     * Constructor
     */
     USBHostKeyboard();
+#if defined(TARGET_RZ_A2XX)
+    ~USBHostKeyboard();
+#endif
 
     /**
      * Try to connect a keyboard device
@@ -80,7 +83,11 @@ private:
     USBHost * host;
     USBDeviceConnected * dev;
     USBEndpoint * int_in;
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * report;
+#else
     uint8_t report[9];
+#endif
     int keyboard_intf;
     bool keyboard_device_found;
 

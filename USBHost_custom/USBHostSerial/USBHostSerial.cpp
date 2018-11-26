@@ -210,13 +210,26 @@ bool USBHostMultiSerial::connect() {
 USBHostSerialPort::USBHostSerialPort(uint32_t buf_size)
 {
     p_circ_buf = new CircBufferHostSerial<uint8_t>(buf_size);
+#if defined(TARGET_RZ_A2XX)
+    p_buf       = (uint8_t *)AllocNonCacheMem(512);
+    p_buf_out   = (uint8_t *)AllocNonCacheMem(512);
+    p_buf_out_c = (uint8_t *)AllocNonCacheMem(1);
+    p_line_coding = (LINE_CODING *)AllocNonCacheMem(sizeof(LINE_CODING));
+#else
     p_buf = new uint8_t[512];
+#endif
     init();
 }
 
 USBHostSerialPort::~USBHostSerialPort() {
     delete p_circ_buf;
+#if defined(TARGET_RZ_A2XX)
+    FreeNonCacheMem(p_buf);
+    FreeNonCacheMem(p_buf_out);
+    FreeNonCacheMem(p_buf_out_c);
+#else
     delete [] p_buf;
+#endif
 }
 
 void USBHostSerialPort::init(void)
@@ -229,10 +242,17 @@ void USBHostSerialPort::init(void)
     size_bulk_out = 0;
     bulk_in = NULL;
     bulk_out = NULL;
+#if defined(TARGET_RZ_A2XX)
+    p_line_coding->baudrate = 9600;
+    p_line_coding->data_bits = 8;
+    p_line_coding->parity = None;
+    p_line_coding->stop_bits = 1;
+#else
     line_coding.baudrate = 9600;
     line_coding.data_bits = 8;
     line_coding.parity = None;
     line_coding.stop_bits = 1;
+#endif
     p_circ_buf->flush();
 }
 
@@ -251,6 +271,14 @@ void USBHostSerialPort::connect(USBHost* _host, USBDeviceConnected * _dev,
     baud(9600);
     size_bulk_in = bulk_in->getSize();
     size_bulk_out = bulk_out->getSize();
+#if defined(TARGET_RZ_A2XX)
+    if (size_bulk_in > 512) {
+        size_bulk_in = 512;
+    }
+    if (size_bulk_out > 512) {
+        size_bulk_out = 512;
+    }
+#endif
     bulk_in->attach(this, &USBHostSerialPort::rxHandler);
     bulk_out->attach(this, &USBHostSerialPort::txHandler);
     host->bulkRead(dev, bulk_in, p_buf, size_bulk_in, false);
@@ -297,7 +325,12 @@ void USBHostSerialPort::txHandler() {
 
 int USBHostSerialPort::_putc(int c) {
     if (bulk_out) {
+#if defined(TARGET_RZ_A2XX)
+        *p_buf_out_c = c;
+        if (host->bulkWrite(dev, bulk_out, p_buf_out_c, 1) == USB_TYPE_OK) {
+#else
         if (host->bulkWrite(dev, bulk_out, (uint8_t *)&c, 1) == USB_TYPE_OK) {
+#endif
             return 1;
         }
     }
@@ -305,11 +338,27 @@ int USBHostSerialPort::_putc(int c) {
 }
 
 void USBHostSerialPort::baud(int baudrate) {
+#if defined(TARGET_RZ_A2XX)
+    p_line_coding->baudrate = baudrate;
+    format(p_line_coding->data_bits, (Parity)p_line_coding->parity, p_line_coding->stop_bits);
+#else
     line_coding.baudrate = baudrate;
     format(line_coding.data_bits, (Parity)line_coding.parity, line_coding.stop_bits);
+#endif
 }
 
 void USBHostSerialPort::format(int bits, Parity parity, int stop_bits) {
+#if defined(TARGET_RZ_A2XX)
+    p_line_coding->data_bits = bits;
+    p_line_coding->parity = parity;
+    p_line_coding->stop_bits = (stop_bits == 1) ? 0 : 2;
+
+    // set line coding
+    host->controlWrite( dev,
+                        USB_RECIPIENT_INTERFACE | USB_HOST_TO_DEVICE | USB_REQUEST_TYPE_CLASS,
+                        SET_LINE_CODING,
+                        0, serial_intf, (uint8_t *)p_line_coding, 7);
+#else
     line_coding.data_bits = bits;
     line_coding.parity = parity;
     line_coding.stop_bits = (stop_bits == 1) ? 0 : 2;
@@ -319,6 +368,7 @@ void USBHostSerialPort::format(int bits, Parity parity, int stop_bits) {
                         USB_RECIPIENT_INTERFACE | USB_HOST_TO_DEVICE | USB_REQUEST_TYPE_CLASS,
                         SET_LINE_CODING,
                         0, serial_intf, (uint8_t *)&line_coding, 7);
+#endif
 }
 
 int USBHostSerialPort::_getc() {
@@ -346,7 +396,12 @@ int USBHostSerialPort::writeBuf(const char* b, int s) {
                 break;
             }
             i = ((uint32_t)s < size_bulk_out) ? s : size_bulk_out;
+#if defined(TARGET_RZ_A2XX)
+            memcpy(p_buf_out, (uint8_t *)(b+c), i);
+            host->bulkWrite(dev, bulk_out, p_buf_out, i);
+#else
             host->bulkWrite(dev, bulk_out, (uint8_t *)(b+c), i);
+#endif
             c += i;
             s -= i;
         }

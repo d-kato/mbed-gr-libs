@@ -26,6 +26,9 @@
 #include "rtos.h"
 #include "dbg.h"
 #include "USBHostHub.h"
+#if defined(TARGET_RZ_A2XX)
+#include "NonCacheMem.h"
+#endif
 
 /**
 * USBHost class
@@ -266,7 +269,11 @@ private:
 #endif
 
     // to store a setup packet
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * setupPacket;
+#else
     uint8_t  setupPacket[8];
+#endif
 
     typedef struct {
         uint8_t event_id;
@@ -285,7 +292,11 @@ private:
     rtos::Mutex td_mutex;
 
     // buffer for conf descriptor
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * data;
+#else
     uint8_t data[415];
+#endif
 
     /**
     * Add a transfer on the TD linked list associated to an ED

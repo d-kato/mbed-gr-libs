@@ -158,8 +158,15 @@ private:
         uint8_t  Status;
     } PACKED CSW;
 
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * trans_buf;
+    uint8_t * result;
+    CBW * p_cbw;
+    CSW * p_csw;
+#else
     CBW cbw;
     CSW csw;
+#endif
     rtos::Mutex _lock;
 
     int SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t * data, uint32_t transfer_len);

@@ -42,6 +42,9 @@ public:
     *
     */
     WANDongleSerialPort();
+#if defined(TARGET_RZ_A2XX)
+    virtual ~WANDongleSerialPort();
+#endif
 
     void init( USBHost* pHost );
 
@@ -102,7 +105,11 @@ protected:
     USBHost * host;
     USBDeviceConnected * dev;
 
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * buf_out;
+#else
     uint8_t buf_out[WANDONGLE_MAX_OUTEP_SIZE];
+#endif
     volatile uint32_t buf_out_len;
     uint32_t max_out_size;
     volatile bool lock_tx;
@@ -110,7 +117,11 @@ protected:
     volatile bool cb_tx_pending;
     rtos::Mutex tx_mtx;
 
+#if defined(TARGET_RZ_A2XX)
+    uint8_t * buf_in;
+#else
     uint8_t buf_in[WANDONGLE_MAX_INEP_SIZE];
+#endif
     volatile uint32_t buf_in_len;
     volatile uint32_t buf_in_read_pos;
     volatile bool lock_rx;

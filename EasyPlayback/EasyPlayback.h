@@ -22,7 +22,7 @@
 #include "EasyDecoder.h"
 #include "AUDIO_GRBoard.h"
 #include "PwmOutSpeaker.h"
-//#include "SPDIF_GRBoard.h"
+#include "SPDIF_GRBoard.h"
 #include "SoundlessSpeaker.h"
 #include "NullSpeaker.h"
 #include "FATFileSystem.h"

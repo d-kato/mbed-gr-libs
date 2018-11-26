@@ -8,6 +8,10 @@
 static DigitalOut lcd_cntrst(P8_15);
 #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) /* GR-LYCHEE */
 static PwmOut lcd_cntrst(P3_12);
+#elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000) /* RZ/A2M */
+#if MBED_CONF_APP_LCD_TYPE != RZ_A2M_HDMI_STICK
+static PwmOut lcd_cntrst(P7_6);
+#endif
 #endif
 #define MAX_BACKLIGHT_VOL       (33.0f)
 #ifndef TYPICAL_BACKLIGHT_VOL
@@ -54,6 +58,20 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     lcd_cntrst.period_us(500);
     ThisThread::sleep_for(100);
     lcd_pwon = 1;
+  #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000) /* RZ/A2M */
+    PinName lcd_pin[28] = {
+        /* data pin */
+        PB_5, PB_4, PB_3, PB_2, PB_1, PB_0, PA_7, PA_6, PA_5, PA_4, PA_3, PA_2, PA_1, PA_0,
+        P8_0, PF_0, PF_1, PF_2, PF_3, PF_4, PF_5, PF_6, PH_2, PF_7, PC_3, PC_4, P7_7, PJ_6
+    };
+    Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
+    #if MBED_CONF_APP_LCD_TYPE != RZ_A2M_HDMI_STICK
+    lcd_cntrst.period_us(500);
+    #else
+    const char send_cmd[3] = {0x08u, 0xbfu, 0x70u};
+    I2C mI2c_(I2C_SDA, I2C_SCL);
+    mI2c_.write(0x78, send_cmd, 3);
+    #endif
   #endif
     return &LcdCfgTbl_LCD_shield;
 #else
@@ -74,10 +92,11 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     return DisplayBase::GRAPHICS_OK;
  #else
     DisplayBase::graphics_error_t error;
-    DisplayBase::video_ext_in_config_t ext_in_config;
     DisplayBase::video_input_sel_t video_input_sel;
 
-  #if defined(TARGET_RZ_A1H)
+  #if CAMERA_MODULE == MODULE_MIPI
+    // do nothing
+  #elif defined(TARGET_RZ_A1H)
     PinName cmos_camera_pin[11] = {
         /* data pin */
         P2_7, P2_6, P2_5, P2_4, P2_3, P2_2, P2_1, P2_0,
@@ -116,17 +135,32 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     ThisThread::sleep_for(10 + 1);
     rstb = 1;
     ThisThread::sleep_for(1 + 1);
+  #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV)
+    PinName cmos_camera_pin[11] = {
+        /* data pin */
+        PE_1, PE_2, PE_3, PE_4, PE_5, PE_6, PH_0, PH_1,
+        /* control pin */
+        P6_1,       /* VIO_CLK   */
+        P6_2,       /* VIO_VD */
+        P6_3        /* VIO_HD */
+    };
+    DigitalOut camera_stby(PE_0);
+    camera_stby = 0;
+    ThisThread::sleep_for(1 + 1);
   #endif
 
     /* camera input port setting */
   #if CAMERA_MODULE == MODULE_VDC
     video_input_sel = DisplayBase::INPUT_SEL_EXT;
     error = Display.Graphics_Dvinput_Port_Init(cmos_camera_pin, 11);
-  #else
+  #elif CAMERA_MODULE == MODULE_CEU
     video_input_sel = DisplayBase::INPUT_SEL_CEU;
     error = Display.Graphics_Ceu_Port_Init(cmos_camera_pin, 11);
+  #else
+    video_input_sel = DisplayBase::INPUT_SEL_MIPI;
+    error = DisplayBase::GRAPHICS_OK;
   #endif
-    if( error != DisplayBase::GRAPHICS_OK ) {
+    if( error != DisplayBase::GRAPHICS_OK) {
         printf("Line %d, error %d\n", __LINE__, error);
         return error;
     }
@@ -137,9 +171,22 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     OV7725_config camera_cfg;
   #elif MBED_CONF_APP_CAMERA_TYPE == CAMERA_OV5642
     OV5642_config camera_cfg;
+  #elif MBED_CONF_APP_CAMERA_TYPE == CAMERA_RASPBERRY_PI
+    RaspberryPi_config camera_cfg;
   #else
     #error "No camera chosen. Please add 'config.camera-type.value' to your mbed_app.json (see README.md for more information)."
   #endif
+
+  #if CAMERA_MODULE == MODULE_MIPI
+    DisplayBase::video_mipi_param_t mipi_config;
+    DisplayBase::video_vin_setup_t  vin_setup;
+
+    camera_cfg.Initialise();
+    camera_cfg.SetMipiConfig(&mipi_config);
+    camera_cfg.SetVinSetup(&vin_setup);
+    error = Display.Graphics_Video_init(video_input_sel, &mipi_config, &vin_setup);
+  #else
+    DisplayBase::video_ext_in_config_t ext_in_config;
 
     camera_cfg.Initialise();
     camera_cfg.SetExtInConfig(&ext_in_config);
@@ -151,6 +198,7 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     }
 
     error = Display.Graphics_Video_init(video_input_sel, &ext_in_config);
+  #endif
     if( error != DisplayBase::GRAPHICS_OK ) {
         printf("Line %d, error %d\n", __LINE__, error);
         return error;
@@ -197,8 +245,10 @@ void EasyAttach_LcdBacklight(bool type) {
 
 void EasyAttach_LcdBacklight(float value) {
 #if MBED_CONF_APP_LCD
-#if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000) || ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000)
+#if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000) || ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) || ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000)
+    #if MBED_CONF_APP_LCD_TYPE != RZ_A2M_HDMI_STICK
     lcd_cntrst = (value * voltage_adjust);
+    #endif
 #endif
 #endif
 }

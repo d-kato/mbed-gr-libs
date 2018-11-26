@@ -116,6 +116,8 @@ Macro definitions
 * @brief  Interrupt number.
 */
 typedef IRQn_Type  bsp_int_src_t;
+#if defined(TARGET_RZ_A1XX)
+
 #define BSP_INT_SRC_SW0             ((IRQn_Type)(0))     /* GIC software interrupt             */
 #define BSP_INT_SRC_SW1             ((IRQn_Type)(1))     /*                                    */
 #define BSP_INT_SRC_SW2             ((IRQn_Type)(2))     /*                                    */
@@ -629,6 +631,13 @@ typedef IRQn_Type  bsp_int_src_t;
 #define BSP_INT_SRC_TINT168         ((IRQn_Type)(584))   /*                                    */
 #define BSP_INT_SRC_TINT169         ((IRQn_Type)(585))   /*                                    */
 #define BSP_INT_SRC_TINT170         ((IRQn_Type)(586))   /*                                    */
+
+#elif defined(TARGET_RZ_A2XX)
+
+#define BSP_INT_SRC_JEDI            ((IRQn_Type)(84))    /* JPEG Codec unit                    */
+#define BSP_INT_SRC_JDTI            ((IRQn_Type)(85))    /*                                    */
+
+#endif
 
 INLINE IRQn_Type  R_CAST_bsp_int_src_t_to_IRQn_Type( bsp_int_src_t const  Value )
 {

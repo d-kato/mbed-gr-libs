@@ -133,7 +133,13 @@ private:
         uint8_t data_bits;
     } PACKED LINE_CODING;
 
+#if defined(TARGET_RZ_A2XX)
+    LINE_CODING * p_line_coding;
+    uint8_t * p_buf_out;
+    uint8_t * p_buf_out_c;
+#else
     LINE_CODING line_coding;
+#endif
 
     void rxHandler();
     void txHandler();
