@@ -162,6 +162,7 @@ void USBPhyHw::init(USBPhyEvents *events)
     } else {
         USB_MX.SYSCFG0 |= USB_HSE;                      /* High-Speed */
     }
+    cpu_delay_1us(1500);
 }
 
 void USBPhyHw::deinit()
@@ -189,7 +190,8 @@ bool USBPhyHw::powered()
 void USBPhyHw::connect()
 {
     /* Enable pullup on D+ */
-    attach_usb();
+    USB_MX.INTENB0 |= (USB_VBSE | USB_SOFE | USB_DVSE | USB_CTRE | USB_BEMPE | USB_NRDYE | USB_BRDYE);
+    USB_MX.SYSCFG0 |= USB_DPRPU;
 
     /* Enable USB */
     InterruptHandlerRegister(USBIX_IRQn, &_usbisr);
@@ -205,7 +207,11 @@ void USBPhyHw::disconnect()
     InterruptHandlerRegister(USBIX_IRQn, NULL);
 
     /* Disable pullup on D+ */
-    detach_usb();
+    USB_MX.SYSCFG0 &= ~USB_DPRPU;
+    cpu_delay_1us(1);
+    USB_MX.SYSCFG0 |= USB_DCFM;
+    cpu_delay_1us(1);
+    USB_MX.SYSCFG0 &= ~USB_DCFM;
 }
 
 void USBPhyHw::configure()
@@ -593,16 +599,21 @@ void USBPhyHw::process()
         USB_MX.INTSTS0 = (uint16_t)~USB_VBINT;
         if (chk_vbsts()) {
             /* USB attach */
-            attach_usb();
+            /* Non processing. */
         } else {
             /* USB detach */
-            detach_usb();
-
             for (i = USB_MIN_PIPE_NO; i < PIPE_NUM; i++) {
                 if (pipe_ctrl[i].enable) {
                     forced_termination(i, (uint16_t)USB_DATA_NONE);
                 }
             }
+            USB_MX.INTSTS0 = 0;
+            USB_MX.BRDYSTS = 0;
+            USB_MX.NRDYSTS = 0;
+            USB_MX.BEMPSTS = 0;
+            USB_MX.BRDYENB = 0;
+            USB_MX.NRDYENB = 0;
+            USB_MX.BEMPENB = 0;
         }
     }
 
@@ -1411,31 +1422,6 @@ bool USBPhyHw::chk_vbsts(void)
     }
 
     return connect_flg;
-}
-
-void USBPhyHw::attach_usb(void)
-{
-    cpu_delay_1us(1000);
-    USB_MX.INTENB0 |= (USB_VBSE | USB_SOFE | USB_DVSE | USB_CTRE | USB_BEMPE | USB_NRDYE | USB_BRDYE);
-    USB_MX.SYSCFG0 |= USB_DPRPU;
-}
-
-void USBPhyHw::detach_usb(void)
-{
-    USB_MX.SYSCFG0 &= ~USB_DPRPU;
-    cpu_delay_1us(1);
-    USB_MX.SYSCFG0 |= USB_DCFM;
-    cpu_delay_1us(1);
-    USB_MX.SYSCFG0 &= ~USB_DCFM;
-
-    USB_MX.INTSTS0 = 0;
-    USB_MX.BRDYSTS = 0;
-    USB_MX.NRDYSTS = 0;
-    USB_MX.BEMPSTS = 0;
-    USB_MX.INTENB0 = 0;
-    USB_MX.BRDYENB = 0;
-    USB_MX.NRDYENB = 0;
-    USB_MX.BEMPENB = 0;
 }
 
 void USBPhyHw::ctrl_end(uint16_t status)

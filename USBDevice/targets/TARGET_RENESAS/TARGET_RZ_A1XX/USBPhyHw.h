@@ -98,8 +98,6 @@ private:
     uint16_t PIPE2FIFO(uint16_t pipe);
     void reset_usb(uint16_t clockmode);
     bool chk_vbsts(void);
-    void attach_usb(void);
-    void detach_usb(void);
     void ctrl_end(uint16_t status);
     void data_end(uint16_t pipe, uint16_t status);
     void forced_termination(uint16_t pipe, uint16_t status);
