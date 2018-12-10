@@ -92,6 +92,24 @@ public:
     }
 };
 
+#else
+
+#include "mbed.h"
+#include "AUDIO_RBSP.h"
+
+class AUDIO_GRBoard : public AUDIO_RBSP {
+public:
+    AUDIO_GRBoard(uint8_t int_level = 0x80, int32_t max_write_num = 16, int32_t max_read_num = 16){}
+
+    virtual void power(bool type = true) {}
+    virtual bool format(char length) { return false; }
+    virtual bool frequency(int hz) { return false; }
+    virtual int write(void * const p_data, uint32_t data_size, const rbsp_data_conf_t * const p_data_conf = NULL) { return -1; }
+    virtual int read(void * const p_data, uint32_t data_size, const rbsp_data_conf_t * const p_data_conf = NULL) { return -1; }
+    virtual bool outputVolume(float leftVolumeOut, float rightVolumeOut) { return false; }
+    virtual bool micVolume(float VolumeIn) { return false; }
+};
+
 #endif
 
 #endif
