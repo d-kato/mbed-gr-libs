@@ -153,8 +153,9 @@ static uint8_t jpeg_image[] = {/* JPEG image data */};
 int main() {
     DisplayApp display_app;
 
-    display_app.SendJpeg(&jpeg_image[0], sizeof(jpeg_image));
-
-    while(1);
+    while (1) {
+        display_app.SendJpeg(&jpeg_image[0], sizeof(jpeg_image));
+        wait(1);
+    }
 }
 ```
