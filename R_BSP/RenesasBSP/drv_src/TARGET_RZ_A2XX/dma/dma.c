@@ -510,13 +510,13 @@ End of function DMA_OpenChannel
 * Return Value :   channel -
 *                     Open channel number.
 *                  error code -
-*                     EMFILE : When looking for a free channel, but a free
+*                     EMFILE_RBSP : When looking for a free channel, but a free
 *                              channel didn't exist.
 ******************************************************************************/
 
 int_t DMA_GetFreeChannel(void)
 {
-    int_t           retval = EFAULT;
+    int_t           retval = EFAULT_RBSP;
     dma_info_ch_t   *dma_info_ch;
     int_t           ch_alloc;
     bool_t          ch_stat_check_flag;
@@ -543,7 +543,7 @@ int_t DMA_GetFreeChannel(void)
                 if (DMA_CH_NUM == ch_alloc)
                 {
                     /* set error return value */
-                    retval = EMFILE;
+                    retval = EMFILE_RBSP;
                     ch_stat_check_flag = true;
                 }
             }
@@ -1000,7 +1000,7 @@ End of function DMA_SetErrCode
 *               Notify error information to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB member.
+*                Note: store error code (EIO_RBSP) to AIOCB member.
 ******************************************************************************/
 
 static void R_DMA_ErrInterruptHandler(void)
@@ -1017,8 +1017,8 @@ static void R_DMA_ErrInterruptHandler(void)
         /* set error infrmation */
         gb_info_drv.p_err_aio->aio_sigevent.sigev_value.sival_int = (int_t)(dstat_er_0_7 | (dstat_er_8_15 << HIGH_COMMON_REG_OFFSET));
 
-        /* set error code (EIO) */
-        gb_info_drv.p_err_aio->aio_return = EIO;
+        /* set error code (EIO_RBSP) */
+        gb_info_drv.p_err_aio->aio_return = EIO_RBSP;
 
         /* call back to the module function which called DMA driver */
         ahf_complete(NULL, gb_info_drv.p_err_aio);
@@ -1042,10 +1042,10 @@ End of function R_DMA_ErrInteruuptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1067,10 +1067,10 @@ End of function R_DMA_End0InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1092,10 +1092,10 @@ End of function R_DMA_End1InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1117,10 +1117,10 @@ End of function R_DMA_End2InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1142,10 +1142,10 @@ End of function R_DMA_End3InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1167,10 +1167,10 @@ End of function R_DMA_End4InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1192,10 +1192,10 @@ End of function R_DMA_End5InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1217,10 +1217,10 @@ End of function R_DMA_End6InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1242,10 +1242,10 @@ End of function R_DMA_End7InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1267,10 +1267,10 @@ End of function R_DMA_End8InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1292,10 +1292,10 @@ End of function R_DMA_End9InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1317,10 +1317,10 @@ End of function R_DMA_End10InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1342,10 +1342,10 @@ End of function R_DMA_End11InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1367,10 +1367,10 @@ End of function R_DMA_End12InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1392,10 +1392,10 @@ End of function R_DMA_End13InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1417,10 +1417,10 @@ End of function R_DMA_End14InterruptHandler
 *               to the module function which called DMA driver.
 * Arguments : None.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1443,10 +1443,10 @@ End of function R_DMA_End15InterruptHandler
 * Arguments : channel -
 *                  Open channel number.
 * Return Value : None.
-*                Note: store error code (EIO) to AIOCB.
+*                Note: store error code (EIO_RBSP) to AIOCB.
 *                  ESUCCESS -
 *                     DMA transfer completed.
-*                  EIO -
+*                  EIO_RBSP -
 *                     DMA transfer don't stopped.
 ******************************************************************************/
 
@@ -1488,8 +1488,8 @@ __INLINE static void R_DMA_EndHandlerProcess(const int_t channel)
             }
             else
             {
-                /* set error code (EIO) */
-                gb_info_drv.info_ch[channel].p_end_aio->aio_return = EIO;
+                /* set error code (EIO_RBSP) */
+                gb_info_drv.info_ch[channel].p_end_aio->aio_return = EIO_RBSP;
             }
         }
         else

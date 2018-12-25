@@ -8,11 +8,6 @@
  * (C) Copyright RENESAS ELECTRONICS Ltd 2012 All Rights Reserved
  *****************************************************************************/
 
-/* Detect if SHC include errno.h has been included first, this is not supported */
-#ifdef _ERRNO
-    #error Renesas/Sh/9_x_x/include/errno.h has been included before SDK errno.h. Please specify SDK include path first.
-#endif
-
 #ifndef SDK_ERRNO
 #define SDK_ERRNO
 
@@ -32,18 +27,26 @@ extern "C" {
 /***********************************************************************************
  System Includes
 ***********************************************************************************/
-#ifdef EBADF
-    #undef EBADF
-#endif
-#ifdef EDOM
-    #undef EDOM
-#endif
-
 /* SDK errno extension, SDK returns 0 as success, and -1 when errno set */
 #define ESUCCESS    (0)
 #define EERROR      (-1)
 
-#if(0)
+#if(1) /* mbed */
+#define EBADF_RBSP       (-17) /* Bad file descriptor */
+#define EINVAL_RBSP      (-28) /* Invalid argument */
+#define ENOMEM_RBSP      (-33) /* No memory available */
+#define ENOENT_RBSP      (-42) /* No such file or directory */
+#define EACCES_RBSP      (-64) /* Access denied */
+#define EBUSY_RBSP       (-67) /* Device or resource busy */
+#define ECANCELED_RBSP   (-68) /* Operation was cancelled */
+#define EIO_RBSP         (-74) /* Input or Output error (possibly recoverable)*/
+#define EMFILE_RBSP      (-76) /* Too many open files */
+#define ENOSPC_RBSP      (-84) /* No space available on device */
+#define ENOTSUP_RBSP     (-87) /* Not supported */
+#define EPERM_RBSP       (-90) /* Operation not permitted */
+#define EFAULT_RBSP      (-97) /* Section fault, bad address */
+#define EOVERFLOW_RBSP  (-117) /* Value too large to store in data type */
+#else  /* not mbed */
 #define EBADF       (-17) /* Bad file descriptor */
 #define EINVAL      (-28) /* Invalid argument */
 #define ENOMEM      (-33) /* No memory available */
@@ -108,11 +111,7 @@ extern "C" {
 #define EMEDIUMTYPE (-127) /* Wrong medium type */
 #define ENOMEDIUM   (-128) /* No medium present */
 #define ESEEKRANGE  (-129) /* seek setting error */  /* Source Merge 11-1 */
-#endif
-#define EBADF       (201) /* Bad file descriptor */
-#ifndef ENOTSUP
-#define ENOTSUP     (202) /* Not supported */
-#endif
+#endif /* end mbed */
 
 /***********************************************************************************
  Defines

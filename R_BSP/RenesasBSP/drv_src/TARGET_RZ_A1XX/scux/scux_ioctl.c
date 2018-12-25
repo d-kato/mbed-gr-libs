@@ -57,15 +57,15 @@ Private global driver management information
 * @param[in]     channel:SCUX channel number.
 * @param[in]     p_scux_addr_param:address parameter.
 * @retval        ESUCCESS : Operation successful.
-*                EACCES : DVU setup isn't carried out when using DVU.
-*                EACCES : MIX setup isn't carried out when using MIX.
-*                EACCES : SSIF setup isn't carried out when using SSIF.
-*                EACCES : SSIF channel is already used.
-*                EACCES : When use MIX, it is a setup which does not agree in a route setup.
-*                EBUSY : It has already transmitted.
-*                EMFILE : Allocate DMA ch for read is failed.
-*                EPERM : Transfer parameter is unexpected.
-*                EFAULT : Internal error is occured.
+*                EACCES_RBSP : DVU setup isn't carried out when using DVU.
+*                EACCES_RBSP : MIX setup isn't carried out when using MIX.
+*                EACCES_RBSP : SSIF setup isn't carried out when using SSIF.
+*                EACCES_RBSP : SSIF channel is already used.
+*                EACCES_RBSP : When use MIX, it is a setup which does not agree in a route setup.
+*                EBUSY_RBSP : It has already transmitted.
+*                EMFILE_RBSP : Allocate DMA ch for read is failed.
+*                EPERM_RBSP : Transfer parameter is unexpected.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 #if(1) /* mbed */
@@ -92,7 +92,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
     }
     if ((NULL == p_info_drv) || (NULL == p_info_ch))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -106,7 +106,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
             if ((-1) == sem_wait_ercd)
             {
                 /* set semaphore error */
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
         }
 
@@ -137,7 +137,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -154,7 +154,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -169,7 +169,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -184,7 +184,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -201,7 +201,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -219,7 +219,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -234,7 +234,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -249,7 +249,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -267,7 +267,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -284,7 +284,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -299,7 +299,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -314,7 +314,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -331,7 +331,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -349,7 +349,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -364,7 +364,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -379,7 +379,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -397,7 +397,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -415,7 +415,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -433,7 +433,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -451,7 +451,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -469,7 +469,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -486,7 +486,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -501,7 +501,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -516,7 +516,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -533,7 +533,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -551,7 +551,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -566,7 +566,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -581,7 +581,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -599,7 +599,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -616,7 +616,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -631,7 +631,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -646,7 +646,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -663,7 +663,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -681,7 +681,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -696,7 +696,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -711,7 +711,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -729,7 +729,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -746,7 +746,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -761,7 +761,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -776,7 +776,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -793,7 +793,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -811,7 +811,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -826,7 +826,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -841,7 +841,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -859,7 +859,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -876,7 +876,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -891,7 +891,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -906,7 +906,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -923,7 +923,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -941,7 +941,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -956,7 +956,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -971,7 +971,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -1052,7 +1052,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
                 if (osOK != sem_ercd)
                 {
                     /* set semaphore error */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                     p_info_ch->ch_stat = SCUX_CH_STOP;
                 }
             }
@@ -1066,7 +1066,7 @@ int_t SCUX_IoctlTransStart(const int_t channel)
             if (osOK != sem_ercd)
             {
                 /* set semaphore error */
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
                 p_info_ch->ch_stat = SCUX_CH_STOP;
             }
         }
@@ -1093,7 +1093,7 @@ End of function SCUX_IoctlTransStart
 * @param[in]     channel:SCUX channel number.
 * @param[in]     (*callback)(void):callback function pointer.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlFlushStop(const int_t channel, void (* const callback)(int_t))
@@ -1103,7 +1103,7 @@ int_t SCUX_IoctlFlushStop(const int_t channel, void (* const callback)(int_t))
 
     if (NULL == p_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -1195,7 +1195,7 @@ End of function SCUX_IoctlFlushStop
 *
 * @param[in]     channel:SCUX channel number.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlClearStop(const int_t channel)
@@ -1214,7 +1214,7 @@ int_t SCUX_IoctlClearStop(const int_t channel)
     scux_info_ch_t * const p_info_ch = SCUX_GetDrvChInfo(channel);
     if (NULL == p_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
         core_util_critical_section_exit();
     }
     else
@@ -1223,10 +1223,10 @@ int_t SCUX_IoctlClearStop(const int_t channel)
         {
             /* memory to memory route */
             dma_retval = R_DMA_Cancel(p_info_ch->dma_tx_ch, &tx_remain_size, &dma_ercd);
-            /* DMA stop check, (when dma_ercd is EBADF, DMA stopped already) */
-            if ((ESUCCESS != dma_retval) && (EBADF != dma_ercd))
+            /* DMA stop check, (when dma_ercd is EBADF_RBSP, DMA stopped already) */
+            if ((ESUCCESS != dma_retval) && (EBADF_RBSP != dma_ercd))
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -1235,10 +1235,10 @@ int_t SCUX_IoctlClearStop(const int_t channel)
             }
 
             dma_retval = R_DMA_Cancel(p_info_ch->dma_rx_ch, &rx_remain_size, &dma_ercd);
-            /* DMA stop check, (when dma_ercd is EBADF, DMA stopped already) */
-            if ((ESUCCESS != dma_retval) && (EBADF != dma_ercd))
+            /* DMA stop check, (when dma_ercd is EBADF_RBSP, DMA stopped already) */
+            if ((ESUCCESS != dma_retval) && (EBADF_RBSP != dma_ercd))
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -1248,7 +1248,7 @@ int_t SCUX_IoctlClearStop(const int_t channel)
                 dma_retval = R_DMA_Free(p_info_ch->dma_rx_ch, NULL);
                 if (ESUCCESS != dma_retval)
                 {
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
             }
 
@@ -1279,10 +1279,10 @@ int_t SCUX_IoctlClearStop(const int_t channel)
         {
             /* SSIF direct route */
             dma_retval = R_DMA_Cancel(p_info_ch->dma_tx_ch, &tx_remain_size, &dma_ercd);
-            /* DMA stop check, (when dma_ercd is EBADF, DMA stopped already) */
-            if ((ESUCCESS != dma_retval) && (EBADF != dma_ercd))
+            /* DMA stop check, (when dma_ercd is EBADF_RBSP, DMA stopped already) */
+            if ((ESUCCESS != dma_retval) && (EBADF_RBSP != dma_ercd))
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -1304,7 +1304,7 @@ int_t SCUX_IoctlClearStop(const int_t channel)
                     /* return next aio request */
                     if (NULL != p_info_ch->p_tx_next_aio)
                     {
-                        p_info_ch->p_tx_next_aio->aio_return = ECANCELED;
+                        p_info_ch->p_tx_next_aio->aio_return = ECANCELED_RBSP;
                         ahf_complete(&p_info_ch->tx_que, p_info_ch->p_tx_next_aio);
                     }
                 }
@@ -1331,7 +1331,7 @@ int_t SCUX_IoctlClearStop(const int_t channel)
                         /* in case of the next request is acquired */
                         if (NULL != p_info_ch->p_tx_next_aio)
                         {
-                            p_info_ch->p_tx_next_aio->aio_return = ECANCELED;
+                            p_info_ch->p_tx_next_aio->aio_return = ECANCELED_RBSP;
                             ahf_complete(&p_info_ch->tx_que, p_info_ch->p_tx_next_aio);
                         }
                     }
@@ -1362,7 +1362,7 @@ int_t SCUX_IoctlClearStop(const int_t channel)
 
             if ((SCUX_CH_STOP_WAIT == old_stat) || (SCUX_CH_STOP_WAIT_IDLE == old_stat))
             {
-                p_info_ch->p_flush_callback(ECANCELED);
+                p_info_ch->p_flush_callback(ECANCELED_RBSP);
                 p_info_ch->p_flush_callback = NULL;
             }
         }
@@ -1420,8 +1420,8 @@ End of function SCUX_IoctlSetRoute
 * @param[in]     channel:SCUX channel number.
 * @param[in]     *p_pin_clk_param:clock source parameter.
 * @retval        ESUCCESS:Operation successful.
-*                EPERM:Parameter is unexpected value.
-*                EFAULT:Internal error is occured.
+*                EPERM_RBSP:Parameter is unexpected value.
+*                EFAULT_RBSP:Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const p_pin_clk_param)
@@ -1435,7 +1435,7 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
 
     if ((NULL == p_info_drv) || (NULL == p_info_ch) || (NULL == p_pin_clk_param))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -1445,7 +1445,7 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
             p_ssif_ch = SCUX_GetSsifChInfo((int_t)p_pin_clk_param->ssif_ch_num);
             if (NULL == p_ssif_ch)
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -1456,7 +1456,7 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
                 if ((-1) == sem_wait_ercd)
                 {
                     /* set semaphore error */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
                 else
                 {
@@ -1467,7 +1467,7 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
                     }
                     else
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 }
                 sem_ercd = osSemaphoreRelease(p_ssif_ch->sem_ch_scux_ssif_access);
@@ -1475,7 +1475,7 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
                 if (osOK != sem_ercd)
                 {
                     /* set semaphore error */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
 
                 if (ESUCCESS == retval)
@@ -1487,7 +1487,7 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -1508,14 +1508,14 @@ int_t SCUX_IoctlSetPinClk(const int_t channel, const scux_ssif_pin_clk_t * const
                     if (osOK != sem_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                 }
             }
         }
         else
         {
-            retval = EPERM;
+            retval = EPERM_RBSP;
         }
     }
 
@@ -1535,7 +1535,7 @@ End of function SCUX_IoctlSetPinClk
 * @param[in]     channel:SCUX channel number.
 * @param[in]     *p_pin_mode_param:synchronous setting parameter.
 * @retval        ESUCCESS:Operation successful.
-*                EPERM:Parameter is unexpected value.
+*                EPERM_RBSP:Parameter is unexpected value.
 *                EFAUT:Internal error is occured.
 ******************************************************************************/
 
@@ -1553,7 +1553,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
 
     if ((NULL == p_info_drv) || (NULL == p_info_ch) || (NULL == p_pin_mode_param))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -1563,7 +1563,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
             p_ssif_ch = SCUX_GetSsifChInfo((int_t)p_pin_mode_param->ssif_ch_num);
             if (NULL == p_ssif_ch)
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -1574,7 +1574,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
                 if ((-1) == sem_wait_ercd)
                 {
                     /* set semaphore error */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
                 else
                 {
@@ -1585,7 +1585,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
                     }
                     else
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 }
                 sem_ercd = osSemaphoreRelease(p_ssif_ch->sem_ch_scux_ssif_access);
@@ -1593,7 +1593,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
                 if (osOK != sem_ercd)
                 {
                     /* set semaphore error */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
 
                 if (ESUCCESS == retval)
@@ -1605,7 +1605,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
                     if ((-1) == sem_wait_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                     else
                     {
@@ -1643,7 +1643,7 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
 #endif /* mbed */
                                 default :
                                     /* SCUX channel is 6 oe more */
-                                    retval = EPERM;
+                                    retval = EPERM_RBSP;
                                 break;
                             }
 
@@ -1664,14 +1664,14 @@ int_t SCUX_IoctlSetPinMode(const int_t channel, const scux_ssif_pin_mode_t * con
                     if (osOK != sem_ercd)
                     {
                         /* set semaphore error */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
                 }
             }
         }
         else
         {
-            retval = EPERM;
+            retval = EPERM_RBSP;
         }
     }
 
@@ -1801,8 +1801,8 @@ End of function SCUX_IoctlSetDvuCfg
 * @param[in]     channel:SCUX channel number.
 * @param[in]     *p_dvu_param:Digital volume parameter.
 * @retval        ESUCCESS:Operation successful.
-*                EPERM:Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EPERM_RBSP:Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlSetDvuDigiVol(const int_t channel, const scux_dvu_digi_vol_t * const p_digi_vol_param)
@@ -1813,7 +1813,7 @@ int_t SCUX_IoctlSetDvuDigiVol(const int_t channel, const scux_dvu_digi_vol_t * c
 
     if ((NULL == p_info_ch) || (NULL == p_digi_vol_param))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -1833,7 +1833,7 @@ int_t SCUX_IoctlSetDvuDigiVol(const int_t channel, const scux_dvu_digi_vol_t * c
         {
             if (SCUX_MAX_DIGITAL_VOLUME < p_info_ch->dvu_cfg.dvu_digi_vol.digi_vol[audio_ch])
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -1871,8 +1871,8 @@ End of function SCUX_IoctlSetDvuDigiVol
 * @param[in]     channel:SCUX channel number.
 * @param[in]     *p_dvu_param:Digital volume parameter.
 * @retval        ESUCCESS:Operation successful.
-*                EPERM:Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EPERM_RBSP:Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * const p_ramp_vol_param)
@@ -1883,7 +1883,7 @@ int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * c
 
     if ((NULL == p_info_ch) || (NULL == p_ramp_vol_param))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -1902,7 +1902,7 @@ int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * c
         if ((p_info_ch->dvu_cfg.dvu_ramp_vol.down_period <= SCUX_DVU_TIME_MIN) ||
             (p_info_ch->dvu_cfg.dvu_ramp_vol.down_period >= SCUX_DVU_TIME_MAX))
         {
-               retval = EPERM;
+               retval = EPERM_RBSP;
         }
 
         if (ESUCCESS == retval)
@@ -1911,7 +1911,7 @@ int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * c
             if ((p_info_ch->dvu_cfg.dvu_ramp_vol.up_period <= SCUX_DVU_TIME_MIN) ||
                 (p_info_ch->dvu_cfg.dvu_ramp_vol.up_period >= SCUX_DVU_TIME_MAX))
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -1920,7 +1920,7 @@ int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * c
             /* check ramp volume */
             if (SCUX_MAX_RAMP_VOLUME < p_info_ch->dvu_cfg.dvu_ramp_vol.ramp_vol)
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -1929,7 +1929,7 @@ int_t SCUX_IoctlSetDvuRampVol(const int_t channel, const scux_dvu_ramp_vol_t * c
             /* check wait time */
             if (SCUX_MAX_WAIT_TIME < p_info_ch->dvu_cfg.dvu_ramp_vol.ramp_wait_time)
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -1970,8 +1970,8 @@ End of function SCUX_IoctlSetDvuRampVol
 * @param[in]     channel:SCUX channel number.
 * @param[in]     *p_zc_mute_param:zerocross mute parameter.
 * @retval        ESUCCESS:Operation successful.
-*                EPERM:Parameter is unexpected value.
-*                EPERM:Rewrite callback pointer while waiting zerocross.
+*                EPERM_RBSP:Parameter is unexpected value.
+*                EPERM_RBSP:Rewrite callback pointer while waiting zerocross.
 ******************************************************************************/
 
 int_t SCUX_IoctlSetDvuZerocrossMute(const int_t channel, const scux_zc_mute_t * const p_zc_mute_param)
@@ -1982,7 +1982,7 @@ int_t SCUX_IoctlSetDvuZerocrossMute(const int_t channel, const scux_zc_mute_t * 
 
     if ((NULL == p_info_ch) || (NULL == p_zc_mute_param))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -2024,8 +2024,8 @@ End of function SCUX_IoctlSetDvuZerocrossMute
 * @param[in]     channel:SCUX channel number.
 * @param[in]     audio_channel:Audio channel number.
 * @retval        ESUCCESS:Operation successful.
-*                EPERM:Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EPERM_RBSP:Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlSetStopMute(const int_t channel, const uint32_t audio_channel)
@@ -2035,13 +2035,13 @@ int_t SCUX_IoctlSetStopMute(const int_t channel, const uint32_t audio_channel)
 
     if (NULL == p_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
         if (audio_channel >= (uint32_t)p_info_ch->src_cfg.use_ch)
         {
-            retval = EPERM;
+            retval = EPERM_RBSP;
         }
 
         if (ESUCCESS == retval)
@@ -2073,8 +2073,8 @@ End of function SCUX_IoctlSetStopMute
 *
 * @param[in]     *p_mix_param:MIX parameter.
 * @retval        ESUCCESS : Operation successful.
-*                EPERM : Transfer parameter is unexpected.
-*                EFAULT : Internal error is occured.
+*                EPERM_RBSP : Transfer parameter is unexpected.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlSetMixCfg(const scux_mix_cfg_t * const p_mix_param)
@@ -2086,7 +2086,7 @@ int_t SCUX_IoctlSetMixCfg(const scux_mix_cfg_t * const p_mix_param)
 
     if ((NULL == p_info_drv) || (NULL == p_mix_param))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -2112,7 +2112,7 @@ int_t SCUX_IoctlSetMixCfg(const scux_mix_cfg_t * const p_mix_param)
                 /* check ramp volume */
                 if (SCUX_MAX_RAMP_VOLUME < p_info_drv->shared_info.mix_vol[scux_ch])
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
             }
         }
@@ -2155,8 +2155,8 @@ End of function SCUX_IoctlSetMixCfg
 * @param[in]     channel:SCUX channel number.
 * @param[in]     mix_vol:MIX volume.
 * @retval        ESUCCESS : Operation successful.
-*                EPERM : Transfer parameter is unexpected.
-*                EFAULT: Internel error si occured.
+*                EPERM_RBSP : Transfer parameter is unexpected.
+*                EFAULT_RBSP: Internel error si occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
@@ -2168,7 +2168,7 @@ int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
 
     if (NULL == p_info_drv)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -2181,7 +2181,7 @@ int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
             if ((-1) == sem_wait_ercd)
             {
                 /* set semaphore error */
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
         }
 
@@ -2197,7 +2197,7 @@ int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
                 /* check ramp volume */
                 if (SCUX_MAX_RAMP_VOLUME < p_info_drv->shared_info.mix_vol[channel])
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
                 else
                 {
@@ -2216,7 +2216,7 @@ int_t SCUX_IoctlSetMixVol(const int_t channel, const uint32_t mix_vol)
             if (osOK != sem_ercd)
             {
                 /* set semaphore error */
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
         }
     }
@@ -2237,9 +2237,9 @@ End of function SCUX_IoctlSetMixVol
 * @param[in]     channel:SCUX channel number.
 * @param[in]     p_ssif_param:SSIF parameter.
 * @retval        ESUCCESS : Operation successful.
-*                EBADF : SSIF channel has already used on other SCUX channel.
-*                EPERM : Transfer parameter is unexpected.
-*                EFAULT: Internel error is occured.
+*                EBADF_RBSP : SSIF channel has already used on other SCUX channel.
+*                EPERM_RBSP : Transfer parameter is unexpected.
+*                EFAULT_RBSP: Internel error is occured.
 ******************************************************************************/
 
 int_t SCUX_IoctlSetSsifCfg(const scux_ssif_cfg_t * const p_ssif_param)
@@ -2251,7 +2251,7 @@ int_t SCUX_IoctlSetSsifCfg(const scux_ssif_cfg_t * const p_ssif_param)
 
     if (NULL == p_ssif_param)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -2260,7 +2260,7 @@ int_t SCUX_IoctlSetSsifCfg(const scux_ssif_cfg_t * const p_ssif_param)
             p_ssif_ch = SCUX_GetSsifChInfo((int_t)p_ssif_param->ssif_ch_num);
             if (NULL == p_ssif_ch)
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -2271,13 +2271,13 @@ int_t SCUX_IoctlSetSsifCfg(const scux_ssif_cfg_t * const p_ssif_param)
                 if ((-1) == sem_wait_ercd)
                 {
                     /* set semaphore error */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
                 else
                 {
                     if (0 != p_ssif_ch->scux_channel)
                     {
-                        retval = EBADF;
+                        retval = EBADF_RBSP;
                     }
                     else
                     {
@@ -2301,13 +2301,13 @@ int_t SCUX_IoctlSetSsifCfg(const scux_ssif_cfg_t * const p_ssif_param)
                 if (osOK != sem_ercd)
                 {
                     /* set semaphore error */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
             }
         }
         else
         {
-            retval = EPERM;
+            retval = EPERM_RBSP;
         }
     }
 

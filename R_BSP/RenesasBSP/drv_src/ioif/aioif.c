@@ -89,7 +89,7 @@ int32_t ahf_create (AHF_S * const ahf, const uint32_t f)
 
     if (ahf == NULL)
     {
-        return EFAULT;
+        return EFAULT_RBSP;
     }
 
     ahf->head = NULL;
@@ -110,7 +110,7 @@ int32_t ahf_create (AHF_S * const ahf, const uint32_t f)
 #endif/*__GNUC__*/
         if ( NULL == p_mutex_def )
         {
-            return ENOMEM;
+            return ENOMEM_RBSP;
         }
 #if defined (__GNUC__)
         /* disable all irq */
@@ -132,7 +132,7 @@ int32_t ahf_create (AHF_S * const ahf, const uint32_t f)
             /* enable all irq */
             core_util_critical_section_exit();
 #endif/*__GNUC__*/
-            return ENOMEM;
+            return ENOMEM_RBSP;
         }
         p_mutex_def->cb_mem = p_mutex_data;
         ahf->p_cmtx = p_mutex_def;
@@ -149,7 +149,7 @@ int32_t ahf_create (AHF_S * const ahf, const uint32_t f)
             /* enable all irq */
             core_util_critical_section_exit();
 #endif/*__GNUC__*/
-            return ENOMEM;
+            return ENOMEM_RBSP;
         }
     }
 
@@ -308,7 +308,7 @@ void ahf_cancelall (AHF_S * const ahf)
     while (cur != NULL)
     {
         next = cur->pNext;
-        cur->aio_return = ECANCELED;
+        cur->aio_return = ECANCELED_RBSP;
         ahf_complete (ahf, cur);
         cur = next;
     }
@@ -402,11 +402,11 @@ Return value:   0 on success.   negative error code on error.
 int32_t ahf_cancel (AHF_S * const ahf, struct aiocb * const aio)
 {
     struct aiocb *cur;
-    int32_t rv = EINVAL;
+    int32_t rv = EINVAL_RBSP;
 
     if (ahf == NULL)
     {
-        return EFAULT;
+        return EFAULT_RBSP;
     }
 
     /* If aio is NULL, must cancel all. */
@@ -448,7 +448,7 @@ int32_t ahf_cancel (AHF_S * const ahf, struct aiocb * const aio)
                 ahf->tail = cur->pPrev;
             }
 
-            cur->aio_return = ECANCELED;
+            cur->aio_return = ECANCELED_RBSP;
             ahf_complete (ahf, aio);
             rv = 0;
         }

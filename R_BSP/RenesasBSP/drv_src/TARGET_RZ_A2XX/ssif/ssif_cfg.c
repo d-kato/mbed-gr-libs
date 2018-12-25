@@ -217,7 +217,7 @@ int_t R_SSIF_Userdef_SetClockDiv(const ssif_channel_cfg_t* const p_ch_cfg, ssif_
 
     if ((NULL == p_ch_cfg) || (NULL == p_clk_div))
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -236,7 +236,7 @@ int_t R_SSIF_Userdef_SetClockDiv(const ssif_channel_cfg_t* const p_ch_cfg, ssif_
 
         if (0u == input_clk)
         {
-            ret = EINVAL;
+            ret = EINVAL_RBSP;
         }
 
         if (ESUCCESS == ret)
@@ -259,7 +259,7 @@ int_t R_SSIF_Userdef_SetClockDiv(const ssif_channel_cfg_t* const p_ch_cfg, ssif_
 
             if (0u == dot_clk)
             {
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
             }
             else
             {
@@ -269,7 +269,7 @@ int_t R_SSIF_Userdef_SetClockDiv(const ssif_channel_cfg_t* const p_ch_cfg, ssif_
                 if (0u != result)
                 {
                     /* cannot create dotclock from input audio clock */
-                    ret = EINVAL;
+                    ret = EINVAL_RBSP;
                 }
                 else
                 {
@@ -317,7 +317,7 @@ int_t R_SSIF_Userdef_SetClockDiv(const ssif_channel_cfg_t* const p_ch_cfg, ssif_
                         *p_clk_div = SSIF_CFG_CKDV_BITS_96;
                         break;
                     default:
-                        ret = EINVAL;
+                        ret = EINVAL_RBSP;
                         break;
                     }
                 }

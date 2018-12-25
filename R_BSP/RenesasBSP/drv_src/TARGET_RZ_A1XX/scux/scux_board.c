@@ -47,8 +47,8 @@ Exported global variables (to be accessed by other files)
 * @param[in]     *p_scux_info_ch : SCUX channel information.
 * @param[in]     ssif_ch : Used ssif channel number.
 * @retval        ESUCCESS : Parameter is no problems.
-*                EPERM : Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EPERM_RBSP : Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_CheckSsifClockDiv(const scux_info_ch_t * const p_scux_info_ch, const uint32_t ssif_ch_num)
@@ -67,7 +67,7 @@ int_t SCUX_CheckSsifClockDiv(const scux_info_ch_t * const p_scux_info_ch, const 
 
     if ((NULL == p_scux_info_ch) || (NULL == p_ssif_ch))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -91,7 +91,7 @@ int_t SCUX_CheckSsifClockDiv(const scux_info_ch_t * const p_scux_info_ch, const 
 
             if (0u == input_clk)
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
 
             if (ESUCCESS == retval)
@@ -127,7 +127,7 @@ int_t SCUX_CheckSsifClockDiv(const scux_info_ch_t * const p_scux_info_ch, const 
                     break;
 
                     default :
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     break;
                 }
 
@@ -145,7 +145,7 @@ int_t SCUX_CheckSsifClockDiv(const scux_info_ch_t * const p_scux_info_ch, const 
                 dot_clk = syswd_len * n_syswd_per_smp * smp_freq;
                 if (0u == dot_clk)
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
                 else
                 {
@@ -155,7 +155,7 @@ int_t SCUX_CheckSsifClockDiv(const scux_info_ch_t * const p_scux_info_ch, const 
                     if (0U != result)
                     {
                         /* cannot create dotclock from input audio clock */
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                     else
                     {
@@ -216,7 +216,7 @@ int_t SCUX_CheckSsifClockDiv(const scux_info_ch_t * const p_scux_info_ch, const 
                             break;
 
                             default:
-                                retval = EPERM;
+                                retval = EPERM_RBSP;
                             break;
                         }
                     }

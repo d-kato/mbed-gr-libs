@@ -181,7 +181,7 @@ static void* R_SSIF_InitOne(const int_t channel, const void* const config_data, 
 
     if (NULL == config_data)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
 #if(1) /* mbed */
     else if ((uint32_t)channel >= SSIF_NUM_CHANS)
@@ -189,7 +189,7 @@ static void* R_SSIF_InitOne(const int_t channel, const void* const config_data, 
     else if (channel >= SSIF_NUM_CHANS)
 #endif
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -242,7 +242,7 @@ static int_t R_SSIF_UnInitOne(const int_t channel, const void* const driver_inst
 
     if (NULL == driver_instance)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
 #if(1) /* mbed */
     else if ((uint32_t)channel >= SSIF_NUM_CHANS)
@@ -250,13 +250,13 @@ static int_t R_SSIF_UnInitOne(const int_t channel, const void* const driver_inst
     else if (channel >= SSIF_NUM_CHANS)
 #endif
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (SSIF_DRVSTS_INIT != ch_drv_stat[channel])
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else
         {
@@ -412,21 +412,21 @@ static int_t R_SSIF_Open(void* const p_driver_instance, const char_t* const p_pa
 
     if ((NULL == p_info_drv) || (NULL == p_path_name))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         req_path_len = strlen(p_path_name);
         if (0u == req_path_len)
         {
-            ercd = ENOENT;
+            ercd = ENOENT_RBSP;
         }
 
         if (ESUCCESS == ercd)
         {
             if (SSIF_DRVSTS_INIT != p_info_drv->drv_stat)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
 
@@ -453,7 +453,7 @@ static int_t R_SSIF_Open(void* const p_driver_instance, const char_t* const p_pa
 
     if (NULL == p_info_ch)
     {
-        ercd = ENOENT;
+        ercd = ENOENT_RBSP;
     }
     else
     {
@@ -461,7 +461,7 @@ static int_t R_SSIF_Open(void* const p_driver_instance, const char_t* const p_pa
         {
             if (false == p_info_ch->enabled)
             {
-                ercd = ENOTSUP;
+                ercd = ENOTSUP_RBSP;
             }
         }
 
@@ -469,7 +469,7 @@ static int_t R_SSIF_Open(void* const p_driver_instance, const char_t* const p_pa
         {
             if (SSIF_CHSTS_INIT != p_info_ch->ch_stat)
             {
-                ercd = EBADF;
+                ercd = EBADF_RBSP;
             }
         }
 
@@ -481,7 +481,7 @@ static int_t R_SSIF_Open(void* const p_driver_instance, const char_t* const p_pa
 
             if ((-1) == os_ret)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else
             {
@@ -499,7 +499,7 @@ static int_t R_SSIF_Open(void* const p_driver_instance, const char_t* const p_pa
             os_ercd = osSemaphoreRelease(p_info_ch->sem_access);
             if (osOK != os_ercd)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
     }
@@ -539,7 +539,7 @@ static int_t R_SSIF_Close(void* const p_fd, int32_t* const p_errno)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -550,13 +550,13 @@ static int_t R_SSIF_Close(void* const p_fd, int32_t* const p_errno)
 
         if ((-1) == os_ret)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else
         {
             if (SSIF_CHSTS_OPEN != p_info_ch->ch_stat)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else
             {
@@ -575,7 +575,7 @@ static int_t R_SSIF_Close(void* const p_fd, int32_t* const p_errno)
 
             if (osOK != os_ercd)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
     }
@@ -612,13 +612,13 @@ static int_t R_SSIF_Ioctl(void* const p_fd, const int_t request, void* const p_b
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (SSIF_CHSTS_OPEN != p_info_ch->ch_stat)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else
         {
@@ -628,7 +628,7 @@ static int_t R_SSIF_Ioctl(void* const p_fd, const int_t request, void* const p_b
 
             if ((-1) == os_ret)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
 
             if (ESUCCESS == ercd)
@@ -639,7 +639,7 @@ static int_t R_SSIF_Ioctl(void* const p_fd, const int_t request, void* const p_b
                     {
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -653,7 +653,7 @@ static int_t R_SSIF_Ioctl(void* const p_fd, const int_t request, void* const p_b
                     {
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -664,7 +664,7 @@ static int_t R_SSIF_Ioctl(void* const p_fd, const int_t request, void* const p_b
 
                     default:
                     {
-                        ercd = EINVAL;
+                        ercd = EINVAL_RBSP;
                         break;
                     }
                 } /* switch */
@@ -674,7 +674,7 @@ static int_t R_SSIF_Ioctl(void* const p_fd, const int_t request, void* const p_b
         os_ercd = osSemaphoreRelease(p_info_ch->sem_access);
         if (osOK != os_ercd)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
     }
 
@@ -707,17 +707,17 @@ static int_t R_SSIF_WriteAsync(void* const p_fd, AIOCB* const p_aio, int32_t* co
 
     if ((NULL == p_info_ch) || (NULL == p_aio))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
-        if (((uint32_t)O_RDONLY) == ((uint32_t)p_info_ch->openflag & O_ACCMODE))
+        if (((uint32_t)O_RDONLY_RBSP) == ((uint32_t)p_info_ch->openflag & O_ACCMODE_RBSP))
         {
-            ercd = EACCES;
+            ercd = EACCES_RBSP;
         }
         else if (0u == p_aio->aio_nbytes)
         {
-            ercd = EINVAL;
+            ercd = EINVAL_RBSP;
         }
         else
         {
@@ -755,23 +755,23 @@ static int_t R_SSIF_ReadAsync(void* const p_fd, AIOCB* const p_aio, int32_t* con
 
     if ((NULL == p_info_ch) || (NULL == p_aio))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
 #if defined(TARGET_RZA1H) /* mbed */
-        if ((O_WRONLY == ((uint32_t)p_info_ch->openflag & O_ACCMODE))
+        if ((O_WRONLY_RBSP == ((uint32_t)p_info_ch->openflag & O_ACCMODE_RBSP))
             || (SSIF_CFG_ENABLE_ROMDEC_DIRECT
                 == p_info_ch->romdec_direct.mode))
 #else /* mbed */
-        if ((O_WRONLY == ((uint32_t)p_info_ch->openflag & O_ACCMODE)))
+        if ((O_WRONLY_RBSP == ((uint32_t)p_info_ch->openflag & O_ACCMODE_RBSP)))
 #endif /* mbed */
         {
-            ercd = EACCES;
+            ercd = EACCES_RBSP;
         }
         else if (0u == p_aio->aio_nbytes)
         {
-            ercd = EINVAL;
+            ercd = EINVAL_RBSP;
         }
         else
         {
@@ -811,7 +811,7 @@ static int_t R_SSIF_Cancel(void* const p_fd, AIOCB* const p_aio, int32_t* const 
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -822,13 +822,13 @@ static int_t R_SSIF_Cancel(void* const p_fd, AIOCB* const p_aio, int32_t* const 
 
         if ((-1) == os_ret)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else
         {
             if (SSIF_CHSTS_OPEN != p_info_ch->ch_stat)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else
             {
@@ -839,7 +839,7 @@ static int_t R_SSIF_Cancel(void* const p_fd, AIOCB* const p_aio, int32_t* const 
 
             if (osOK != os_ercd)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
     }

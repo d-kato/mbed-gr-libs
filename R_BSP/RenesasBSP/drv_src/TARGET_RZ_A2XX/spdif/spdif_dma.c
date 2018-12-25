@@ -88,14 +88,14 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         /* allocate DMA Channel for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY == p_info_ch->openflag)
+            if (O_RDONLY_RBSP == p_info_ch->openflag)
             {
                 p_info_ch->dma_tx_ch = -1;
             }
@@ -106,7 +106,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
                 if (EERROR == dma_ret)
                 {
                     p_info_ch->dma_tx_ch = -1;
-                    ercd = ENOMEM;
+                    ercd = ENOMEM_RBSP;
                 }
                 else
                 {
@@ -119,7 +119,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
         /* allocate DMA Channel for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY == p_info_ch->openflag)
+            if (O_WRONLY_RBSP == p_info_ch->openflag)
             {
                 p_info_ch->dma_rx_ch = -1;
             }
@@ -130,7 +130,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
                 if (EERROR == dma_ret)
                 {
                     p_info_ch->dma_rx_ch = -1;
-                    ercd = ENOMEM;
+                    ercd = ENOMEM_RBSP;
                 }
                 else
                 {
@@ -143,7 +143,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
         /* setup DMA channel for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY != p_info_ch->openflag)
+            if (O_RDONLY_RBSP != p_info_ch->openflag)
             {
                 AIOCB* const p_tx_aio = &gb_spdif_dma_tx_end_aiocb;
                 p_tx_aio->aio_sigevent.sigev_notify = SIGEV_THREAD;
@@ -161,7 +161,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
                 dma_ret = R_DMA_Setup(p_info_ch->dma_tx_ch, &dma_ch_setup, &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
         }
@@ -169,7 +169,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
         /* setup DMA channel for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY != p_info_ch->openflag)
+            if (O_WRONLY_RBSP != p_info_ch->openflag)
             {
                 AIOCB* const p_rx_aio = &gb_spdif_dma_rx_end_aiocb;
                 p_rx_aio->aio_sigevent.sigev_notify = SIGEV_THREAD;
@@ -187,7 +187,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
                 dma_ret = R_DMA_Setup(p_info_ch->dma_rx_ch, &dma_ch_setup, &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
         }
@@ -195,7 +195,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
         /* start DMA dummy transfer for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY != p_info_ch->openflag)
+            if (O_RDONLY_RBSP != p_info_ch->openflag)
             {
                 /* setup short dummy transfer */
                 gb_spdif_txdma_dummy_trparam.src_addr = (void*)&spdif_tx_dummy_buf[0];
@@ -205,14 +205,14 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
                 dma_ret = R_DMA_NextData(p_info_ch->dma_tx_ch, &gb_spdif_txdma_dummy_trparam, &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
                 else
                 {
                     dma_ret = R_DMA_Start(p_info_ch->dma_tx_ch, &gb_spdif_txdma_dummy_trparam, &dma_ercd);
                     if (EERROR == dma_ret)
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
             }
@@ -221,7 +221,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
         /* start DMA dummy transfer for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY != p_info_ch->openflag)
+            if (O_WRONLY_RBSP != p_info_ch->openflag)
             {
                 /* setup short dummy transfer */
                 gb_spdif_rxdma_dummy_trparam.src_addr = (void*)&SPDIF.RDAD.LONG;
@@ -231,14 +231,14 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
                 dma_ret = R_DMA_NextData(p_info_ch->dma_rx_ch, &gb_spdif_rxdma_dummy_trparam, &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
                 else
                 {
                     dma_ret = R_DMA_Start(p_info_ch->dma_rx_ch, &gb_spdif_rxdma_dummy_trparam, &dma_ercd);
                     if (EERROR == dma_ret)
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
             }
@@ -249,20 +249,20 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
         {
             /* clear status and enable error interrupt */
             /* enable end interrupt */
-            if (O_RDWR == p_info_ch->openflag)
+            if (O_RDWR_RBSP == p_info_ch->openflag)
             {
                 /* start write and read DMA at the same time */
                 SPDIF.STAT.LONG &= ~(SPDIF_STAT_READ_ONLY | SPDIF_STAT_UBU | SPDIF_STAT_CSE | SPDIF_STAT_ABU |
                                      SPDIF_STAT_UBO | SPDIF_STAT_CE | SPDIF_STAT_PARE | SPDIF_STAT_PREE | SPDIF_STAT_ABO);
                 SPDIF.CTRL.LONG |= (SPDIF_CTRL_TME | SPDIF_CTRL_TDE | SPDIF_CTRL_RME | SPDIF_CTRL_RDE);
             }
-            else if (O_WRONLY == p_info_ch->openflag)
+            else if (O_WRONLY_RBSP == p_info_ch->openflag)
             {
                 /* start write DMA only */
                 SPDIF.STAT.LONG &= ~(SPDIF_STAT_READ_ONLY | SPDIF_STAT_UBU | SPDIF_STAT_CSE | SPDIF_STAT_ABU);
                 SPDIF.CTRL.LONG |= (SPDIF_CTRL_TME | SPDIF_CTRL_TDE);
             }
-            else if (O_RDONLY == p_info_ch->openflag)
+            else if (O_RDONLY_RBSP == p_info_ch->openflag)
             {
                 /* start read DMA only */
                 SPDIF.STAT.LONG &= ~(SPDIF_STAT_READ_ONLY | SPDIF_STAT_UBO | SPDIF_STAT_CE | SPDIF_STAT_PARE | SPDIF_STAT_PREE | SPDIF_STAT_ABO);
@@ -270,7 +270,7 @@ int_t SPDIF_InitDMA(spdif_info_ch_t* const p_info_ch)
             }
             else
             {
-                ercd = EINVAL;
+                ercd = EINVAL_RBSP;
             }
         }
 
@@ -405,14 +405,14 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         /* setup DMA channel for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY != openflag)
+            if (O_RDONLY_RBSP != openflag)
             {
                 AIOCB* const p_tx_aio = &gb_spdif_dma_tx_end_aiocb;
                 p_tx_aio->aio_sigevent.sigev_notify = SIGEV_THREAD;
@@ -430,7 +430,7 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
                 dma_ret = R_DMA_Setup(p_info_ch->dma_tx_ch, &dma_ch_setup, &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
         }
@@ -438,7 +438,7 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
         /* setup DMA channel for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY != openflag)
+            if (O_WRONLY_RBSP != openflag)
             {
                 AIOCB* const p_rx_aio = &gb_spdif_dma_rx_end_aiocb;
                 p_rx_aio->aio_sigevent.sigev_notify = SIGEV_THREAD;
@@ -456,7 +456,7 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
                 dma_ret = R_DMA_Setup(p_info_ch->dma_rx_ch, &dma_ch_setup, &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
         }
@@ -464,7 +464,7 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
         /* start DMA dummy transfer for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY != openflag)
+            if (O_RDONLY_RBSP != openflag)
             {
                 /* setup short dummy transfer */
                 gb_spdif_txdma_dummy_trparam.src_addr = (void*)&spdif_tx_dummy_buf[0];
@@ -474,14 +474,14 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
                 dma_ret = R_DMA_NextData(p_info_ch->dma_tx_ch, &gb_spdif_txdma_dummy_trparam, &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
                 else
                 {
                     dma_ret = R_DMA_Start(p_info_ch->dma_tx_ch, &gb_spdif_txdma_dummy_trparam, &dma_ercd);
                     if (EERROR == dma_ret)
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
             }
@@ -490,7 +490,7 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
         /* start DMA dummy transfer for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY != openflag)
+            if (O_WRONLY_RBSP != openflag)
             {
                 /* setup short dummy transfer */
                 gb_spdif_rxdma_dummy_trparam.src_addr = (void*)&SPDIF.RDAD.LONG;
@@ -500,14 +500,14 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
                 dma_ret = R_DMA_NextData(p_info_ch->dma_rx_ch, &gb_spdif_rxdma_dummy_trparam, &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
                 else
                 {
                     dma_ret = R_DMA_Start(p_info_ch->dma_rx_ch, &gb_spdif_rxdma_dummy_trparam, &dma_ercd);
                     if (EERROR == dma_ret)
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
             }
@@ -518,20 +518,20 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
         {
             /* clear status and enable error interrupt */
             /* enable end interrupt */
-            if (O_RDWR == openflag)
+            if (O_RDWR_RBSP == openflag)
             {
                 /* start write and read DMA at the same time */
                 SPDIF.STAT.LONG &= ~(SPDIF_STAT_UBU | SPDIF_STAT_CSE | SPDIF_STAT_ABU);
                 SPDIF.STAT.LONG &= ~(SPDIF_STAT_UBO | SPDIF_STAT_CE | SPDIF_STAT_PARE | SPDIF_STAT_PREE | SPDIF_STAT_ABO);
                 SPDIF.CTRL.LONG |= (SPDIF_CTRL_TME | SPDIF_CTRL_TDE | SPDIF_CTRL_RME | SPDIF_CTRL_RDE);
             }
-            else if (O_WRONLY == openflag)
+            else if (O_WRONLY_RBSP == openflag)
             {
                 /* start write DMA only */
                 SPDIF.STAT.LONG &= ~(SPDIF_STAT_UBU | SPDIF_STAT_CSE | SPDIF_STAT_ABU);
                 SPDIF.CTRL.LONG |= (SPDIF_CTRL_TME | SPDIF_CTRL_TDE);
             }
-            else if (O_RDONLY == openflag)
+            else if (O_RDONLY_RBSP == openflag)
             {
                 /* start read DMA only */
                 SPDIF.STAT.LONG &= ~(SPDIF_STAT_UBO | SPDIF_STAT_CE | SPDIF_STAT_PARE | SPDIF_STAT_PREE | SPDIF_STAT_ABO);
@@ -539,7 +539,7 @@ int_t SPDIF_RestartDMA(spdif_info_ch_t* const p_info_ch, int_t openflag)
             }
             else
             {
-                ercd = EINVAL;
+                ercd = EINVAL_RBSP;
             }
         }
     }
@@ -567,7 +567,7 @@ void SPDIF_CancelDMA(const spdif_info_ch_t* const p_info_ch, int_t openflag)
     }
     else
     {
-        if (O_RDONLY != openflag) {
+        if (O_RDONLY_RBSP != openflag) {
             if (-1 != p_info_ch->dma_tx_ch)
             {
                 uint32_t remain;
@@ -579,7 +579,7 @@ void SPDIF_CancelDMA(const spdif_info_ch_t* const p_info_ch, int_t openflag)
             }
         }
 
-        if (O_WRONLY != openflag) {
+        if (O_WRONLY_RBSP != openflag) {
             if (-1 != p_info_ch->dma_rx_ch)
             {
                 uint32_t remain;

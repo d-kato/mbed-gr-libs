@@ -307,12 +307,12 @@ static void R_SCUX_FdiHandlerProcess(const scux_ch_num_t channel)
         if ((p_info_ch->p_scux_reg->p_ffd_reg->DEVCR_FFD0_0 & DEVCR_FFD0_DEVCOL_MASK) != 0)
         {
             /* critical error (over lap) */
-            ercd = EIO;
+            ercd = EIO_RBSP;
         }
         else
         {
             /* be returned error (FFD under flow, over flow) */
-            ercd = EOVERFLOW;
+            ercd = EOVERFLOW_RBSP;
         }
 
         p_info_ch->p_scux_reg->p_ffd_reg->DEVCR_FFD0_0 &= ~(DEVCR_FFD0_DEVCUF_SET |
@@ -438,12 +438,12 @@ static void R_SCUX_FuiHandlerProcess(const scux_ch_num_t channel)
         if ((p_info_ch->p_scux_reg->p_ffu_reg->UEVCR_FFU0_0 & UEVCR_FFU0_UEVCOL_MASK) != 0)
         {
             /* critical error (over lap) */
-            ercd = EIO;
+            ercd = EIO_RBSP;
         }
         else
         {
             /* be returned error (FFU under flow, over flow) */
-            ercd = EOVERFLOW;
+            ercd = EOVERFLOW_RBSP;
         }
 
         p_info_ch->p_scux_reg->p_ffu_reg->UEVCR_FFU0_0 &= ~(UEVCR_FFU0_UEVCUF_SET |
@@ -668,7 +668,7 @@ static void R_SCUX_AiHandlerProcess(const uint32_t src_channel)
                     p_info_ch->p_scux_reg->p_src_reg->SEVCR0_2SRC0_0 &= ~(SEVCR_2SRC0_EVCUF_SET |
                                                                           SEVCR_2SRC0_EVCOF_SET);
                     /* be returned error (FFU under flow, over flow) */
-                    R_SCUX_ErrHandlerProcess(p_info_ch, EOVERFLOW);
+                    R_SCUX_ErrHandlerProcess(p_info_ch, EOVERFLOW_RBSP);
                 }
             }
 
@@ -685,7 +685,7 @@ static void R_SCUX_AiHandlerProcess(const uint32_t src_channel)
                     p_info_ch->p_scux_reg->p_src_reg->SEVCR1_2SRC0_0 &= ~(SEVCR_2SRC0_EVCUF_SET |
                                                                           SEVCR_2SRC0_EVCOF_SET);
                     /* be returned error (FFU under flow, over flow) */
-                    R_SCUX_ErrHandlerProcess(p_info_ch, EOVERFLOW);
+                    R_SCUX_ErrHandlerProcess(p_info_ch, EOVERFLOW_RBSP);
                 }
             }
         }
@@ -711,7 +711,7 @@ static void R_SCUX_AiHandlerProcess(const uint32_t src_channel)
                     p_info_ch->p_scux_reg->p_src_reg->SEVCR0_2SRC0_0 &= ~(SEVCR_2SRC0_EVCUF_SET |
                                                                           SEVCR_2SRC0_EVCOF_SET);
                     /* be returned error (FFU under flow, over flow) */
-                    R_SCUX_ErrHandlerProcess(p_info_ch, EOVERFLOW);
+                    R_SCUX_ErrHandlerProcess(p_info_ch, EOVERFLOW_RBSP);
                 }
             }
 
@@ -728,7 +728,7 @@ static void R_SCUX_AiHandlerProcess(const uint32_t src_channel)
                     p_info_ch->p_scux_reg->p_src_reg->SEVCR1_2SRC0_0 &= ~(SEVCR_2SRC0_EVCUF_SET |
                                                                           SEVCR_2SRC0_EVCOF_SET);
                     /* be returned error (FFU under flow, over flow) */
-                    R_SCUX_ErrHandlerProcess(p_info_ch, EOVERFLOW);
+                    R_SCUX_ErrHandlerProcess(p_info_ch, EOVERFLOW_RBSP);
                 }
             }
         }
@@ -769,8 +769,8 @@ static void R_SCUX_ErrHandlerProcess(scux_info_ch_t * const p_scux_info_ch, cons
     else
     {
         retval = R_DMA_Cancel(p_scux_info_ch->dma_tx_ch, &tx_remain_size, &dma_retval);
-        /* DMA stop check, (when dma_retval is EBADF, DMA stopped already) */
-        if ((ESUCCESS != retval) && (EBADF != dma_retval))
+        /* DMA stop check, (when dma_retval is EBADF_RBSP, DMA stopped already) */
+        if ((ESUCCESS != retval) && (EBADF_RBSP != dma_retval))
         {
             /* NON_NOTICE_ASSERT: NULL pointer */
         }
@@ -784,8 +784,8 @@ static void R_SCUX_ErrHandlerProcess(scux_info_ch_t * const p_scux_info_ch, cons
         {
             retval = R_DMA_Cancel(p_scux_info_ch->dma_rx_ch, &rx_remain_size, &dma_retval);
 
-            /* DMA stop check, (when dma_retval is EBADF, DMA stopped already) */
-            if ((ESUCCESS != retval) && (EBADF != dma_retval))
+            /* DMA stop check, (when dma_retval is EBADF_RBSP, DMA stopped already) */
+            if ((ESUCCESS != retval) && (EBADF_RBSP != dma_retval))
             {
                 /* NON_NOTICE_ASSERT: NULL pointer */
             }
@@ -830,7 +830,7 @@ static void R_SCUX_ErrHandlerProcess(scux_info_ch_t * const p_scux_info_ch, cons
                 }
                 else
                 {
-                    p_scux_info_ch->p_tx_next_aio->aio_return = ECANCELED;
+                    p_scux_info_ch->p_tx_next_aio->aio_return = ECANCELED_RBSP;
                 }
                 ahf_complete(&p_scux_info_ch->tx_que, p_scux_info_ch->p_tx_next_aio);
             }

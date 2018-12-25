@@ -56,9 +56,9 @@ Private global tables
 *                                  When pointer is NULL, it isn't set error code.
 *                                  error code -
 *                                  OS error num : Registering handler failed.
-*                                  EPERM : Pointer of callback function which called in DMA 
+*                                  EPERM_RBSP : Pointer of callback function which called in DMA 
 *                                          error interrupt handler is NULL.
-*                                  EFAULT : dma_init_param is NULL.
+*                                  EFAULT_RBSP : dma_init_param is NULL.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -78,7 +78,7 @@ int_t R_DMA_Init(const dma_drv_init_t * const p_dma_init_param, int32_t * const 
     {
         /* set error return value */
         retval = (EERROR);
-        DMA_SetErrCode(EFAULT, p_errno);
+        DMA_SetErrCode(EFAULT_RBSP, p_errno);
     }
 
     if (ESUCCESS == retval)
@@ -89,7 +89,7 @@ int_t R_DMA_Init(const dma_drv_init_t * const p_dma_init_param, int32_t * const 
         {
             /* set error return value */
             retval = (EERROR);
-            DMA_SetErrCode(EPERM, p_errno);
+            DMA_SetErrCode(EPERM_RBSP, p_errno);
         }
     }
 
@@ -127,9 +127,9 @@ End of function R_DMA_Init
 *                           When pointer is NULL, it isn't set error code.
 *                           error code -
 *                           OS error num : Unegistering handler failed.
-*                           EACCES : Driver status isn't DMA_DRV_INIT.
-*                           EBUSY : It has been allocated already in channel.
-*                           EFAULT : Channel status is besides the status definded in dma_stat_ch_t.
+*                           EACCES_RBSP : Driver status isn't DMA_DRV_INIT.
+*                           EBUSY_RBSP : It has been allocated already in channel.
+*                           EFAULT_RBSP : Channel status is besides the status definded in dma_stat_ch_t.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -161,7 +161,7 @@ int_t R_DMA_UnInit(int32_t * const p_errno)
         {
             /* set error return value */
             retval = EERROR;
-            DMA_SetErrCode(EACCES, p_errno);
+            DMA_SetErrCode(EACCES_RBSP, p_errno);
         }
         else
         {
@@ -182,11 +182,11 @@ int_t R_DMA_UnInit(int32_t * const p_errno)
                         /* These 2 cases are intentionally combined. */
                         case DMA_CH_OPEN:
                         case DMA_CH_TRANSFER:
-                            DMA_SetErrCode(EBUSY, p_errno);
+                            DMA_SetErrCode(EBUSY_RBSP, p_errno);
                         break;
 
                         default:
-                            DMA_SetErrCode(EFAULT, p_errno);
+                            DMA_SetErrCode(EFAULT_RBSP, p_errno);
                         break;
                     }
                 }
@@ -233,12 +233,12 @@ End of function R_DMA_UnInit
 * @param[in,out] p_errno   :Pointer of error code
 *                           When pointer is NULL, it isn't set error code.
 *                           error code -
-*                           EINVAL : Value of the ch is outside the range of DMA_ALLOC_CH(-1) <= ch < DMA_CH_NUM.
-*                           EACCES : Driver status isn't DMA_DRV_INIT.
-*                           EBUSY : It has been allocated already in channel.
-*                           EMFILE : When looking for a free channel, but a free channel didn't exist.
-*                           ENOTSUP : Channel status is DMA_CH_UNINIT.
-*                           EFAULT: Channel status is besides the status definded in dma_stat_ch_t.
+*                           EINVAL_RBSP : Value of the ch is outside the range of DMA_ALLOC_CH(-1) <= ch < DMA_CH_NUM.
+*                           EACCES_RBSP : Driver status isn't DMA_DRV_INIT.
+*                           EBUSY_RBSP : It has been allocated already in channel.
+*                           EMFILE_RBSP : When looking for a free channel, but a free channel didn't exist.
+*                           ENOTSUP_RBSP : Channel status is DMA_CH_UNINIT.
+*                           EFAULT_RBSP: Channel status is besides the status definded in dma_stat_ch_t.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -267,7 +267,7 @@ int_t R_DMA_Alloc(const int_t channel, int32_t * const p_errno)
         if (DMA_DRV_INIT != dma_info_drv->drv_stat)
         {
             /* set error return value */
-            ercd =  EACCES;
+            ercd =  EACCES_RBSP;
         }
         else
         {
@@ -298,7 +298,7 @@ int_t R_DMA_Alloc(const int_t channel, int32_t * const p_errno)
             else
             {
                 /* set error return value */
-                ercd =  EINVAL;
+                ercd =  EINVAL_RBSP;
             }
         }
     }
@@ -330,12 +330,12 @@ End of function R_DMA_Alloc
 * @param[in,out] p_errno   :Pointer of error code
 *                           When pointer is NULL, it isn't set error code.
 *                           error code -
-*                           EBADF : Channel status is DMA_CH_INIT.
-*                           EINVAL : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
-*                           EACCES : Driver status isn't DMA_DRV_INIT.
-*                           EBUSY : It has been start DMA transfer in channel.
-*                           ENOTSUP : Channel status is DMA_CH_UNINIT.
-*                           EFAULT: Channel status is besides the status definded in dma_stat_ch_t.
+*                           EBADF_RBSP : Channel status is DMA_CH_INIT.
+*                           EINVAL_RBSP : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
+*                           EACCES_RBSP : Driver status isn't DMA_DRV_INIT.
+*                           EBUSY_RBSP : It has been start DMA transfer in channel.
+*                           ENOTSUP_RBSP : Channel status is DMA_CH_UNINIT.
+*                           EFAULT_RBSP: Channel status is besides the status definded in dma_stat_ch_t.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -382,19 +382,19 @@ int_t R_DMA_Free(const int_t channel, int32_t *const p_errno)
                         switch (dma_info_ch->ch_stat)
                         {
                             case DMA_CH_UNINIT:
-                                error_code = ENOTSUP;
+                                error_code = ENOTSUP_RBSP;
                             break;
 
                             case DMA_CH_INIT:
-                                error_code = EBADF;
+                                error_code = EBADF_RBSP;
                             break;
 
                             case DMA_CH_TRANSFER:
-                                error_code = EBUSY;
+                                error_code = EBUSY_RBSP;
                             break;
 
                             default:
-                                error_code = EFAULT;
+                                error_code = EFAULT_RBSP;
                             break;
                         }
                         DMA_SetErrCode(error_code, p_errno);
@@ -405,7 +405,7 @@ int_t R_DMA_Free(const int_t channel, int32_t *const p_errno)
             {
                 /* set error return value */
                 retval = EERROR;
-                DMA_SetErrCode(EACCES, p_errno);
+                DMA_SetErrCode(EACCES_RBSP, p_errno);
 
             }
         }
@@ -414,7 +414,7 @@ int_t R_DMA_Free(const int_t channel, int32_t *const p_errno)
     {
         /* set error return value */
         retval = EERROR;
-        DMA_SetErrCode(EINVAL, p_errno);
+        DMA_SetErrCode(EINVAL_RBSP, p_errno);
     }
 
     core_util_critical_section_exit();
@@ -438,12 +438,12 @@ End of function R_DMA_Free
 * @param[in,out] p_errno   :Pointer of error code
 *                           When pointer is NULL, it isn't set error code.
 *                           error code -
-*                           EBADF : Channel status is DMA_CH_INIT.
-*                           EINVAL : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
-*                           EBUSY : It has been start DMA transfer in channel.
-*                           ENOTSUP : Channel status is DMA_CH_UNINIT.
-*                           EPERM : The value in p_ch_setup isn't in the right range.
-*                           EFAULT: Channel status is besides the status definded in dma_stat_ch_t. p_ch_setup is NULL.
+*                           EBADF_RBSP : Channel status is DMA_CH_INIT.
+*                           EINVAL_RBSP : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
+*                           EBUSY_RBSP : It has been start DMA transfer in channel.
+*                           ENOTSUP_RBSP : Channel status is DMA_CH_UNINIT.
+*                           EPERM_RBSP : The value in p_ch_setup isn't in the right range.
+*                           EFAULT_RBSP: Channel status is besides the status definded in dma_stat_ch_t. p_ch_setup is NULL.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -593,7 +593,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
             {
                 /* set error return value */
                 retval = EERROR;
-                DMA_SetErrCode(EPERM, p_errno);
+                DMA_SetErrCode(EPERM_RBSP, p_errno);
             }
 
             if (ESUCCESS == retval)
@@ -604,7 +604,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
                 {
                     /* set error return value */
                     retval = EERROR;
-                    DMA_SetErrCode(EPERM, p_errno);
+                    DMA_SetErrCode(EPERM_RBSP, p_errno);
                 }
             }
 
@@ -616,7 +616,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
                 {
                     /* set error return value */
                     retval = EERROR;
-                    DMA_SetErrCode(EPERM, p_errno);
+                    DMA_SetErrCode(EPERM_RBSP, p_errno);
                 }
             }
 
@@ -628,7 +628,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
                 {
                     /* set error return value */
                     retval = EERROR;
-                    DMA_SetErrCode(EPERM, p_errno);
+                    DMA_SetErrCode(EPERM_RBSP, p_errno);
                 }
             }
 
@@ -640,7 +640,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
                 {
                     /* set error return value */
                     retval = EERROR;
-                    DMA_SetErrCode(EPERM, p_errno);
+                    DMA_SetErrCode(EPERM_RBSP, p_errno);
                 }
             }
 
@@ -652,7 +652,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
                 {
                     /* set error return value */
                     retval = EERROR;
-                    DMA_SetErrCode(EPERM, p_errno);
+                    DMA_SetErrCode(EPERM_RBSP, p_errno);
                 }
             }
 
@@ -694,7 +694,7 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
                         {
                             /* set error return value */
                             retval = EERROR;
-                            DMA_SetErrCode(EPERM, p_errno);
+                            DMA_SetErrCode(EPERM_RBSP, p_errno);
                             check_table_flag = true;
                         }
                         cfg_table_count++;
@@ -723,19 +723,19 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
                         switch (dma_info_ch->ch_stat)
                         {
                             case DMA_CH_UNINIT:
-                                error_code = ENOTSUP;
+                                error_code = ENOTSUP_RBSP;
                             break;
 
                             case DMA_CH_INIT:
-                                error_code = EBADF;
+                                error_code = EBADF_RBSP;
                             break;
 
                             case DMA_CH_TRANSFER:
-                                error_code = EBUSY;
+                                error_code = EBUSY_RBSP;
                             break;
 
                             default:
-                                error_code = EFAULT;
+                                error_code = EFAULT_RBSP;
                             break;
                         }
                         DMA_SetErrCode(error_code, p_errno);
@@ -749,14 +749,14 @@ int_t R_DMA_Setup(const int_t channel, const dma_ch_setup_t * const p_ch_setup,
         {
             /* set error return value */
             retval = EERROR;
-            DMA_SetErrCode(EFAULT, p_errno);
+            DMA_SetErrCode(EFAULT_RBSP, p_errno);
         }
     }
     else
     {
         /* set error return value */
         retval = EERROR;
-        DMA_SetErrCode(EINVAL, p_errno);
+        DMA_SetErrCode(EINVAL_RBSP, p_errno);
     }
 
     return retval;
@@ -778,12 +778,12 @@ End of function R_DMA_SetParam
 * @param[in,out] p_errno   :Pointer of error code
 *                           When pointer is NULL, it isn't set error code.
 *                           error code -
-*                           EBADF : Channel status is DMA_CH_INIT.
-*                           EINVAL : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
-*                           EBUSY : It has been start DMA transfer in channel.
-*                           ENOTSUP : Channel status is DMA_CH_UNINIT.
-*                           EPERM : The value in p_ch_setup isn't in the right range.
-*                           EFAULT: Channel status is besides the status definded in dma_stat_ch_t. p_dma_data is NULL.
+*                           EBADF_RBSP : Channel status is DMA_CH_INIT.
+*                           EINVAL_RBSP : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
+*                           EBUSY_RBSP : It has been start DMA transfer in channel.
+*                           ENOTSUP_RBSP : Channel status is DMA_CH_UNINIT.
+*                           EPERM_RBSP : The value in p_ch_setup isn't in the right range.
+*                           EFAULT_RBSP: Channel status is besides the status definded in dma_stat_ch_t. p_dma_data is NULL.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -815,7 +815,7 @@ int_t R_DMA_Start(const int_t channel, const dma_trans_data_t * const p_dma_data
             {
                 /* set error return value */
                 retval = EERROR;
-                DMA_SetErrCode(EPERM, p_errno);
+                DMA_SetErrCode(EPERM_RBSP, p_errno);
             }
 
             if (ESUCCESS == retval)
@@ -841,19 +841,19 @@ int_t R_DMA_Start(const int_t channel, const dma_trans_data_t * const p_dma_data
                         switch (dma_info_ch->ch_stat)
                         {
                             case DMA_CH_UNINIT:
-                                error_code = ENOTSUP;
+                                error_code = ENOTSUP_RBSP;
                              break;
 
                              case DMA_CH_INIT:
-                                error_code = EBADF;
+                                error_code = EBADF_RBSP;
                              break;
 
                             case DMA_CH_TRANSFER:
-                                error_code = EBUSY;
+                                error_code = EBUSY_RBSP;
                             break;
 
                             default:
-                                error_code = EFAULT;
+                                error_code = EFAULT_RBSP;
                              break;
                         }
                         DMA_SetErrCode(error_code, p_errno);
@@ -865,14 +865,14 @@ int_t R_DMA_Start(const int_t channel, const dma_trans_data_t * const p_dma_data
         {
             /* set error return value */
             retval = EERROR;
-            DMA_SetErrCode(EFAULT, p_errno);
+            DMA_SetErrCode(EFAULT_RBSP, p_errno);
         }
     }
     else
     {
         /* set error return value */
         retval = EERROR;
-        DMA_SetErrCode(EINVAL, p_errno);
+        DMA_SetErrCode(EINVAL_RBSP, p_errno);
     }
 
     core_util_critical_section_exit();
@@ -896,12 +896,12 @@ End of function R_DMA_Start
 * @param[in,out] p_errno   :Pointer of error code
 *                           When pointer is NULL, it isn't set error code.
 *                           error code -
-*                           EBADF : Channel status is DMA_CH_INIT.
-*                           EINVAL : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
-*                           EBUSY : It has been set continous DMA transfer.
-*                           ENOTSUP : Channel status is DMA_CH_UNINIT.
-*                           EPERM : The value in p_ch_setup isn't in the right range.
-*                           EFAULT: Channel status is besides the status definded in dma_stat_ch_t. p_dma_data is NULL.
+*                           EBADF_RBSP : Channel status is DMA_CH_INIT.
+*                           EINVAL_RBSP : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
+*                           EBUSY_RBSP : It has been set continous DMA transfer.
+*                           ENOTSUP_RBSP : Channel status is DMA_CH_UNINIT.
+*                           EPERM_RBSP : The value in p_ch_setup isn't in the right range.
+*                           EFAULT_RBSP: Channel status is besides the status definded in dma_stat_ch_t. p_dma_data is NULL.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -933,7 +933,7 @@ int_t R_DMA_NextData(const int_t channel, const dma_trans_data_t * const p_dma_d
             {
                 /* set error return value */
                 retval = EERROR;
-                DMA_SetErrCode(EPERM, p_errno);
+                DMA_SetErrCode(EPERM_RBSP, p_errno);
             }
 
             if (ESUCCESS == retval)
@@ -954,7 +954,7 @@ int_t R_DMA_NextData(const int_t channel, const dma_trans_data_t * const p_dma_d
                         {
                             /* set error return value */
                             retval = EERROR;
-                            DMA_SetErrCode(EBUSY, p_errno);
+                            DMA_SetErrCode(EBUSY_RBSP, p_errno);
                         }
                     }
                     else
@@ -964,15 +964,15 @@ int_t R_DMA_NextData(const int_t channel, const dma_trans_data_t * const p_dma_d
                         switch (dma_info_ch->ch_stat)
                         {
                             case DMA_CH_UNINIT:
-                                error_code = ENOTSUP;
+                                error_code = ENOTSUP_RBSP;
                             break;
 
                             case DMA_CH_INIT:
-                                error_code = EBADF;
+                                error_code = EBADF_RBSP;
                             break;
 
                             default:
-                                error_code = EFAULT;
+                                error_code = EFAULT_RBSP;
                             break;
                         }
                         DMA_SetErrCode(error_code, p_errno);
@@ -984,14 +984,14 @@ int_t R_DMA_NextData(const int_t channel, const dma_trans_data_t * const p_dma_d
         {
             /* set error return value */
             retval = EERROR;
-            DMA_SetErrCode(EFAULT, p_errno);
+            DMA_SetErrCode(EFAULT_RBSP, p_errno);
         }
     }
     else
     {
         /* set error return value */
         retval = EERROR;
-        DMA_SetErrCode(EINVAL, p_errno);
+        DMA_SetErrCode(EINVAL_RBSP, p_errno);
     }
 
     core_util_critical_section_exit();
@@ -1015,10 +1015,10 @@ End of function R_DMA_NextData
 * @param[in,out] p_errno   :Pointer of error code
 *                           When pointer is NULL, it isn't set error code.
 *                           error code -
-*                           EBADF : Channel status is DMA_CH_INIT or DMA_CH_OPEN. (DMA stopped)
-*                           EINVAL : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
-*                           ENOTSUP : Channel status is DMA_CH_UNINIT.
-*                           EFAULT: Channel status is besides the status definded in dma_stat_ch_t. p_remain is NULL.
+*                           EBADF_RBSP : Channel status is DMA_CH_INIT or DMA_CH_OPEN. (DMA stopped)
+*                           EINVAL_RBSP : Value of the ch is outside the range of (-1) < ch < (DMA_CH_NUM + 1).
+*                           ENOTSUP_RBSP : Channel status is DMA_CH_UNINIT.
+*                           EFAULT_RBSP: Channel status is besides the status definded in dma_stat_ch_t. p_remain is NULL.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -1060,19 +1060,19 @@ int_t R_DMA_Cancel(const int_t channel, uint32_t * const p_remain, int32_t * con
                     switch (dma_info_ch->ch_stat)
                     {
                         case DMA_CH_UNINIT:
-                            error_code = ENOTSUP;
+                            error_code = ENOTSUP_RBSP;
                         break;
 
                         case DMA_CH_INIT:
-                            error_code = EBADF;
+                            error_code = EBADF_RBSP;
                         break;
 
                         case DMA_CH_OPEN:
-                            error_code = EBADF;
+                            error_code = EBADF_RBSP;
                         break;
 
                         default:
-                            error_code = EFAULT;
+                            error_code = EFAULT_RBSP;
                         break;
                     }
                     DMA_SetErrCode(error_code, p_errno);
@@ -1083,14 +1083,14 @@ int_t R_DMA_Cancel(const int_t channel, uint32_t * const p_remain, int32_t * con
         {
             /* set error return value */
             retval = EERROR;
-            DMA_SetErrCode(EFAULT, p_errno);
+            DMA_SetErrCode(EFAULT_RBSP, p_errno);
         }
     }
     else
     {
         /* set error return value */
         retval = EERROR;
-        DMA_SetErrCode(EINVAL, p_errno);
+        DMA_SetErrCode(EINVAL_RBSP, p_errno);
     }
 
     core_util_critical_section_exit();
