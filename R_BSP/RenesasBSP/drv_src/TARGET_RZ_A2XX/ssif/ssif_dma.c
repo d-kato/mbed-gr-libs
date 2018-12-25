@@ -108,7 +108,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -117,7 +117,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
         /* allocate DMA Channel for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY == p_info_ch->openflag)
+            if (O_RDONLY_RBSP == p_info_ch->openflag)
             {
                 p_info_ch->dma_tx_ch = -1;
             }
@@ -128,7 +128,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
                 if (EERROR == dma_ret)
                 {
                     p_info_ch->dma_tx_ch = -1;
-                    ercd = ENOMEM;
+                    ercd = ENOMEM_RBSP;
                 }
                 else
                 {
@@ -141,7 +141,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
         /* allocate DMA Channel for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY == p_info_ch->openflag)
+            if (O_WRONLY_RBSP == p_info_ch->openflag)
             {
                 p_info_ch->dma_rx_ch = -1;
             }
@@ -152,7 +152,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
                 if (EERROR == dma_ret)
                 {
                     p_info_ch->dma_rx_ch = -1;
-                    ercd = ENOMEM;
+                    ercd = ENOMEM_RBSP;
                 }
                 else
                 {
@@ -165,7 +165,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
         /* setup DMA channel for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY != p_info_ch->openflag)
+            if (O_RDONLY_RBSP != p_info_ch->openflag)
             {
                 AIOCB* const p_tx_aio = &gb_ssif_dma_tx_end_aiocb[ssif_ch];
                 p_tx_aio->aio_sigevent.sigev_notify = SIGEV_THREAD;
@@ -187,7 +187,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
 
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
         }
@@ -195,7 +195,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
         /* setup DMA channel for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY != p_info_ch->openflag)
+            if (O_WRONLY_RBSP != p_info_ch->openflag)
             {
                 AIOCB* const p_rx_aio = &gb_ssif_dma_rx_end_aiocb[ssif_ch];
                 p_rx_aio->aio_sigevent.sigev_notify = SIGEV_THREAD;
@@ -216,7 +216,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
 
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
         }
@@ -224,7 +224,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
         /* start DMA dummy transfer for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY != p_info_ch->openflag)
+            if (O_RDONLY_RBSP != p_info_ch->openflag)
             {
                 /* setup short dummy transfer */
                 gb_ssif_txdma_dummy_trparam[ssif_ch].src_addr = (void*)&ssif_tx_dummy_buf[0];
@@ -234,14 +234,14 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
                 dma_ret = R_DMA_NextData(p_info_ch->dma_tx_ch, &gb_ssif_txdma_dummy_trparam[ssif_ch], &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
                 else
                 {
                     dma_ret = R_DMA_Start(p_info_ch->dma_tx_ch, &gb_ssif_txdma_dummy_trparam[ssif_ch], &dma_ercd);
                     if (EERROR == dma_ret)
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
             }
@@ -250,7 +250,7 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
         /* start DMA dummy transfer for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY != p_info_ch->openflag)
+            if (O_WRONLY_RBSP != p_info_ch->openflag)
             {
                 /* setup short dummy transfer */
                 gb_ssif_rxdma_dummy_trparam[ssif_ch].src_addr = (void*)&g_ssireg[ssif_ch]->SSIFRDR.LONG;
@@ -260,14 +260,14 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
                 dma_ret = R_DMA_NextData(p_info_ch->dma_rx_ch, &gb_ssif_rxdma_dummy_trparam[ssif_ch], &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
                 else
                 {
                     dma_ret = R_DMA_Start(p_info_ch->dma_rx_ch, &gb_ssif_rxdma_dummy_trparam[ssif_ch], &dma_ercd);
                     if (EERROR == dma_ret)
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
             }
@@ -282,24 +282,24 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
             /* enable end interrupt */
             g_ssireg[ssif_ch]->SSIFCR.LONG |= SSIF_FCR_BIT_TIE | SSIF_FCR_BIT_RIE;
 
-            if (O_RDWR == p_info_ch->openflag)
+            if (O_RDWR_RBSP == p_info_ch->openflag)
             {
                 /* start write and read DMA at the same time */
                 g_ssireg[ssif_ch]->SSICR.LONG  |= SSIF_CR_BIT_TEN | SSIF_CR_BIT_REN;
             }
-            else if (O_WRONLY == p_info_ch->openflag)
+            else if (O_WRONLY_RBSP == p_info_ch->openflag)
             {
                 /* start write DMA only */
                 g_ssireg[ssif_ch]->SSICR.LONG  |= SSIF_CR_BIT_TEN;
             }
-            else if (O_RDONLY == p_info_ch->openflag)
+            else if (O_RDONLY_RBSP == p_info_ch->openflag)
             {
                 /* start read DMA only */
                 g_ssireg[ssif_ch]->SSICR.LONG  |= SSIF_CR_BIT_REN;
             }
             else
             {
-                ercd = EINVAL;
+                ercd = EINVAL_RBSP;
             }
         }
 
@@ -435,7 +435,7 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -444,7 +444,7 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
         /* setup DMA channel for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY != p_info_ch->openflag)
+            if (O_RDONLY_RBSP != p_info_ch->openflag)
             {
                 AIOCB* const p_tx_aio = &gb_ssif_dma_tx_end_aiocb[ssif_ch];
                 p_tx_aio->aio_sigevent.sigev_notify = SIGEV_THREAD;
@@ -466,7 +466,7 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
 
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
         }
@@ -474,7 +474,7 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
         /* setup DMA channel for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY != p_info_ch->openflag)
+            if (O_WRONLY_RBSP != p_info_ch->openflag)
             {
                 AIOCB* const p_rx_aio = &gb_ssif_dma_rx_end_aiocb[ssif_ch];
                 p_rx_aio->aio_sigevent.sigev_notify = SIGEV_THREAD;
@@ -496,7 +496,7 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
 
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
         }
@@ -504,7 +504,7 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
         /* start DMA dummy transfer for write(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_RDONLY != p_info_ch->openflag)
+            if (O_RDONLY_RBSP != p_info_ch->openflag)
             {
                 /* setup short dummy transfer */
                 gb_ssif_txdma_dummy_trparam[ssif_ch].src_addr = (void*)&ssif_tx_dummy_buf[0];
@@ -514,14 +514,14 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
                 dma_ret = R_DMA_NextData(p_info_ch->dma_tx_ch, &gb_ssif_txdma_dummy_trparam[ssif_ch], &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
                 else
                 {
                     dma_ret = R_DMA_Start(p_info_ch->dma_tx_ch, &gb_ssif_txdma_dummy_trparam[ssif_ch], &dma_ercd);
                     if (EERROR == dma_ret)
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
             }
@@ -530,7 +530,7 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
         /* start DMA dummy transfer for read(if necessary) */
         if (ESUCCESS == ercd)
         {
-            if (O_WRONLY != p_info_ch->openflag)
+            if (O_WRONLY_RBSP != p_info_ch->openflag)
             {
                 /* setup short dummy transfer */
                 gb_ssif_rxdma_dummy_trparam[ssif_ch].src_addr = (void*)&g_ssireg[ssif_ch]->SSIFRDR.LONG;
@@ -540,14 +540,14 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
                 dma_ret = R_DMA_NextData(p_info_ch->dma_rx_ch, &gb_ssif_rxdma_dummy_trparam[ssif_ch], &dma_ercd);
                 if (EERROR == dma_ret)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
                 else
                 {
                     dma_ret = R_DMA_Start(p_info_ch->dma_rx_ch, &gb_ssif_rxdma_dummy_trparam[ssif_ch], &dma_ercd);
                     if (EERROR == dma_ret)
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
             }
@@ -562,24 +562,24 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
             /* enable end interrupt */
             g_ssireg[ssif_ch]->SSIFCR.LONG |= SSIF_FCR_BIT_TIE | SSIF_FCR_BIT_RIE;
 
-            if (O_RDWR == p_info_ch->openflag)
+            if (O_RDWR_RBSP == p_info_ch->openflag)
             {
                 /* start write and read DMA at the same time */
                 g_ssireg[ssif_ch]->SSICR.LONG  |= SSIF_CR_BIT_TEN | SSIF_CR_BIT_REN;
             }
-            else if (O_WRONLY == p_info_ch->openflag)
+            else if (O_WRONLY_RBSP == p_info_ch->openflag)
             {
                 /* start write DMA only */
                 g_ssireg[ssif_ch]->SSICR.LONG  |= SSIF_CR_BIT_TEN;
             }
-            else if (O_RDONLY == p_info_ch->openflag)
+            else if (O_RDONLY_RBSP == p_info_ch->openflag)
             {
                 /* start read DMA only */
                 g_ssireg[ssif_ch]->SSICR.LONG  |= SSIF_CR_BIT_REN;
             }
             else
             {
-                ercd = EINVAL;
+                ercd = EINVAL_RBSP;
             }
         }
     }

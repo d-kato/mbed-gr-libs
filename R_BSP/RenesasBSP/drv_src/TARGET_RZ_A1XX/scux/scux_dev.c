@@ -116,7 +116,7 @@ static void  SCUX_DMA_DirectTxCallBack(union sigval const param);
 * @param[in]     *p_scux_info_ch:SCUX channel information.
 * @param[in]     *p_write_aio:Write request information.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_CopyWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_write_aio)
@@ -133,7 +133,7 @@ int_t SCUX_CopyWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p
 
     if ((NULL == p_scux_info_ch) || (NULL == p_write_aio))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -141,7 +141,7 @@ int_t SCUX_CopyWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p
 
         if (ESUCCESS != retval)
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
         else
         {
@@ -161,7 +161,7 @@ int_t SCUX_CopyWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p
             dma_retval = R_DMA_Start(p_scux_info_ch->dma_tx_ch, &dma_address_param, &ret);
             if (ESUCCESS != dma_retval)
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -197,7 +197,7 @@ int_t SCUX_CopyWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p
                     case SCUX_CH_INIT :
                         /* fall through */
                     case SCUX_CH_STOP :
-                        retval = EBADF;
+                        retval = EBADF_RBSP;
                     break;
 
                     case SCUX_CH_TRANS_IDLE :
@@ -219,7 +219,7 @@ int_t SCUX_CopyWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p
                     break;
 
                     default :
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                         /* NOTREACHED on At the time of a normal performance */
                     break;
                 }
@@ -243,7 +243,7 @@ End of function SCUX_CopyWriteStart
 * @param[in]     *p_scux_info_ch:SCUX channel information.
 * @param[in]     *p_write_aio:Write request information.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_write_aio)
@@ -262,7 +262,7 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
 
     if ((NULL == p_scux_info_ch) || (NULL == p_write_aio))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -270,7 +270,7 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
 
         if (ESUCCESS != retval)
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
         else
         {
@@ -295,7 +295,7 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
 
             if (ESUCCESS != dma_retval)
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -308,7 +308,7 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
                 dma_retval = R_DMA_Start(p_scux_info_ch->dma_tx_ch, &dma_address_param, &ret);
                 if (ESUCCESS != dma_retval)
                 {
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
                 else
                 {
@@ -329,7 +329,7 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
                             /* fall through */
                         case SCUX_CH_STOP :
                             /* fall through */
-                            retval = EBADF;
+                            retval = EBADF_RBSP;
                         break;
 
                         case SCUX_CH_TRANS_IDLE :
@@ -338,7 +338,7 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
 
                         case SCUX_CH_TRANS_RD :
                             /* read function disabled */
-                            retval = EFAULT;
+                            retval = EFAULT_RBSP;
                         break;
 
                         case SCUX_CH_TRANS_WR :
@@ -347,7 +347,7 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
 
                         case SCUX_CH_TRANS_RDWR :
                             /* read function disabled */
-                            retval = EFAULT;
+                            retval = EFAULT_RBSP;
                         break;
 
                         case SCUX_CH_STOP_WAIT :
@@ -356,12 +356,12 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
 
                         case SCUX_CH_STOP_WAIT_IDLE :
                             /* read function disabled */
-                            retval = EFAULT;
+                            retval = EFAULT_RBSP;
                         break;
 
                         default :
                             /* NOTREACHED on At the time of a normal performance */
-                            retval = EFAULT;
+                            retval = EFAULT_RBSP;
                         break;
                     }
 
@@ -375,7 +375,7 @@ int_t SCUX_DirectWriteStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const
                         }
                         if (SCUX_RAMP_WAIT_MAX <= ramp_wait_cnt)
                         {
-                            retval = EFAULT;
+                            retval = EFAULT_RBSP;
                         }
                         else
                         {
@@ -406,7 +406,7 @@ End of function SCUX_DirectWriteStart
 * @param[in]     *p_scux_info_ch:SCUX channel information.
 * @param[in]     *p_read_aio:Read request information.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_CopyReadStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_read_aio)
@@ -418,7 +418,7 @@ int_t SCUX_CopyReadStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_
 
     if ((NULL == p_scux_info_ch) || (NULL == p_read_aio))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -426,7 +426,7 @@ int_t SCUX_CopyReadStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_
 
         if (ESUCCESS != retval)
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
         else
         {
@@ -447,7 +447,7 @@ int_t SCUX_CopyReadStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_
 
             if (ESUCCESS != dma_retval)
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -485,7 +485,7 @@ int_t SCUX_CopyReadStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_
                         /* fall through */
                     case SCUX_CH_STOP :
                         /* fall through */
-                        retval = EBADF;
+                        retval = EBADF_RBSP;
                     break;
 
                     case SCUX_CH_TRANS_IDLE :
@@ -512,7 +512,7 @@ int_t SCUX_CopyReadStart(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_
 
                     default :
                         /* NOTREACHED on At the time of a normal performance */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     break;
                 }
             }
@@ -535,7 +535,7 @@ End of function SCUX_CopyReadStart
 * @param[in]     *p_scux_info_ch:SCUX channel information.
 * @param[in]     *p_write_aio:Write request information.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_FlushWriteStart(scux_info_ch_t * const p_scux_info_ch)
@@ -545,7 +545,7 @@ int_t SCUX_FlushWriteStart(scux_info_ch_t * const p_scux_info_ch)
 
     if (NULL == p_scux_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -555,7 +555,7 @@ int_t SCUX_FlushWriteStart(scux_info_ch_t * const p_scux_info_ch)
 
             if (ESUCCESS != retval)
             {
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
             else
             {
@@ -578,7 +578,7 @@ int_t SCUX_FlushWriteStart(scux_info_ch_t * const p_scux_info_ch)
                 retval = R_DMA_Start(p_scux_info_ch->dma_tx_ch, &dma_address_param, NULL);
                 if (ESUCCESS != retval)
                 {
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
                 else
                 {
@@ -634,8 +634,8 @@ End of function SCUX_FlushWriteStart
 * @param[in]     *p_scux_info_ch : SCUX channel information.
 * @param[in]     *p_cancel_aio : Cancel request information.
 * @retval        ESUCCESS : Operation successful.
-*                EBUSY  : Cancel requst is on going.
-*                EFAULT : Internal error is occured.
+*                EBUSY_RBSP  : Cancel requst is on going.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 #if(1) /* mbed */
@@ -650,7 +650,7 @@ int_t SCUX_CopyCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * con
 
     if (NULL == p_scux_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -659,7 +659,7 @@ int_t SCUX_CopyCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * con
         /* check cancel request */
         if ((p_scux_info_ch->p_tx_aio == p_cancel_aio) || (p_scux_info_ch->p_rx_aio == p_cancel_aio))
         {
-            retval = EBUSY;
+            retval = EBUSY_RBSP;
         }
         else
         {
@@ -700,8 +700,8 @@ End of function SCUX_CopyCancelSpecific
 * @param[in]     *p_scux_info_ch : SCUX channel information.
 * @param[in]     *p_cancel_aio : Cancel request information.
 * @retval        ESUCCESS : Operation successful.
-*                EBUSY  : Cancel requst is on going.
-*                EFAULT : Internal error is occured.
+*                EBUSY_RBSP  : Cancel requst is on going.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_DirectCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * const p_cancel_aio)
@@ -711,7 +711,7 @@ int_t SCUX_DirectCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * c
 
     if (NULL == p_scux_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -720,7 +720,7 @@ int_t SCUX_DirectCancelSpecific(scux_info_ch_t * const p_scux_info_ch, AIOCB * c
         /* check cancel request */
         if ((p_scux_info_ch->p_tx_aio == p_cancel_aio) || (p_scux_info_ch->p_tx_next_aio == p_cancel_aio))
         {
-            retval = EBUSY;
+            retval = EBUSY_RBSP;
         }
         else
         {
@@ -750,7 +750,7 @@ End of function SCUX_DirectCancelSpecific
 *
 * @param[in]     *p_scux_info_ch : SCUX channel information.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 #if(1) /* mbed */
@@ -772,17 +772,17 @@ int_t SCUX_CopyCancelAll(scux_info_ch_t * const p_scux_info_ch)
 
     if (NULL == p_scux_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
         core_util_critical_section_enter();
 
         dma_retval = R_DMA_Cancel(p_scux_info_ch->dma_tx_ch, &tx_remain_size, &dma_ercd);
-        /* DMA stop check, (when dma_ercd is EBADF, DMA stopped already) */
-        if ((ESUCCESS != dma_retval) && (EBADF != dma_ercd))
+        /* DMA stop check, (when dma_ercd is EBADF_RBSP, DMA stopped already) */
+        if ((ESUCCESS != dma_retval) && (EBADF_RBSP != dma_ercd))
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
         else
         {
@@ -791,10 +791,10 @@ int_t SCUX_CopyCancelAll(scux_info_ch_t * const p_scux_info_ch)
         }
 
         dma_retval = R_DMA_Cancel(p_scux_info_ch->dma_rx_ch, &rx_remain_size, &dma_ercd);
-        /* DMA stop check, (when dma_ercd is EBADF, DMA stopped already) */
-        if ((ESUCCESS != dma_retval) && (EBADF != dma_ercd))
+        /* DMA stop check, (when dma_ercd is EBADF_RBSP, DMA stopped already) */
+        if ((ESUCCESS != dma_retval) && (EBADF_RBSP != dma_ercd))
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
         else
         {
@@ -807,14 +807,14 @@ int_t SCUX_CopyCancelAll(scux_info_ch_t * const p_scux_info_ch)
             /* return write request */
             if (NULL !=  p_scux_info_ch->p_tx_aio)
             {
-                p_scux_info_ch->p_tx_aio->aio_return = ECANCELED;
+                p_scux_info_ch->p_tx_aio->aio_return = ECANCELED_RBSP;
                 ahf_complete(&p_scux_info_ch->tx_que, p_scux_info_ch->p_tx_aio);
             }
 
             /* return read request */
             if (NULL != p_scux_info_ch->p_rx_aio)
             {
-                p_scux_info_ch->p_rx_aio->aio_return = ECANCELED;
+                p_scux_info_ch->p_rx_aio->aio_return = ECANCELED_RBSP;
                 ahf_complete(&p_scux_info_ch->rx_que, p_scux_info_ch->p_rx_aio);
             }
 
@@ -869,7 +869,7 @@ End of function SCUX_CopyCancelAll
 *
 * @param[in]     *p_scux_info_ch : SCUX channel information.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_DirectCancelAll(scux_info_ch_t * const p_scux_info_ch)
@@ -885,17 +885,17 @@ int_t SCUX_DirectCancelAll(scux_info_ch_t * const p_scux_info_ch)
 
     if (NULL == p_scux_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
         core_util_critical_section_enter();
 
         dma_retval = R_DMA_Cancel(p_scux_info_ch->dma_tx_ch, &tx_remain_size, &dma_ercd);
-        /* DMA stop check, (when dma_ercd is EBADF, DMA stopped already) */
-        if ((ESUCCESS != dma_retval) && (EBADF != dma_ercd))
+        /* DMA stop check, (when dma_ercd is EBADF_RBSP, DMA stopped already) */
+        if ((ESUCCESS != dma_retval) && (EBADF_RBSP != dma_ercd))
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
         else
         {
@@ -904,12 +904,12 @@ int_t SCUX_DirectCancelAll(scux_info_ch_t * const p_scux_info_ch)
 
             if (NULL != p_scux_info_ch->p_tx_aio)
             {
-                p_scux_info_ch->p_tx_aio->aio_return = ECANCELED;
+                p_scux_info_ch->p_tx_aio->aio_return = ECANCELED_RBSP;
                 ahf_complete(&p_scux_info_ch->tx_que, p_scux_info_ch->p_tx_aio);
             }
             if (NULL != p_scux_info_ch->p_tx_next_aio)
             {
-                p_scux_info_ch->p_tx_next_aio->aio_return = ECANCELED;
+                p_scux_info_ch->p_tx_next_aio->aio_return = ECANCELED_RBSP;
                 ahf_complete(&p_scux_info_ch->tx_que, p_scux_info_ch->p_tx_next_aio);
             }
             ahf_cancelall(&p_scux_info_ch->tx_que);
@@ -2968,7 +2968,7 @@ int_t SCUX_SetupDma(scux_info_ch_t * const p_scux_info_ch)
             p_scux_info_ch->dma_rx_ch = R_DMA_Alloc(DMA_ALLOC_CH, NULL);
             if (EERROR == p_scux_info_ch->dma_rx_ch)
             {
-                retval = EMFILE;
+                retval = EMFILE_RBSP;
             }
             else
             {
@@ -4386,8 +4386,8 @@ static void SCUX_DMA_CopyTxEndFlush(scux_info_ch_t * const p_info_ch)
     {
         /* finish send dummy data process, and SCUX stop process */
         retval = R_DMA_Cancel(p_info_ch->dma_tx_ch, &tx_remain_size, &dma_ercd);
-        /* It isn't an error even if error code is EBADF, because it is already stopped. */
-        if ((ESUCCESS != retval) && (EBADF != dma_ercd))
+        /* It isn't an error even if error code is EBADF_RBSP, because it is already stopped. */
+        if ((ESUCCESS != retval) && (EBADF_RBSP != dma_ercd))
         {
             /* NON_NOTICE_ASSERT: DMA operation failed */
         }
@@ -4396,8 +4396,8 @@ static void SCUX_DMA_CopyTxEndFlush(scux_info_ch_t * const p_info_ch)
         p_info_ch->dma_tx_current_size = 0;
 
         retval = R_DMA_Cancel(p_info_ch->dma_rx_ch, &rx_remain_size, &dma_ercd);
-        /* It isn't an error even if error code is EBADF, because it is already stopped. */
-        if ((ESUCCESS != retval) && (EBADF != dma_ercd))
+        /* It isn't an error even if error code is EBADF_RBSP, because it is already stopped. */
+        if ((ESUCCESS != retval) && (EBADF_RBSP != dma_ercd))
         {
             /* NON_NOTICE_ASSERT: DMA operation failed */
         }
@@ -4675,8 +4675,8 @@ static void SCUX_DMA_DirectTxEndFlush(scux_info_ch_t * const p_info_ch)
     {
         /* finish send dummy data process, and SCUX stop process */
         retval = R_DMA_Cancel(p_info_ch->dma_tx_ch, &tx_remain_size, &dma_ercd);
-        /* It isn't an error even if error code is EBADF, because it is already stopped. */
-        if ((ESUCCESS != retval) && (EBADF != dma_ercd))
+        /* It isn't an error even if error code is EBADF_RBSP, because it is already stopped. */
+        if ((ESUCCESS != retval) && (EBADF_RBSP != dma_ercd))
         {
             /* NON_NOTICE_ASSERT: NULL pointer */
         }

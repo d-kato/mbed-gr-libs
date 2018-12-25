@@ -112,11 +112,11 @@ int_t SSIF_InitialiseOne(const int_t channel, const ssif_channel_cfg_t* const p_
 
     if (NULL == p_cfg_data)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else if (false == p_cfg_data->enabled)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -184,7 +184,7 @@ int_t SSIF_Initialise(const ssif_channel_cfg_t* const p_cfg_data)
 
     if (NULL == p_cfg_data)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -269,7 +269,7 @@ int_t SSIF_EnableChannel(ssif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -277,26 +277,26 @@ int_t SSIF_EnableChannel(ssif_info_ch_t* const p_info_ch)
 
         if (ssif_ch >= SSIF_NUM_CHANS)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else
         {
             /* check channel open flag(duplex) */
-            if ((O_RDWR == p_info_ch->openflag)
+            if ((O_RDWR_RBSP == p_info_ch->openflag)
                 && (false == p_info_ch->is_full_duplex))
             {
-                ercd = EINVAL;
+                ercd = EINVAL_RBSP;
             }
 
 #if defined(TARGET_RZA1H) /* mbed */
             /* check channel open flag(romdec direct input) */
             if (ESUCCESS == ercd)
             {
-                if ((O_RDONLY != p_info_ch->openflag)
+                if ((O_RDONLY_RBSP != p_info_ch->openflag)
                     && (SSIF_CFG_ENABLE_ROMDEC_DIRECT
                         == p_info_ch->romdec_direct.mode))
                 {
-                    ercd = EINVAL;
+                    ercd = EINVAL_RBSP;
                 }
             }
 
@@ -359,7 +359,7 @@ int_t SSIF_DisableChannel(ssif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -367,7 +367,7 @@ int_t SSIF_DisableChannel(ssif_info_ch_t* const p_info_ch)
 
         if (ssif_ch >= SSIF_NUM_CHANS)
         {
-            ret = EFAULT;
+            ret = EFAULT_RBSP;
         }
         else
         {
@@ -468,7 +468,7 @@ void SSIF_ErrorRecovery(ssif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -476,7 +476,7 @@ void SSIF_ErrorRecovery(ssif_info_ch_t* const p_info_ch)
 
         if (ssif_ch >= SSIF_NUM_CHANS)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else
         {
@@ -682,7 +682,7 @@ int_t SSIF_IOCTL_ConfigChannel(ssif_info_ch_t* const p_info_ch,
 
     if ((NULL == p_info_ch) || (NULL == p_ch_cfg))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -722,7 +722,7 @@ int_t SSIF_IOCTL_GetStatus(const ssif_info_ch_t* const p_info_ch, uint32_t* cons
 
     if ((NULL == p_info_ch) || (NULL == p_status))
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -822,7 +822,7 @@ static int_t SSIF_InitChannel(ssif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -835,7 +835,7 @@ static int_t SSIF_InitChannel(ssif_info_ch_t* const p_info_ch)
 
         if (NULL == p_info_ch->sem_access)
         {
-            ercd = ENOMEM;
+            ercd = ENOMEM_RBSP;
         }
 
         if (ESUCCESS == ercd)
@@ -843,7 +843,7 @@ static int_t SSIF_InitChannel(ssif_info_ch_t* const p_info_ch)
             ercd = ahf_create(&p_info_ch->tx_que, AHF_LOCKINT);
             if (ESUCCESS != ercd)
             {
-                ercd = ENOMEM;
+                ercd = ENOMEM_RBSP;
             }
         }
 
@@ -852,7 +852,7 @@ static int_t SSIF_InitChannel(ssif_info_ch_t* const p_info_ch)
             ercd = ahf_create(&p_info_ch->rx_que, AHF_LOCKINT);
             if (ESUCCESS != ercd)
             {
-                ercd = ENOMEM;
+                ercd = ENOMEM_RBSP;
             }
         }
 
@@ -967,7 +967,7 @@ static int_t SSIF_UpdateChannelConfig(ssif_info_ch_t* const p_info_ch,
 
     if ((NULL == p_info_ch) || (NULL == p_ch_cfg))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -1020,7 +1020,7 @@ static int_t SSIF_UpdateChannelConfig(ssif_info_ch_t* const p_info_ch,
                 if ((SSIF_CFG_MULTI_CH_1 == p_info_ch->multi_ch)
                     || (SSIF_CFG_WS_HIGH == p_info_ch->ws_pol))
                 {
-                    ercd = EINVAL;
+                    ercd = EINVAL_RBSP;
                 }
             }
         }
@@ -1064,7 +1064,7 @@ static int_t SSIF_SetCtrlParams(const ssif_info_ch_t* const p_info_ch)
     uint32_t ssif_ch;
     if (NULL == p_info_ch)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -1121,7 +1121,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
 
     if (NULL == p_ch_cfg)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -1133,7 +1133,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
             /* do nothing */
             break;
         default:
-            ret = EINVAL;
+            ret = EINVAL_RBSP;
             break;
         }
 
@@ -1151,7 +1151,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1176,7 +1176,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1203,7 +1203,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1218,7 +1218,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1233,7 +1233,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1248,7 +1248,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1263,7 +1263,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1278,7 +1278,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1293,7 +1293,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1308,7 +1308,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1323,7 +1323,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1339,7 +1339,7 @@ static int_t SSIF_CheckChannelCfg(const ssif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1370,7 +1370,7 @@ static int_t SSIF_CheckWordSize(const ssif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -1379,7 +1379,7 @@ static int_t SSIF_CheckWordSize(const ssif_info_ch_t* const p_info_ch)
         if (SSIF_CFG_MULTI_CH_4 < ssicr_chnl)
         /* <-MISRA 13.7 */
         {
-            ret = EINVAL;
+            ret = EINVAL_RBSP;
         }
         else
         {
@@ -1400,7 +1400,7 @@ static int_t SSIF_CheckWordSize(const ssif_info_ch_t* const p_info_ch)
 
             if (0u == datawd_len)
             {
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
             }
             else
             {
@@ -1409,7 +1409,7 @@ static int_t SSIF_CheckWordSize(const ssif_info_ch_t* const p_info_ch)
 
                 if (syswd_len < (datawd_len * dw_per_sw))
                 {
-                    ret = EINVAL;
+                    ret = EINVAL_RBSP;
                 }
             }
         }

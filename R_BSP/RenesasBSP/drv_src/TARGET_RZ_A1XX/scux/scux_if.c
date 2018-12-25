@@ -195,10 +195,10 @@ Private functions
 * @param[in]     p_config_data :pointer of several parameters array per channels
 * @param[in,out] p_errno    :pointer of error code
 *                            error code -
-*                            ENOMEM : Making semaphore failed.
-*                            EBUSY  : SCUX driver has been initialized already.
-*                            EFAULT : p_config_data is NULL.
-*                            EFAULT : Internal error is occured.
+*                            ENOMEM_RBSP : Making semaphore failed.
+*                            EBUSY_RBSP  : SCUX driver has been initialized already.
+*                            EFAULT_RBSP : p_config_data is NULL.
+*                            EFAULT_RBSP : Internal error is occured.
 * @retval        other than (-1)
 *                  Operation successful.
 *                EERROR -
@@ -213,11 +213,11 @@ static void *R_SCUX_InitOne(const int_t channel, const void * const p_config_dat
 
     if (NULL == p_info_drv)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else if ((SCUX_CH_0 > channel) || ( SCUX_CH_NUM <= channel))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -225,18 +225,18 @@ static void *R_SCUX_InitOne(const int_t channel, const void * const p_config_dat
 
         if (NULL == p_info_ch)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else if (false != p_info_ch->enabled)
         {
-            ercd = EBUSY;
+            ercd = EBUSY_RBSP;
         }
         else
         {
             if (NULL == p_config_data)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else
             {
@@ -273,7 +273,7 @@ End of function R_SCUX_InitOne
 * @param[in]     p_driver_instance :which was returned by R_SCUX_Init
 * @param[in,out] p_errno    :pointer of error code
 *                            error code -
-*                            EBADF : Driver status isn't SCUX_DRV_INIT.
+*                            EBADF_RBSP : Driver status isn't SCUX_DRV_INIT.
 * @retval        ESUCCESS -
 *                  Operation successful.
 *                EERROR -
@@ -294,17 +294,17 @@ static int_t R_SCUX_UnInitOne(const int_t channel, const void* const p_driver_in
     
     if (NULL == p_info_drv)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else if ((SCUX_CH_0 > channel) || ( SCUX_CH_NUM <= channel))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (SCUX_DRV_INIT != p_info_drv->drv_stat)
         {
-            ercd = EBADF;
+            ercd = EBADF_RBSP;
         }
         else
         {
@@ -312,11 +312,11 @@ static int_t R_SCUX_UnInitOne(const int_t channel, const void* const p_driver_in
 
             if (NULL == p_info_ch)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else if (false == p_info_ch->enabled)
             {
-                ercd = EBADF;
+                ercd = EBADF_RBSP;
             }
             else
             {
@@ -480,13 +480,13 @@ End of function R_SCUX_UnInit
 *                               is created (not used for serial family driver)
 * @param[in,out] p_errno       :pointer of error code
 *                               error code -
-*                               ENOMEM : Craeaton of IOIF queue is failed.
-*                               ENOENT : Pathname is incorrect length.
-*                               ENOENT : Channel information is NULL.
-*                               EACCES : Setting to flag is other than O_WONLY or O_RDWR
-*                               EMFILE : Allocation of write DMA channel is failed.
-*                               ENOTSUP : Channel is not support.
-*                               EFAULT : Internal error is occured.
+*                               ENOMEM_RBSP : Craeaton of IOIF queue is failed.
+*                               ENOENT_RBSP : Pathname is incorrect length.
+*                               ENOENT_RBSP : Channel information is NULL.
+*                               EACCES_RBSP : Setting to flag is other than O_WRONLY_RBSP or O_RDWR_RBSP
+*                               EMFILE_RBSP : Allocation of write DMA channel is failed.
+*                               ENOTSUP_RBSP : Channel is not support.
+*                               EFAULT_RBSP : Internal error is occured.
 *
 * @retval        Except ERROR -
 *                  Operation successful.
@@ -512,19 +512,19 @@ static int_t R_SCUX_Open(void * const p_driver_instance, const char_t * p_path_n
     /* check driver instance */
     if (NULL == p_driver_instance)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (NULL == p_info_drv)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else
         {
             if (SCUX_DRV_INIT != p_info_drv->drv_stat)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
     }
@@ -534,13 +534,13 @@ static int_t R_SCUX_Open(void * const p_driver_instance, const char_t * p_path_n
     {
         if (NULL == p_info_drv)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
         else
         {
             if (NULL == p_path_name)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else
             {
@@ -548,7 +548,7 @@ static int_t R_SCUX_Open(void * const p_driver_instance, const char_t * p_path_n
                 pathname_len = SCUX_StrNLen(p_path_name, MAX_PATH_SEARCH_LEN);
                 if ( (0U == pathname_len) || (MAX_PATH_SEARCH_LEN == pathname_len) )
                 {
-                    ercd = ENOENT;
+                    ercd = ENOENT_RBSP;
                 }
                 else
                 {
@@ -572,7 +572,7 @@ static int_t R_SCUX_Open(void * const p_driver_instance, const char_t * p_path_n
 
                     if (NULL == p_info_ch)
                     {
-                        ercd = ENOENT; /* Pathname not recognised */
+                        ercd = ENOENT_RBSP; /* Pathname not recognised */
                     }
                 }
             }
@@ -583,9 +583,9 @@ static int_t R_SCUX_Open(void * const p_driver_instance, const char_t * p_path_n
     {
         if (ESUCCESS == ercd)
         {
-            if ((O_WRONLY != flags) && (O_RDWR != flags))
+            if ((O_WRONLY_RBSP != flags) && (O_RDWR_RBSP != flags))
             {
-                ercd = EACCES;
+                ercd = EACCES_RBSP;
             }
 
             /* ->MISRA 1.2 It is confirming in advance whether to be NULL or not. */
@@ -597,20 +597,20 @@ static int_t R_SCUX_Open(void * const p_driver_instance, const char_t * p_path_n
             if ((-1) == sem_wait_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else
             {
                 if (false == p_info_ch->enabled)
                 {
-                    ercd = ENOTSUP;
+                    ercd = ENOTSUP_RBSP;
                 }
 
                 if (ESUCCESS == ercd)
                 {
                     if (SCUX_CH_INIT != p_info_ch->ch_stat)
                     {
-                        ercd = EBUSY;
+                        ercd = EBUSY_RBSP;
                     }
                 }
 
@@ -624,7 +624,7 @@ static int_t R_SCUX_Open(void * const p_driver_instance, const char_t * p_path_n
             if (osOK != sem_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
     }
@@ -655,7 +655,7 @@ End of function R_SCUX_Open
 * @param[in]     p_fd:which was returned by R_SCUX_Init()
 * @param[in,out] p_errno:pointer of error code
 *                        error code -
-*                           EFAULT : Internal error is occured.
+*                           EFAULT_RBSP : Internal error is occured.
 *
 * @retval        ESUCCESS -
 *                  Operation successful.
@@ -673,13 +673,13 @@ static int_t R_SCUX_Close(void * const p_fd, int32_t * const p_errno)
 
     if ((NULL == p_info_ch) || (NULL == p_info_drv))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (SCUX_DRV_INIT != p_info_drv->drv_stat)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
 
         if (ESUCCESS == ercd)
@@ -693,14 +693,14 @@ static int_t R_SCUX_Close(void * const p_fd, int32_t * const p_errno)
             if ((-1) == sem_wait_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
 
             if (ESUCCESS == ercd)
             {
                 if (false == p_info_ch->enabled)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
 
                 if (ESUCCESS == ercd)
@@ -708,7 +708,7 @@ static int_t R_SCUX_Close(void * const p_fd, int32_t * const p_errno)
                     if ((SCUX_CH_UNINIT == p_info_ch->ch_stat) ||
                         (SCUX_CH_INIT == p_info_ch->ch_stat))
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
 
@@ -723,7 +723,7 @@ static int_t R_SCUX_Close(void * const p_fd, int32_t * const p_errno)
             if (osOK != sem_ercd)
             {
                 /* set error return value */
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
             }
 
         }
@@ -753,8 +753,8 @@ End of function R_SCUX_Close
 * @param[in]     p_buf  :Data buffer for IOCTL request code.
 * @param[in,out] p_errno:pointer of error code
 *                        error code -
-*                           EINVAL : IOCTL request code is unexpected value.
-*                           EFAULT : Internal error is occured.
+*                           EINVAL_RBSP : IOCTL request code is unexpected value.
+*                           EFAULT_RBSP : Internal error is occured.
 *                           other value : The value depending on IOCTL request code.
 *                                         Refer to the function of scux_ioctl.c for those meanings.
 *
@@ -774,13 +774,13 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
     if ((NULL == p_info_ch) || (NULL == p_info_drv))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (SCUX_DRV_INIT != p_info_drv->drv_stat)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
 
         if (ESUCCESS == ercd)
@@ -796,7 +796,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                 if ((-1) == sem_wait_ercd)
                 {
                     /* set error return value */
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
 
@@ -804,7 +804,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
             {
                 if (false == p_info_ch->enabled)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
 
                 if (ESUCCESS == ercd)
@@ -812,7 +812,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                     if ((SCUX_CH_UNINIT == p_info_ch->ch_stat) ||
                         (SCUX_CH_INIT == p_info_ch->ch_stat))
                     {
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                 }
 
@@ -825,7 +825,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                 if (osOK != sem_ercd)
                 {
                     /* set error return value */
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
 
@@ -844,13 +844,13 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             if (SCUX_CH_STOP != p_info_ch->ch_stat)
                             {
-                                ercd = EBUSY;
+                                ercd = EBUSY_RBSP;
                             }
                             else
                             {
@@ -863,7 +863,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -879,21 +879,21 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             /* check p_Buf */
                             if (NULL == p_buf)
                             {
-                                ercd = EFAULT;
+                                ercd = EFAULT_RBSP;
                             }
                             else
                             {
                                 core_util_critical_section_enter();
                                 if (SCUX_CH_STOP == p_info_ch->ch_stat)
                                 {
-                                    ercd = EBUSY;
+                                    ercd = EBUSY_RBSP;
                                 }
 
                                 /* The mesure to MISRA 1.1 , SEC P1.1.1 */
@@ -918,7 +918,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -935,14 +935,14 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             core_util_critical_section_enter();
                             if (SCUX_CH_STOP == p_info_ch->ch_stat)
                             {
-                                ercd = EBUSY;
+                                ercd = EBUSY_RBSP;
 
                                 core_util_critical_section_exit();
                             }
@@ -958,7 +958,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -974,19 +974,19 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             if (SCUX_CH_STOP != p_info_ch->ch_stat)
                             {
-                                ercd = EBUSY;
+                                ercd = EBUSY_RBSP;
                             }
                             else
                             {
                                 if (NULL == p_buf)
                                 {
-                                    ercd = EFAULT;
+                                    ercd = EFAULT_RBSP;
                                 }
                                 else
                                 {
@@ -1000,7 +1000,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -1016,19 +1016,19 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             if (SCUX_CH_STOP != p_info_ch->ch_stat)
                             {
-                                ercd = EBUSY;
+                                ercd = EBUSY_RBSP;
                             }
                             else
                             {
                                 if (NULL == p_buf)
                                 {
-                                    ercd = EFAULT;
+                                    ercd = EFAULT_RBSP;
                                 }
                                 else
                                 {
@@ -1042,7 +1042,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -1058,19 +1058,19 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             if (SCUX_CH_STOP != p_info_ch->ch_stat)
                             {
-                                ercd = EBUSY;
+                                ercd = EBUSY_RBSP;
                             }
                             else
                             {
                                 if (NULL == p_buf)
                                 {
-                                    ercd = EFAULT;
+                                    ercd = EFAULT_RBSP;
                                 }
                                 else
                                 {
@@ -1084,7 +1084,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -1100,19 +1100,19 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             if (SCUX_CH_STOP != p_info_ch->ch_stat)
                             {
-                                ercd = EBUSY;
+                                ercd = EBUSY_RBSP;
                             }
                             else
                             {
                                 if (NULL == p_buf)
                                 {
-                                    ercd = EFAULT;
+                                    ercd = EFAULT_RBSP;
                                 }
                                 else
                                 {
@@ -1126,7 +1126,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -1142,19 +1142,19 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             if (SCUX_CH_STOP != p_info_ch->ch_stat)
                             {
-                                ercd = EBUSY;
+                                ercd = EBUSY_RBSP;
                             }
                             else
                             {
                                 if (NULL == p_buf)
                                 {
-                                    ercd = EFAULT;
+                                    ercd = EFAULT_RBSP;
                                 }
                                 else
                                 {
@@ -1168,7 +1168,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -1177,7 +1177,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1190,7 +1190,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1203,7 +1203,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1216,7 +1216,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1229,7 +1229,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1242,7 +1242,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1262,19 +1262,19 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if ((-1) == sem_wait_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
                             if (SCUX_CH_STOP != p_info_ch->ch_stat)
                             {
-                                ercd = EBUSY;
+                                ercd = EBUSY_RBSP;
                             }
                             else
                             {
                                 if (NULL == p_buf)
                                 {
-                                    ercd = EFAULT;
+                                    ercd = EFAULT_RBSP;
                                 }
                                 else
                                 {
@@ -1288,7 +1288,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                         if (osOK != sem_ercd)
                         {
                             /* set error return value */
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
 
                     break;
@@ -1297,7 +1297,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1310,7 +1310,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1323,7 +1323,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1336,7 +1336,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1349,7 +1349,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
 
                         if (NULL == p_buf)
                         {
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         }
                         else
                         {
@@ -1359,7 +1359,7 @@ static int_t R_SCUX_Ioctl(void * const p_fd, const int_t request, void * const p
                     break;
 
                     default:
-                        ercd = EINVAL;
+                        ercd = EINVAL_RBSP;
                     break;
                 }
             }
@@ -1390,10 +1390,10 @@ End of function R_SCUX_Ioctl
 * @param[in]     p_aio  :aio control block.
 * @param[in,out] p_errno:pointer of error code
 *                               error code -
-*                               EBADF : Channel status isn't SCUX_CH_STOP or SCUX_CH_STOP_WAIT.
-*                               EINVAL : p_fd is NULL.
-*                               EINVAL : write size is 0.
-*                               EFAULT : Internal error is occured.
+*                               EBADF_RBSP : Channel status isn't SCUX_CH_STOP or SCUX_CH_STOP_WAIT.
+*                               EINVAL_RBSP : p_fd is NULL.
+*                               EINVAL_RBSP : write size is 0.
+*                               EFAULT_RBSP : Internal error is occured.
 *
 * @retval        ESUCCESS -
 *                  Operation successful.
@@ -1411,20 +1411,20 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
 
     if ((NULL == p_info_ch) || (NULL == p_aio) || (NULL == p_info_drv))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (0U == p_aio->aio_nbytes)
         {
-            ercd = EINVAL;
+            ercd = EINVAL_RBSP;
         }
 
         if (ESUCCESS == ercd)
         {
             if (SCUX_DRV_INIT != p_info_drv->drv_stat)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
 
@@ -1439,13 +1439,13 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
             if ((-1) == sem_wait_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else
             {
                 if (false == p_info_ch->enabled)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
 
@@ -1465,11 +1465,11 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
                         case SCUX_CH_UNINIT :
                             /* fall through */
                         case SCUX_CH_INIT :
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         break;
 
                         case SCUX_CH_STOP :
-                            ercd = EBADF;
+                            ercd = EBADF_RBSP;
                         break;
 
                         case SCUX_CH_TRANS_IDLE :
@@ -1494,11 +1494,11 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
                         case SCUX_CH_STOP_WAIT :
                             /* fall through */
                         case SCUX_CH_STOP_WAIT_IDLE :
-                            ercd = EBADF;
+                            ercd = EBADF_RBSP;
                         break;
 
                         default :
-                            ercd = EFAULT;
+                            ercd = EFAULT_RBSP;
                         break;
                     }
                 }
@@ -1510,7 +1510,7 @@ static int_t R_SCUX_WriteAsync(void * const p_fd, AIOCB * const p_aio, int32_t *
             if (osOK != sem_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
     }
@@ -1538,11 +1538,11 @@ End of function R_SCUX_WriteAsync
 * @param[in]     p_aio  :aio control block.
 * @param[in,out] p_errno:pointer of error code
 *                               error code -
-*                               EBADF : Channel status isn't SCUX_CH_STOP or SCUX_CH_STOP_WAIT.
-*                               EINVAL : read size is 0.
-*                               EACCES : Request for write only mode channel.
-*                               EACCES : Route setting is unexpected.
-*                               EFAULT : Internal error is occured.
+*                               EBADF_RBSP : Channel status isn't SCUX_CH_STOP or SCUX_CH_STOP_WAIT.
+*                               EINVAL_RBSP : read size is 0.
+*                               EACCES_RBSP : Request for write only mode channel.
+*                               EACCES_RBSP : Route setting is unexpected.
+*                               EFAULT_RBSP : Internal error is occured.
 *
 * @retval        ESUCCESS -
 *                  Operation successful.
@@ -1560,20 +1560,20 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
 
     if ((NULL == p_info_ch) || (NULL == p_info_drv) || (NULL == p_aio))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (0U == p_aio->aio_nbytes)
         {
-            ercd = EINVAL;
+            ercd = EINVAL_RBSP;
         }
 
         if (ESUCCESS == ercd)
         {
             if (SCUX_DRV_INIT != p_info_drv->drv_stat)
             {
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
 
@@ -1588,21 +1588,21 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
             if ((-1) == sem_wait_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
             else
             {
                 if (false == p_info_ch->enabled)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
             }
 
             if (ESUCCESS == ercd)
             {
-                if (O_WRONLY == (p_info_ch->open_flags & O_ACCMODE))
+                if (O_WRONLY_RBSP == (p_info_ch->open_flags & O_ACCMODE_RBSP))
                 {
-                    ercd = EACCES;
+                    ercd = EACCES_RBSP;
                 }
             }
 
@@ -1611,7 +1611,7 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
 
                 if (SCUX_ROUTE_MEM_TO_MEM != (p_info_ch->route_set & SCUX_GET_ROUTE_MASK))
                 {
-                    ercd = EACCES;
+                    ercd = EACCES_RBSP;
                 }
 
                 if (ESUCCESS == ercd)
@@ -1630,11 +1630,11 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
                             case SCUX_CH_UNINIT :
                                 /* fall through */
                             case SCUX_CH_INIT :
-                                ercd = EFAULT;
+                                ercd = EFAULT_RBSP;
                             break;
 
                             case SCUX_CH_STOP :
-                                ercd = EBADF;
+                                ercd = EBADF_RBSP;
                             break;
 
                             case SCUX_CH_TRANS_IDLE :
@@ -1660,7 +1660,7 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
                             break;
 
                             default :
-                                ercd = EFAULT;
+                                ercd = EFAULT_RBSP;
                             break;
                         }
                     }
@@ -1673,7 +1673,7 @@ static int_t R_SCUX_ReadAsync(void * const p_fd, AIOCB * const p_aio, int32_t * 
             if (osOK != sem_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
     }
@@ -1702,7 +1702,7 @@ End of function R_SCUX_ReadAsync
 * @param[in]     p_aio  :aio control block.
 * @param[in,out] p_errno:pointer of error code
 *                               error code -
-*                               EFAULT : Internal error is occured.
+*                               EFAULT_RBSP : Internal error is occured.
 *
 * @retval        ESUCCESS -
 *                  Operation successful.
@@ -1720,13 +1720,13 @@ static int_t R_SCUX_Cancel(void * const p_fd, AIOCB * const p_aio, int32_t * con
 
     if ((NULL == p_info_ch) || (NULL == p_info_drv))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
         if (SCUX_DRV_INIT != p_info_drv->drv_stat)
         {
-            ercd = EFAULT;
+            ercd = EFAULT_RBSP;
         }
 
         if (ESUCCESS == ercd)
@@ -1740,14 +1740,14 @@ static int_t R_SCUX_Cancel(void * const p_fd, AIOCB * const p_aio, int32_t * con
             if ((-1) == sem_wait_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
 
             if (ESUCCESS == ercd)
             {
                 if (false == p_info_ch->enabled)
                 {
-                    ercd = EFAULT;
+                    ercd = EFAULT_RBSP;
                 }
 
                 if (ESUCCESS == ercd)
@@ -1756,14 +1756,14 @@ static int_t R_SCUX_Cancel(void * const p_fd, AIOCB * const p_aio, int32_t * con
                         (SCUX_CH_UNINIT == p_info_ch->ch_stat))
                     {
                         /* It should not becomde status */
-                        ercd = EFAULT;
+                        ercd = EFAULT_RBSP;
                     }
                     else if ((SCUX_CH_STOP_WAIT == p_info_ch->ch_stat) ||
                               (SCUX_CH_STOP_WAIT_IDLE == p_info_ch->ch_stat) ||
                               (SCUX_CH_STOP == p_info_ch->ch_stat))
                     {
                         /* busy error on flush waiting */
-                        ercd = EBADF;
+                        ercd = EBADF_RBSP;
                     }
                     else
                     {
@@ -1797,7 +1797,7 @@ static int_t R_SCUX_Cancel(void * const p_fd, AIOCB * const p_aio, int32_t * con
             if (osOK != sem_ercd)
             {
                 /* set error return value */
-                ercd = EFAULT;
+                ercd = EFAULT_RBSP;
             }
         }
     }

@@ -349,8 +349,8 @@ End of function SCUX_GetSsifChInfo
 *                EERROR -
 *                  Error occured.
 *                    error code -
-*                       ENOMEM : Making semaphore is failed.
-*                       EFAULT : Internal error is occured.
+*                       ENOMEM_RBSP : Making semaphore is failed.
+*                       EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p_scux_init_param)
 {
@@ -370,11 +370,11 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
 
     if (NULL == p_scux_init_param)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else if (false == p_scux_init_param->enabled)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -436,7 +436,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
 
         if (false == init_start_flag)
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
         else
         {
@@ -624,7 +624,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                 gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access = osSemaphoreNew(0xffff, 1, p_semdef_ch_scux_access[scux_ch_count]);
                 if (NULL == gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access)
                 {
-                     retval = ENOMEM;
+                     retval = ENOMEM_RBSP;
                 }
                 if ((ESUCCESS == retval) && (false == init_shared_flag))
                 {
@@ -633,7 +633,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                         gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access = osSemaphoreNew(0xffff, 1, p_semdef_ch_scux_ssif_access[ssif_ch_count]);
                         if (NULL == gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access)
                         {
-                            retval = ENOMEM;
+                            retval = ENOMEM_RBSP;
                         }
                     }
                 }
@@ -642,7 +642,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                     gb_scux_info_drv.shared_info.sem_shared_access = osSemaphoreNew(0xffff, 1, osSemaphore(scux_shared_access));
                     if (NULL == gb_scux_info_drv.shared_info.sem_shared_access)
                     {
-                        retval = ENOMEM;
+                        retval = ENOMEM_RBSP;
                     }
                 }
                 
@@ -663,7 +663,7 @@ int_t SCUX_InitializeOne(const int_t channel, const scux_channel_cfg_t * const p
                     if (osOK != sem_ercd)
                     {
                         /* set error return value */
-                        retval = EFAULT;
+                        retval = EFAULT_RBSP;
                     }
 
                     gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access = NULL;
@@ -869,8 +869,8 @@ End of function SCUX_UnInitializeOne
 *                EERROR -
 *                  Error occured.
 *                    error code -
-*                       ENOMEM : Making semaphore is failed.
-*                       EFAULT : Internal error is occured.
+*                       ENOMEM_RBSP : Making semaphore is failed.
+*                       EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
 {
@@ -885,7 +885,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
 
     if (NULL == p_scux_init_param)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -1083,7 +1083,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                 gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access = osSemaphoreNew(0xffff, 1, p_semdef_ch_scux_access[scux_ch_count]);
                 if (NULL == gb_scux_info_drv.info_ch[scux_ch_count].sem_ch_scux_access)
                 {
-                     retval = ENOMEM;
+                     retval = ENOMEM_RBSP;
                 }
                 if ((ESUCCESS == retval) && (false == init_shared_flag))
                 {
@@ -1092,7 +1092,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                         gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access = osSemaphoreNew(0xffff, 1, p_semdef_ch_scux_ssif_access[ssif_ch_count]);
                         if (NULL == gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access)
                         {
-                            retval = ENOMEM;
+                            retval = ENOMEM_RBSP;
                         }
                     }
                 }
@@ -1101,7 +1101,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                     gb_scux_info_drv.shared_info.sem_shared_access = osSemaphoreNew(0xffff, 1, osSemaphore(scux_shared_access));
                     if (NULL == gb_scux_info_drv.shared_info.sem_shared_access)
                     {
-                        retval = ENOMEM;
+                        retval = ENOMEM_RBSP;
                     }
                 }
 
@@ -1127,7 +1127,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
                 if (osOK != sem_ercd)
                 {
                     /* set error return value */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 }
 
                 gb_scux_info_drv.info_ch[scux_ch_count].enabled = false;
@@ -1142,7 +1142,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
             if (osOK != sem_ercd)
             {
                 /* set error return value */
-                retval = EFAULT;
+                retval = EFAULT_RBSP;
             }
         }
 
@@ -1151,7 +1151,7 @@ int_t SCUX_Initialize(const scux_channel_cfg_t * const p_scux_init_param)
         if (osOK != sem_ercd)
         {
             /* set error return value */
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
 
         gb_scux_info_drv.drv_stat = SCUX_DRV_UNINIT;
@@ -1312,8 +1312,8 @@ End of function SCUX_UnInitialize
 * @param[in]     flags:specifies the access mode whether the channel is
 *                      opened for a read or a write
 * @retval        ESUCCESS: Operation successful.
-*                ENOMEM: Create queue is failed.
-*                EMFILE: Allocate DMA ch for write is failed.
+*                ENOMEM_RBSP: Create queue is failed.
+*                EMFILE_RBSP: Allocate DMA ch for write is failed.
 ******************************************************************************/
 
 int_t SCUX_OpenChannel(const int_t channel, const int_t flags)
@@ -1324,7 +1324,7 @@ int_t SCUX_OpenChannel(const int_t channel, const int_t flags)
     retval = ahf_create(&gb_scux_info_drv.info_ch[channel].tx_que, AHF_LOCKINT);
     if (ESUCCESS != retval)
     {
-        retval = ENOMEM;
+        retval = ENOMEM_RBSP;
     }
     else
     {
@@ -1332,7 +1332,7 @@ int_t SCUX_OpenChannel(const int_t channel, const int_t flags)
         retval = ahf_create(&gb_scux_info_drv.info_ch[channel].rx_que, AHF_LOCKINT);
         if (ESUCCESS != retval)
         {
-            retval = ENOMEM;
+            retval = ENOMEM_RBSP;
         }
     }
 
@@ -1357,7 +1357,7 @@ int_t SCUX_OpenChannel(const int_t channel, const int_t flags)
         gb_scux_info_drv.info_ch[channel].dma_tx_ch = R_DMA_Alloc(DMA_ALLOC_CH, NULL);
         if (EERROR == gb_scux_info_drv.info_ch[channel].dma_tx_ch)
         {
-            retval = EMFILE;
+            retval = EMFILE_RBSP;
         }
         else
         {
@@ -1381,7 +1381,7 @@ End of function SCUX_OpenChannel
 *
 * @param[in]     channel: SCUX channel number.
 * @retval        ESUCCESS : Operation successful.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t  SCUX_CloseChannel(const int_t channel)
@@ -1400,7 +1400,7 @@ int_t  SCUX_CloseChannel(const int_t channel)
         ercd = SCUX_IoctlClearStop(channel);
         if (ESUCCESS != ercd)
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
     }
 
@@ -1417,7 +1417,7 @@ int_t  SCUX_CloseChannel(const int_t channel)
         ercd = R_DMA_Free(gb_scux_info_drv.info_ch[channel].dma_tx_ch, NULL);
         if (ESUCCESS != ercd)
         {
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
         else
         {
@@ -1444,11 +1444,11 @@ End of function SCUX_CloseChannel
 *
 * @param[in]     *p_scux_info_ch:SCUX channel information.
 * @retval        ESUCCESS : Parameter is no problems.
-*                EACCES : DVU setting isn't performed when DVU is used.
-*                EACCES : MIX setting isn't performed when MIX is used.
-*                EACCES : SSIF setting isn't performed when SSIF is used.
-*                EPERM : Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EACCES_RBSP : DVU setting isn't performed when DVU is used.
+*                EACCES_RBSP : MIX setting isn't performed when MIX is used.
+*                EACCES_RBSP : SSIF setting isn't performed when SSIF is used.
+*                EPERM_RBSP : Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
@@ -1459,7 +1459,7 @@ int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
 
     if (NULL == p_scux_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -1468,7 +1468,7 @@ int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
             ((SCUX_ROUTE_SRC_SSIF_MIN >= p_scux_info_ch->route_set) || (SCUX_ROUTE_SRC_SSIF_MAX <= p_scux_info_ch->route_set)) &&
             ((SCUX_ROUTE_SRC_MIX_SSIF_MIN >= p_scux_info_ch->route_set) || (SCUX_ROUTE_SRC_MIX_SSIF_MAX <= p_scux_info_ch->route_set)))
         {
-            retval = EPERM;
+            retval = EPERM_RBSP;
         }
         else
         {
@@ -1490,7 +1490,7 @@ int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
                         (SCUX_ROUTE_SRC0_MIX_SSIF012 != p_scux_info_ch->route_set))
 #endif /* mbed */
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 break;
 
@@ -1509,7 +1509,7 @@ int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
                         (SCUX_ROUTE_SRC1_MIX_SSIF012 != p_scux_info_ch->route_set))
 #endif /* mbed */
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 break;
 
@@ -1526,7 +1526,7 @@ int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
                         (SCUX_ROUTE_SRC2_MIX_SSIF012 != p_scux_info_ch->route_set))
 #endif /* mbed */
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 break;
 
@@ -1543,13 +1543,13 @@ int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
                         (SCUX_ROUTE_SRC3_MIX_SSIF012 != p_scux_info_ch->route_set))
 #endif /* mbed */
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 break;
 
                 default :
                     /* NOTREACHED on At the time of a normal performance */
-                    retval = EFAULT;
+                    retval = EFAULT_RBSP;
                 break;
 
             }
@@ -1740,7 +1740,7 @@ int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
 #endif /* mbed */
                 default :
                     /* NOTREACHED on At the time of a normal performance */
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 break;
             }
         }
@@ -1756,7 +1756,7 @@ int_t SCUX_CheckParam(scux_info_ch_t * const p_scux_info_ch)
                 if (false != p_scux_info_ch->src_cfg.mode_sync)
                 {
                     /* src disable is async mode only */
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
             }
         }
@@ -1798,8 +1798,8 @@ End of function SCUX_CheckParam
 * @param[in]     ssif_ch : Used ssif channel number.
 * @param[in]     use_mix_flag : Flag of Using MIX .
 * @retval        ESUCCESS : Parameter is no problems.
-*                EPERM : Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EPERM_RBSP : Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uint32_t ssif_ch[SCUX_SSIF_NUM_CH_ARRANGEMENT])
@@ -1815,7 +1815,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
 
     if ((NULL == p_scux_info_ch) || (NULL == ssif_ch))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -1828,7 +1828,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                 (SCUX_USE_CH_6 != p_scux_info_ch->src_cfg.use_ch) &&
                 (SCUX_USE_CH_8 != p_scux_info_ch->src_cfg.use_ch))
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
         else
@@ -1836,7 +1836,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
             /* on SCUX2, SCUX3, enable audio channel is only 1ch and 2ch */
             if ((SCUX_USE_CH_1 != p_scux_info_ch->src_cfg.use_ch) && (SCUX_USE_CH_2 != p_scux_info_ch->src_cfg.use_ch))
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -1845,7 +1845,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
             /* if using SSIF, 1ch audio channel is disabled */
             if ((SCUX_SSIF_NO_USE_CH != ssif_ch[SCUX_SSIF_CH_ARRANGEMENT1]) && (SCUX_USE_CH_1 == p_scux_info_ch->src_cfg.use_ch))
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -1860,7 +1860,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                     {
                         if (SCUX_USE_CH_2 == p_scux_info_ch->src_cfg.use_ch)
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     }
                 }
@@ -1872,7 +1872,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
             /* multiple SSIF ch check (multiple SSIF is used SSIF2) */
             if ((SCUX_SSIF_NO_USE_CH != ssif_ch[SCUX_SSIF_CH_ARRANGEMENT2]) && (SCUX_USE_CH_6 != p_scux_info_ch->src_cfg.use_ch))
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -1881,7 +1881,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
             /* check word length */
             if ((SCUX_DATA_LEN_MIN >= p_scux_info_ch->src_cfg.word_len) || (SCUX_DATA_LEN_MAX <= p_scux_info_ch->src_cfg.word_len))
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -1890,14 +1890,14 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
             /* check delay mode */
             if ((SCUX_DELAY_MIN >= p_scux_info_ch->src_cfg.delay_mode) || (SCUX_DELAY_MAX <= p_scux_info_ch->src_cfg.delay_mode))
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
             else
             {
                 /* enable audio channel is less than 2ch when delay mode is enabled */
                 if ((SCUX_DELAY_NORMAL != p_scux_info_ch->src_cfg.delay_mode) && (SCUX_USE_CH_2 < p_scux_info_ch->src_cfg.use_ch))
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
             }
         }
@@ -1926,7 +1926,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         ((SCUX_SYNC_RATE_88_2 == p_scux_info_ch->src_cfg.input_rate_sync) ||
                          (SCUX_SYNC_RATE_96 == p_scux_info_ch->src_cfg.input_rate_sync)))
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
 
                     /* enable rate is less than 49KHz on 8ch */
@@ -1935,12 +1935,12 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                          (SCUX_SYNC_RATE_88_2 == p_scux_info_ch->src_cfg.input_rate_sync) ||
                          (SCUX_SYNC_RATE_96 == p_scux_info_ch->src_cfg.input_rate_sync)))
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 }
                 else
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
 
                 if (ESUCCESS == retval) {
@@ -1957,12 +1957,12 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         if ((SCUX_USE_CH_6 <= p_scux_info_ch->src_cfg.use_ch) &&
                             (SCUX_SYNC_RATE_96 == p_scux_info_ch->src_cfg.output_rate_sync))
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     }
                     else
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 }
 
@@ -2003,7 +2003,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         freq_value = p_scux_info_ch->src_cfg.freq_tioc3a;
                         if (0U == freq_value)
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     break;
 
@@ -2011,7 +2011,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         freq_value = p_scux_info_ch->src_cfg.freq_tioc4a;
                         if (0U == freq_value)
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     break;
 
@@ -2031,13 +2031,13 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         freq_value = p_scux_info_ch->src_cfg.input_ws;
                         if (0U == freq_value)
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     break;
 
                     default :
                         /* NOTREACHED on At the time of a normal performance */
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     break;
                 }
 
@@ -2059,7 +2059,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         if ((0U != (p_scux_info_ch->src_cfg.input_div_async % SCUX_EVEN_VALUE_DIV)) ||
                             (SCUX_MAX_DIV_CLK < p_scux_info_ch->src_cfg.input_div_async))
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                         else
                         {
@@ -2097,7 +2097,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         if ((SCUX_MIN_FREQ > p_scux_info_ch->input_rate) ||
                            (max_rate < p_scux_info_ch->input_rate))
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     }
                 }
@@ -2124,7 +2124,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         }
                         else
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     }
                     else
@@ -2157,7 +2157,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                                 freq_value = p_scux_info_ch->src_cfg.freq_tioc3a;
                                 if (0U == freq_value)
                                 {
-                                    retval = EPERM;
+                                    retval = EPERM_RBSP;
                                 }
                             break;
 
@@ -2165,7 +2165,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                                 freq_value = p_scux_info_ch->src_cfg.freq_tioc4a;
                                 if (0U == freq_value)
                                 {
-                                    retval = EPERM;
+                                    retval = EPERM_RBSP;
                                 }
                             break;
 
@@ -2185,7 +2185,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                                 freq_value = p_scux_info_ch->src_cfg.output_ws;
                                 if (0U == freq_value)
                                 {
-                                    retval = EPERM;
+                                    retval = EPERM_RBSP;
                                 }
                             break;
 
@@ -2193,7 +2193,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                                 /* error check is gone when route is other than SSIF */
                                 if (SCUX_ROUTE_SSIF != (p_scux_info_ch->route_set & SCUX_GET_ROUTE_MASK))
                                 {
-                                    retval = EPERM;
+                                    retval = EPERM_RBSP;
                                 }
                             break;
                         }
@@ -2216,7 +2216,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                             if ((0U != (p_scux_info_ch->src_cfg.output_div_async % SCUX_EVEN_VALUE_DIV)) ||
                                 (SCUX_MAX_DIV_CLK < p_scux_info_ch->src_cfg.output_div_async))
                             {
-                                retval = EPERM;
+                                retval = EPERM_RBSP;
                             }
                         }
                     }
@@ -2266,7 +2266,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                         if ((SCUX_MIN_FREQ > p_scux_info_ch->output_rate) ||
                             (max_rate < p_scux_info_ch->output_rate))
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
 
                     }
@@ -2302,7 +2302,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
 
                             default :
                                 /* NOTREACHED on At the time of a normal performance */
-                                retval = EPERM;
+                                retval = EPERM_RBSP;
                             break;
                         }
                     break;
@@ -2317,14 +2317,14 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
 
                     default :
                         /* NOTREACHED on At the time of a normal performance */
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     break;
                 }
 
                 rate_sample_ratio = ((p_scux_info_ch->output_rate * SCUX_RATE_INT_CONV_VALUE) / p_scux_info_ch->input_rate);
                 if ((min_conv_rate > rate_sample_ratio) || (max_conv_rate < rate_sample_ratio))
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
             }
         }
@@ -2334,7 +2334,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
             /* check wait time */
             if (SCUX_MAX_WAIT_TIME < p_scux_info_ch->src_cfg.wait_sample)
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -2344,7 +2344,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
             if ((SCUX_MIN_RATE_MIN_PAERCENTAGE > (uint32_t)p_scux_info_ch->src_cfg.min_rate_percentage) ||
                 (SCUX_MIN_RATE_MAX_PAERCENTAGE < (uint32_t)p_scux_info_ch->src_cfg.min_rate_percentage))
             {
-                retval = EPERM;
+                retval = EPERM_RBSP;
             }
         }
 
@@ -2356,7 +2356,7 @@ static int_t SCUX_CheckSrcParam(scux_info_ch_t * const p_scux_info_ch, const uin
                 if ((SCUX_AUDIO_CH_MIN >= p_scux_info_ch->src_cfg.select_in_data_ch[audio_ch]) ||
                     (SCUX_AUDIO_CH_MAX <= p_scux_info_ch->src_cfg.select_in_data_ch[audio_ch]))
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
             }
         }
@@ -2377,9 +2377,9 @@ End of function SCUX_CheckSrcParam
 *
 * @param[in]     *p_scux_info_ch:SCUX channel information.
 * @retval        ESUCCESS : Parameter is no problems.
-*                EACCES : DVU setting isn't performed when DVU is used.
-*                EPERM : Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EACCES_RBSP : DVU setting isn't performed when DVU is used.
+*                EPERM_RBSP : Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 static int_t SCUX_CheckDvuParam(const scux_info_ch_t * const p_scux_info_ch)
@@ -2390,13 +2390,13 @@ static int_t SCUX_CheckDvuParam(const scux_info_ch_t * const p_scux_info_ch)
 
     if (NULL == p_scux_info_ch)
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
         if (false == p_scux_info_ch->dvu_setup)
         {
-            retval = EACCES;
+            retval = EACCES_RBSP;
         }
         else
         {
@@ -2410,7 +2410,7 @@ static int_t SCUX_CheckDvuParam(const scux_info_ch_t * const p_scux_info_ch)
                     {
                         if (SCUX_MAX_DIGITAL_VOLUME < p_scux_info_ch->dvu_cfg.dvu_digi_vol.digi_vol[audio_ch])
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     }
                 }
@@ -2427,7 +2427,7 @@ static int_t SCUX_CheckDvuParam(const scux_info_ch_t * const p_scux_info_ch)
                     if ((p_scux_info_ch->dvu_cfg.dvu_ramp_vol.up_period <= SCUX_DVU_TIME_MIN) ||
                         (p_scux_info_ch->dvu_cfg.dvu_ramp_vol.up_period >= SCUX_DVU_TIME_MAX))
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
 
                     if (ESUCCESS == retval)
@@ -2436,7 +2436,7 @@ static int_t SCUX_CheckDvuParam(const scux_info_ch_t * const p_scux_info_ch)
                         if ((p_scux_info_ch->dvu_cfg.dvu_ramp_vol.down_period <= SCUX_DVU_TIME_MIN) ||
                             (p_scux_info_ch->dvu_cfg.dvu_ramp_vol.down_period >= SCUX_DVU_TIME_MAX))
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     }
 
@@ -2445,7 +2445,7 @@ static int_t SCUX_CheckDvuParam(const scux_info_ch_t * const p_scux_info_ch)
                         /* check ramp volume */
                         if (SCUX_MAX_RAMP_VOLUME < p_scux_info_ch->dvu_cfg.dvu_ramp_vol.ramp_vol)
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     }
 
@@ -2454,7 +2454,7 @@ static int_t SCUX_CheckDvuParam(const scux_info_ch_t * const p_scux_info_ch)
                         /* check wait time */
                         if (SCUX_MAX_WAIT_TIME < p_scux_info_ch->dvu_cfg.dvu_ramp_vol.ramp_wait_time)
                         {
-                            retval = EPERM;
+                            retval = EPERM_RBSP;
                         }
                     }
                 }
@@ -2479,11 +2479,11 @@ End of function SCUX_CheckDvuParam
 * @param[in]     ssif_ch : Used ssif channel number.
 * @param[in]     use_mix_flag : Flag of Using MIX .
 * @retval        ESUCCESS : Parameter is no problems.
-*                EACCES : SSIF setting isn't performed when SSIF is used.
-*                EACCES : SSIF channel is already used.
-*                EACCES : When use MIX, it is a setup which does not agree in a route setup.
-*                EPERM : Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EACCES_RBSP : SSIF setting isn't performed when SSIF is used.
+*                EACCES_RBSP : SSIF channel is already used.
+*                EACCES_RBSP : When use MIX, it is a setup which does not agree in a route setup.
+*                EPERM_RBSP : Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const uint32_t ssif_ch[SCUX_SSIF_NUM_CH_ARRANGEMENT], const bool_t use_mix_flag)
@@ -2495,7 +2495,7 @@ static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const ui
 
     if ((NULL == p_info_drv) || (NULL == p_scux_info_ch) || (NULL == ssif_ch))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
@@ -2509,14 +2509,14 @@ static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const ui
                     /* check SSIF is already setup */
                     if (false == gb_scux_ssif_info[ssif_ch[ssif_arrange_num]].ssif_setup)
                     {
-                        retval = EACCES;
+                        retval = EACCES_RBSP;
                     }
                     else
                     {
                         /* used SSIF channel is checked by other SCUX channel */
                         if (0 != gb_scux_ssif_info[ssif_ch[ssif_arrange_num]].scux_channel)
                         {
-                            retval = EACCES;
+                            retval = EACCES_RBSP;
                         }
                     }
                 }
@@ -2534,7 +2534,7 @@ static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const ui
                     /* check SSIF is already setup */
                     if (false == gb_scux_ssif_info[ssif_ch[ssif_arrange_num]].ssif_setup)
                     {
-                        retval = EACCES;
+                        retval = EACCES_RBSP;
                     }
                 }
             }
@@ -2546,7 +2546,7 @@ static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const ui
                     /* In the MIX setup for the and after 2times, it is checked that same SSIF ch on 1st setting is set up */
                     if (p_info_drv->shared_info.mix_ssif_ch != mix_ssif_ch_bit)
                     {
-                        retval = EACCES;
+                        retval = EACCES_RBSP;
                     }
                 }
                 else
@@ -2558,14 +2558,14 @@ static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const ui
                             (0 != gb_scux_ssif_info[ssif_ch[SCUX_SSIF_CH_ARRANGEMENT2]].scux_channel) ||
                             (0 != gb_scux_ssif_info[ssif_ch[SCUX_SSIF_CH_ARRANGEMENT3]].scux_channel))
                         {
-                            retval = EACCES;
+                            retval = EACCES_RBSP;
                         }
                     }
                     else
                     {
                         if (0 != gb_scux_ssif_info[ssif_ch[SCUX_SSIF_CH_ARRANGEMENT1]].scux_channel)
                         {
-                            retval = EACCES;
+                            retval = EACCES_RBSP;
                         }
                     }
                 }
@@ -2583,7 +2583,7 @@ static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const ui
                 if ((gb_scux_ssif_info[ssif_ch[ssif_arrange_num]].ssif_cfg.system_word <= SCUX_SSIF_SYSTEM_LEN_MIN) ||
                     (gb_scux_ssif_info[ssif_ch[ssif_arrange_num]].ssif_cfg.system_word >= SCUX_SSIF_SYSTEM_LEN_MAX))
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
                 else
                 {
@@ -2592,7 +2592,7 @@ static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const ui
                     if ((SCUX_DATA_LEN_16 != p_scux_info_ch->src_cfg.word_len) &&
                         (SCUX_SSIF_SYSTEM_LEN_16 == gb_scux_ssif_info[ssif_ch[ssif_arrange_num]].ssif_cfg.system_word))
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 }
 
@@ -2602,7 +2602,7 @@ static int_t SCUX_CheckSsifParam(scux_info_ch_t * const p_scux_info_ch, const ui
                     if ((SCUX_SSIF_NO_USE_CH != ssif_ch[SCUX_SSIF_CH_ARRANGEMENT2]) &&
                         (false != gb_scux_ssif_info[ssif_ch[ssif_arrange_num]].ssif_cfg.use_tdm))
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 }
                 if (ESUCCESS == retval)
@@ -2651,9 +2651,9 @@ End of function SCUX_CheckSsifParam
 *
 * @param[in]     *p_scux_info_ch:SCUX channel information.
 * @retval        ESUCCESS : Parameter is no problems.
-*                EACCES : MIX setting isn't performed when MIX is used.
-*                EPERM : Parameter is unexpected value.
-*                EFAULT : Internal error is occured.
+*                EACCES_RBSP : MIX setting isn't performed when MIX is used.
+*                EPERM_RBSP : Parameter is unexpected value.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 
 static int_t SCUX_CheckMixParam(const scux_info_ch_t * const p_scux_info_ch)
@@ -2665,13 +2665,13 @@ static int_t SCUX_CheckMixParam(const scux_info_ch_t * const p_scux_info_ch)
 
     if ((NULL == p_info_drv) || (NULL == p_scux_info_ch))
     {
-        retval = EFAULT;
+        retval = EFAULT_RBSP;
     }
     else
     {
         if (false == p_info_drv->shared_info.mix_setup)
         {
-            retval = EACCES;
+            retval = EACCES_RBSP;
         }
         else
         {
@@ -2681,14 +2681,14 @@ static int_t SCUX_CheckMixParam(const scux_info_ch_t * const p_scux_info_ch)
                 if ((SCUX_MIX_TIME_MIN >= p_info_drv->shared_info.up_period) ||
                     (SCUX_MIX_TIME_MAX <= p_info_drv->shared_info.up_period))
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
 
                 /* check ramp down time */
                 if ((SCUX_MIX_TIME_MIN >= p_info_drv->shared_info.down_period) ||
                     (SCUX_MIX_TIME_MAX <= p_info_drv->shared_info.down_period))
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
             }
 
@@ -2701,7 +2701,7 @@ static int_t SCUX_CheckMixParam(const scux_info_ch_t * const p_scux_info_ch)
                 {
                     if (SCUX_MAX_RAMP_VOLUME < p_info_drv->shared_info.mix_vol[scux_ch])
                     {
-                        retval = EPERM;
+                        retval = EPERM_RBSP;
                     }
                 }
             }
@@ -2713,7 +2713,7 @@ static int_t SCUX_CheckMixParam(const scux_info_ch_t * const p_scux_info_ch)
                 if ((SCUX_AUDIO_CH_MIN >= p_info_drv->shared_info.select_out_data_ch[audio_ch]) ||
                     (SCUX_AUDIO_CH_MAX <= p_info_drv->shared_info.select_out_data_ch[audio_ch]))
                 {
-                    retval = EPERM;
+                    retval = EPERM_RBSP;
                 }
             }
         }
@@ -2771,7 +2771,7 @@ End of function SCUX_StrNLen
 *                
 * @param[in]     None.
 * @retval        ESUCCESS : Parameter is no problems.
-*                EFAULT : Internal error is occured.
+*                EFAULT_RBSP : Internal error is occured.
 ******************************************************************************/
 static int_t SCUX_CmnUnInitialize(void)
 {
@@ -2793,7 +2793,7 @@ static int_t SCUX_CmnUnInitialize(void)
             if (osOK != sem_ercd)
             {
                 /* set error return value */
-                 retval = EFAULT;
+                 retval = EFAULT_RBSP;
             }
 
             gb_scux_ssif_info[ssif_ch_count].sem_ch_scux_ssif_access = NULL;
@@ -2807,7 +2807,7 @@ static int_t SCUX_CmnUnInitialize(void)
         if (osOK != sem_ercd)
         {
             /* set error return value */
-            retval = EFAULT;
+            retval = EFAULT_RBSP;
         }
 
         gb_scux_info_drv.shared_info.sem_shared_access = NULL;

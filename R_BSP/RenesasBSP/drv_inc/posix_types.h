@@ -51,10 +51,6 @@
 extern "C" {
 #endif
 
-#if(1) /* mbed */
-#include "mbed_retarget.h"
-#endif
-
 /* From <unistd.h> */
 #ifndef SEEK_SET
 #define SEEK_SET        0           /* from the biginning of file */
@@ -81,6 +77,10 @@ extern "C" {
  * otherwise the buffered file functions fopen() etc. will not work.
  */
 #if(1) /* mbed */
+#define O_ACCMODE_RBSP  00000007
+#define O_RDONLY_RBSP   00000001
+#define O_WRONLY_RBSP   00000002
+#define O_RDWR_RBSP     00000004
 #else  /* not mbed */
 #define O_ACCMODE       00000007
 #define O_RDONLY        00000001

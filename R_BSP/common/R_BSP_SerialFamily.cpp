@@ -52,11 +52,11 @@ bool R_BSP_SerialFamily::init_channel(RBSP_MBED_FNS * function_list, int channel
     int_t   flags;
 
     if ((max_write_num > 0) && (max_read_num > 0)) {
-        flags = O_RDWR;
+        flags = O_RDWR_RBSP;
     } else if (max_write_num > 0) {
-        flags = O_WRONLY;
+        flags = O_WRONLY_RBSP;
     } else if (max_read_num > 0) {
-        flags = O_RDONLY;
+        flags = O_RDONLY_RBSP;
     } else {
         flags = 0;
     }

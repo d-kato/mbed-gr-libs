@@ -141,11 +141,11 @@ int_t SPDIF_InitialiseOne(const int_t channel, const spdif_channel_cfg_t* const 
 
     if (NULL == p_cfg_data)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else if (false == p_cfg_data->enabled)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -304,7 +304,7 @@ int_t SPDIF_EnableChannel(spdif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -330,7 +330,7 @@ int_t SPDIF_EnableChannel(spdif_info_ch_t* const p_info_ch)
         }
 
 
-        if (O_RDONLY != p_info_ch->openflag)
+        if (O_RDONLY_RBSP != p_info_ch->openflag)
         {
             /* ==== Disable interrupt ==== */
             /* ----  Disable interrupt (User data empty) ----  */
@@ -367,7 +367,7 @@ int_t SPDIF_EnableChannel(spdif_info_ch_t* const p_info_ch)
             SPDIF.CTRL.BIT.TUII = 1;
         }
 
-        if (O_WRONLY != p_info_ch->openflag)
+        if (O_WRONLY_RBSP != p_info_ch->openflag)
         {
             /* ==== Status Clear(dummy read) ==== */
             dummy_buf_32 = SPDIF.RUI.LONG;
@@ -414,7 +414,7 @@ int_t SPDIF_DisableChannel(spdif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -502,7 +502,7 @@ void SPDIF_ErrorRecovery_tx(spdif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -510,7 +510,7 @@ void SPDIF_ErrorRecovery_tx(spdif_info_ch_t* const p_info_ch)
         SPDIF.CTRL.LONG &= ~(SPDIF_CTRL_TME | SPDIF_CTRL_TDE);
 
         /* pause DMA transfer */
-        SPDIF_CancelDMA(p_info_ch, O_WRONLY);
+        SPDIF_CancelDMA(p_info_ch, O_WRONLY_RBSP);
 
         /* cancel event to ongoing request */
         if (NULL != p_info_ch->p_aio_tx_curr)
@@ -535,7 +535,7 @@ void SPDIF_ErrorRecovery_tx(spdif_info_ch_t* const p_info_ch)
         }
 
         /* setup/restart DMA transfer */
-        ercd = SPDIF_RestartDMA(p_info_ch, O_WRONLY);
+        ercd = SPDIF_RestartDMA(p_info_ch, O_WRONLY_RBSP);
     }
 
     if (ESUCCESS != ercd)
@@ -552,7 +552,7 @@ void SPDIF_ErrorRecovery_rx(spdif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -560,7 +560,7 @@ void SPDIF_ErrorRecovery_rx(spdif_info_ch_t* const p_info_ch)
         SPDIF.CTRL.LONG &= ~(SPDIF_CTRL_RME | SPDIF_CTRL_RDE);
 
         /* pause DMA transfer */
-        SPDIF_CancelDMA(p_info_ch, O_RDONLY);
+        SPDIF_CancelDMA(p_info_ch, O_RDONLY_RBSP);
 
         /* cancel event to ongoing request */
         if (NULL != p_info_ch->p_aio_rx_curr)
@@ -584,7 +584,7 @@ void SPDIF_ErrorRecovery_rx(spdif_info_ch_t* const p_info_ch)
             p_info_ch->p_aio_rx_next = NULL;
         }
         /* setup/restart DMA transfer */
-        ercd = SPDIF_RestartDMA(p_info_ch, O_RDONLY);
+        ercd = SPDIF_RestartDMA(p_info_ch, O_RDONLY_RBSP);
     }
 
     if (ESUCCESS != ercd)
@@ -694,7 +694,7 @@ int_t SPDIF_IOCTL_ConfigChannel(spdif_info_ch_t* const p_info_ch,
 
     if ((NULL == p_info_ch) || (NULL == p_ch_cfg))
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -741,7 +741,7 @@ int_t SPDIF_IOCTL_SetChannelStatus(spdif_info_ch_t* const p_info_ch,
 
     if ((NULL == p_info_ch) || (NULL == p_channel_status))
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -771,7 +771,7 @@ int_t SPDIF_IOCTL_GetChannelStatus(spdif_info_ch_t* const p_info_ch,
 
     if ((NULL == p_info_ch) || (NULL == p_channel_status))
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -800,7 +800,7 @@ int_t SPDIF_IOCTL_SetTransAudioBit(spdif_info_ch_t* const p_info_ch,
 
     if (NULL == p_info_ch)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -814,7 +814,7 @@ int_t SPDIF_IOCTL_SetTransAudioBit(spdif_info_ch_t* const p_info_ch,
             /* do nothing */
             break;
         default:
-            ret = EINVAL;
+            ret = EINVAL_RBSP;
             break;
         }
 
@@ -846,7 +846,7 @@ int_t SPDIF_IOCTL_SetRecvAudioBit(spdif_info_ch_t* const p_info_ch,
 
     if (NULL == p_info_ch)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -860,7 +860,7 @@ int_t SPDIF_IOCTL_SetRecvAudioBit(spdif_info_ch_t* const p_info_ch,
             /* do nothing */
             break;
         default:
-            ret = EINVAL;
+            ret = EINVAL_RBSP;
             break;
         }
 
@@ -897,7 +897,7 @@ static int_t SPDIF_InitChannel(spdif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ercd = EFAULT;
+        ercd = EFAULT_RBSP;
     }
     else
     {
@@ -906,7 +906,7 @@ static int_t SPDIF_InitChannel(spdif_info_ch_t* const p_info_ch)
 
         if (NULL == p_info_ch->sem_access)
         {
-            ercd = ENOMEM;
+            ercd = ENOMEM_RBSP;
         }
 
         if (ESUCCESS == ercd)
@@ -914,7 +914,7 @@ static int_t SPDIF_InitChannel(spdif_info_ch_t* const p_info_ch)
             ercd = ahf_create(&p_info_ch->tx_que, AHF_LOCKINT);
             if (ESUCCESS != ercd)
             {
-                ercd = ENOMEM;
+                ercd = ENOMEM_RBSP;
             }
         }
 
@@ -923,7 +923,7 @@ static int_t SPDIF_InitChannel(spdif_info_ch_t* const p_info_ch)
             ercd = ahf_create(&p_info_ch->rx_que, AHF_LOCKINT);
             if (ESUCCESS != ercd)
             {
-                ercd = ENOMEM;
+                ercd = ENOMEM_RBSP;
             }
         }
 
@@ -1046,7 +1046,7 @@ static int_t SPDIF_SetCtrlParams(const spdif_info_ch_t* const p_info_ch)
 
     if (NULL == p_info_ch)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -1086,7 +1086,7 @@ static int_t SPDIF_CheckChannelCfg(const spdif_channel_cfg_t* const p_ch_cfg)
 
     if (NULL == p_ch_cfg)
     {
-        ret = EFAULT;
+        ret = EFAULT_RBSP;
     }
     else
     {
@@ -1098,7 +1098,7 @@ static int_t SPDIF_CheckChannelCfg(const spdif_channel_cfg_t* const p_ch_cfg)
             /* do nothing */
             break;
         default:
-            ret = EINVAL;
+            ret = EINVAL_RBSP;
             break;
         }
 
@@ -1114,7 +1114,7 @@ static int_t SPDIF_CheckChannelCfg(const spdif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
@@ -1131,7 +1131,7 @@ static int_t SPDIF_CheckChannelCfg(const spdif_channel_cfg_t* const p_ch_cfg)
                 /* do nothing */
                 break;
             default:
-                ret = EINVAL;
+                ret = EINVAL_RBSP;
                 break;
             }
         }
