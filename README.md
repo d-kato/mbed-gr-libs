@@ -1,6 +1,6 @@
 # **Mbed Library for GR-Boards**  mbed-gr-libs
 **Please see [here](README_JPN.md) for Japanese version.**  
-GR-PEACH and GR-LYCHEE library group. The library includes the following functions.  
+GR-PEACH, GR-LYCHEE and RZ/A2M board library group. The library includes the following functions.  
 * Connect camera and LCD
 * Connect USB memory and SD card
 * Cache control
@@ -11,6 +11,9 @@ GR-PEACH and GR-LYCHEE library group. The library includes the following functio
 * USB Function
 * ESP32 AT command library
 * DisplayApp (Image display on PC display with USB connection)
+* ASCII font
+* Communication speed of SD card
+* DRP (RZ/A2M only)
 
 
 ## Connect camera and LCD
@@ -24,10 +27,9 @@ By using ``SdUsbConnect class`` you can easily connect USB memory and SD card.
 If both devices are inserted, connect to the device you detected earlier.
 ```cpp
 #include "SdUsbConnect.h"
-#define MOUNT_NAME  "storage"
 
 int main() {
-  SdUsbConnect storage(MOUNT_NAME);
+  SdUsbConnect storage("storage");
 
   // wait connect
   storage.wait_connect();
@@ -38,6 +40,12 @@ int main() {
       printf("disconnect\r\n");
       break;
     }
+
+    FILE * fp = fopen("/storage/test.txt", "rb");
+    char buf[32];
+    fread(buf, sizeof(char), 32, fp);
+    printf("%s", buf);
+    fclose(fp);
   }
 }
 ```
@@ -133,6 +141,7 @@ This is a library for displaying JPEG images in the GR-Board on the PC. Connect 
 
 ![](docs/img/usb0_and_button.jpg)  
 
+For RZ / A2M, connect to ``USB CH.0``.  
 If your PC isn't Windows10, you need to install the specified driver from the below URL.  
 
 https://os.mbed.com/handbook/USBSerial
@@ -159,3 +168,37 @@ int main() {
     }
 }
 ```
+
+
+## ASCII font
+By using ``AsciiFont class`` you can draw ASCII code characters.  
+
+```cpp
+#include "mbed.h"
+#include "AsciiFont.h"
+
+#define WIDTH           (12)
+#define HEIGHT          (16)
+#define BYTE_PER_PIXEL  (1u)
+#define STRIDE          (((WIDTH * BYTE_PER_PIXEL) + 7u) & ~7u) //multiple of 8
+
+uint8_t text_field[STRIDE * HEIGHT];
+
+int main() {
+    AsciiFont ascii_font(text_field, WIDTH, HEIGHT, STRIDE, BYTE_PER_PIXEL);
+
+    ascii_font.Erase(0xcc);  // Erase text field
+    ascii_font.DrawStr("AB", 0, 0, 0x11, 1);
+    ascii_font.DrawChar('C', AsciiFont::CHAR_PIX_WIDTH, AsciiFont::CHAR_PIX_HEIGHT, 0x22, 1);
+}
+```
+
+## Communication speed of SD card
+RZ/A2M communicates with SD speed class. If you need UHS speed class with RZ/A2M, please contact us from [here](https://www.renesas.com/jp/en/support/contact.html).  
+GR-PEACH and GR-LYCHEE access an SD Card using SPI bus.  
+Please refer to ``SdUsbConnect class`` for connection.  
+
+
+## DRP (RZ/A2M only)
+DRP(Dynamically Reconfigurable Processor) is the programmable hardware which have both the flexibility of software and the speed of hardware. The firmware which define processing, can be renewed immediately.  
+Please see ``drp-for-mbed/TARGET_RZ_A2XX/r_drp/doc`` for details.  

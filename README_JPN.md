@@ -1,18 +1,18 @@
 # **Mbed GRボード用ライブラリ**  mbed-gr-libs
-GR-PEACH、GR-LYCHEE用のライブラリ群です。ライブラリには以下の機能が含まれます。  
+GR-PEACH、GR-LYCHEE、RZ/A2Mボード用のライブラリ群です。ライブラリには以下の機能が含まれます。  
 * カメラとLCDの接続
 * USBメモリとSDカードの接続
 * キャッシュ制御
 * JPEG変換
-* RGAライブラリ(GR-PEACHのみ)
+* RGAライブラリ (GR-PEACHのみ)
 * オーディオ再生
 * USBホスト
 * USBファンクション
 * ESP32 ATコマンド用ライブラリ
 * DisplayApp (USB接続でPCディスプレイに画像表示)
-
-GR-LYCHEEの開発環境については、[GR-LYCHEE用オフライン開発環境の手順](https://developer.mbed.org/users/dkato/notebook/offline-development-lychee-langja/)を参照ください。
-
+* ASCIIフォント
+* SDカードの通信速度
+* DRP (RZ/A2Mのみ)
 
 ## カメラとLCDの接続
 ``EasyAttach_CameraAndLCD``を使うことで、カメラとLCDの接続を簡単に行うことができます。  
@@ -25,20 +25,25 @@ GR-LYCHEEの開発環境については、[GR-LYCHEE用オフライン開発環�
 両方のデバイスが挿入されている場合は、先に検出した方のデバイスに接続します。
 ```cpp
 #include "SdUsbConnect.h"
-#define MOUNT_NAME             "storage"
 
 int main() {
-  SdUsbConnect storage(MOUNT_NAME);
+  SdUsbConnect storage("storage");
 
-  //接続完了待ち
+  // 接続待ち
   storage.wait_connect();
 
   while (1) {
-    //接続確認
-    if (!storage.connected()) { //切断
+    // 接続確認
+    if (!storage.connected()) { // 切断
       printf("disconnect\r\n");
       break;
     }
+
+    FILE * fp = fopen("/storage/test.txt", "rb");
+    char buf[32];
+    fread(buf, sizeof(char), 32, fp);
+    printf("%s", buf);
+    fclose(fp);
   }
 }
 ```
@@ -134,6 +139,7 @@ GR-Board内のJPEG画像をPC上に表示するためのライブラリです。
 
 ![](docs/img/usb0_and_button.jpg)  
 
+RZ/A2Mの場合は``USBチャネル1``に接続してください。  
 Windows10以外ご使用の場合、ドライバのインストールが必要となります。下記サイトのからドライバーをダウンロードできます。  
 
 https://os.mbed.com/handbook/USBSerial
@@ -160,3 +166,37 @@ int main() {
     }
 }
 ```
+
+
+## ASCIIフォント
+``AsciiFontクラス``を使うことで、ASCIIコードの文字を描画できます。  
+
+```cpp
+#include "mbed.h"
+#include "AsciiFont.h"
+
+#define WIDTH           (12)
+#define HEIGHT          (16)
+#define BYTE_PER_PIXEL  (1u)
+#define STRIDE          (((WIDTH * BYTE_PER_PIXEL) + 7u) & ~7u) //multiple of 8
+
+uint8_t text_field[STRIDE * HEIGHT];
+
+int main() {
+    AsciiFont ascii_font(text_field, WIDTH, HEIGHT, STRIDE, BYTE_PER_PIXEL);
+
+    ascii_font.Erase(0xcc);  // Erase text field
+    ascii_font.DrawStr("AB", 0, 0, 0x11, 1);
+    ascii_font.DrawChar('C', AsciiFont::CHAR_PIX_WIDTH, AsciiFont::CHAR_PIX_HEIGHT, 0x22, 1);
+}
+```
+
+## SDカードの通信速度
+RZ/A2MはSDスピードクラスで通信を行います。RZ/A2MでUHSスピードクラスが必要な方は、[こちら]((https://www.renesas.com/jp/ja/support/contact.html)よりお問合せください。  
+GR-PEACH、GR-LYCHEEは SPIバスを使ってSDカードにアクセスします。  
+接続については``SdUsbConnectクラス``を参照ください。  
+
+
+## DRP (RZ/A2Mのみ)
+DRP(Dynamically Reconfigurable Processor)はソフトウェアの柔軟さとハードウェアの高速性を兼ね備えたプログラマブルハードウェアです。処理を定義するファームウェアの書き換えが瞬間に行えます。  
+詳しくは ``drp-for-mbed/TARGET_RZ_A2XX/r_drp/doc`` を参照ください。  
