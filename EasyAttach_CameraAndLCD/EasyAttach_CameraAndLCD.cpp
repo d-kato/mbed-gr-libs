@@ -9,7 +9,7 @@ static DigitalOut lcd_cntrst(P8_15);
 #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) /* GR-LYCHEE */
 static PwmOut lcd_cntrst(P3_12);
 #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000) /* RZ/A2M */
-#if MBED_CONF_APP_LCD_TYPE != RZ_A2M_HDMI_STICK
+#if MBED_CONF_APP_LCD_TYPE != RZ_A2M_DVI_STICK
 static PwmOut lcd_cntrst(P7_6);
 #endif
 #endif
@@ -65,7 +65,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
         P8_0, PF_0, PF_1, PF_2, PF_3, PF_4, PF_5, PF_6, PH_2, PF_7, PC_3, PC_4, P7_7, PJ_6
     };
     Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
-    #if MBED_CONF_APP_LCD_TYPE != RZ_A2M_HDMI_STICK
+    #if MBED_CONF_APP_LCD_TYPE != RZ_A2M_DVI_STICK
     lcd_cntrst.period_us(500);
     #else
     const char send_cmd[3] = {0x08u, 0xbfu, 0x70u};
@@ -250,7 +250,7 @@ void EasyAttach_LcdBacklight(bool type) {
 void EasyAttach_LcdBacklight(float value) {
 #if MBED_CONF_APP_LCD
 #if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000) || ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) || ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000)
-    #if MBED_CONF_APP_LCD_TYPE != RZ_A2M_HDMI_STICK
+    #if MBED_CONF_APP_LCD_TYPE != RZ_A2M_DVI_STICK
     lcd_cntrst = (value * voltage_adjust);
     #endif
 #endif

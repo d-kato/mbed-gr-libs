@@ -1,6 +1,6 @@
 
-#ifndef LCD_CFG_HDMI_STICK_H
-#define LCD_CFG_HDMI_STICK_H
+#ifndef LCD_CFG_DVI_STICK_H
+#define LCD_CFG_DVI_STICK_H
 
 #include "DisplayBace.h"
 
@@ -57,7 +57,7 @@
 #define LCD_V_SYNC_WIDTH                    (5u)
 #endif
 
-extern const DisplayBase::lcd_config_t LcdCfgTbl_HDMI_Stick;
+extern const DisplayBase::lcd_config_t LcdCfgTbl_DVI_Stick;
 
 #endif
 

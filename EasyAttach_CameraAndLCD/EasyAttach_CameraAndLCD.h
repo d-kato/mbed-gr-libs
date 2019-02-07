@@ -77,7 +77,7 @@
   #define GR_LYCHEE_ATM0430D25        0x1001
   #define GR_LYCHEE_FG040346DSSWBG03  0x1002
   #define RZ_A2M_EVB_RSK_TFT          0x2000
-  #define RZ_A2M_HDMI_STICK           0x2001
+  #define RZ_A2M_DVI_STICK           0x2001
 
   #define GR_LYCHEE_LCD               GR_LYCHEE_TF043HV001A0
 
@@ -87,7 +87,7 @@
     #elif defined(TARGET_GR_LYCHEE)
       #define MBED_CONF_APP_LCD_TYPE    GR_LYCHEE_LCD
     #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV)
-      #define MBED_CONF_APP_LCD_TYPE    RZ_A2M_HDMI_STICK
+      #define MBED_CONF_APP_LCD_TYPE    RZ_A2M_DVI_STICK
     #endif
   #endif
 
@@ -114,8 +114,8 @@
     #include "LCD_config_FG040346DSSWBG03.h"
   #elif MBED_CONF_APP_LCD_TYPE == RZ_A2M_EVB_RSK_TFT
     #include "LCD_config_RSK_TFT.h"
-  #elif MBED_CONF_APP_LCD_TYPE == RZ_A2M_HDMI_STICK
-    #include "LCD_config_HDMI_Stick.h"
+  #elif MBED_CONF_APP_LCD_TYPE == RZ_A2M_DVI_STICK
+    #include "LCD_config_DVI_Stick.h"
   #else
     #error "No lcd chosen. Please add 'config.lcd-type.value' to your mbed_app.json (see README.md for more information)."
   #endif

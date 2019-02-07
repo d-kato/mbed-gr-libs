@@ -1,6 +1,6 @@
-#include "LcdCfg_HDMI_Stick.h"
+#include "LcdCfg_DVI_Stick.h"
 
-const DisplayBase::lcd_config_t LcdCfgTbl_HDMI_Stick = {
+const DisplayBase::lcd_config_t LcdCfgTbl_DVI_Stick = {
       DisplayBase::LCD_TYPE_PARALLEL_RGB                                            /* lcd_type             */
     , LCD_INPUT_CLOCK                                                               /* intputClock          */
     , LCD_OUTPUT_CLOCK                                                              /* outputClock          */
