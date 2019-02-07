@@ -164,3 +164,8 @@ bool RomRamBlockDevice::isRomAddress(const uint8_t *address) {
     return false;
 }
 
+const char *RomRamBlockDevice::get_type() const
+{
+    return "ROMRAM";
+}
+

@@ -535,6 +535,11 @@ bd_size_t USBHostMSD::size() const
     return 512*sectors;
 }
 
+const char *USBHostMSD::get_type() const
+{
+    return "MSD";
+}
+
 void USBHostMSD::debug(bool dbg)
 {
 //    _dbg = dbg;

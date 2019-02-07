@@ -69,7 +69,11 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     lcd_cntrst.period_us(500);
     #else
     const char send_cmd[3] = {0x08u, 0xbfu, 0x70u};
+    #if defined(TARGET_RZ_A2M_SBEV)
+    I2C mI2c_(PD_5, PD_4);
+    #else
     I2C mI2c_(I2C_SDA, I2C_SCL);
+    #endif
     mI2c_.write(0x78, send_cmd, 3);
     #endif
   #endif

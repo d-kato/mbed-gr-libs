@@ -75,7 +75,7 @@ public:
         const char sw_stanby_out_cmd[3] = {0x01, 0x00, 0x01};    /* Software standby out setting */
         const char sw_reset_cmd[3]      = {0x01, 0x03, 0x01};    /* Software reset setting */
         int ret;
-#if defined(TARGET_RZ_A2M_EVB)
+#if defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV)
         I2C mI2c_(PD_5, PD_4);
 #else
         I2C mI2c_(I2C_SDA, I2C_SCL);
