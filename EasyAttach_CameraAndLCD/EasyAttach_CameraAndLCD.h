@@ -49,7 +49,7 @@
 
   #if ((MBED_CONF_APP_CAMERA_TYPE & 0x2000) != 0)
     #define CAMERA_MODULE             MODULE_MIPI
-  #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV)
+  #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
     #define CAMERA_MODULE             MODULE_CEU
   #else
     #define CAMERA_MODULE             MODULE_VDC
@@ -86,7 +86,7 @@
       #define MBED_CONF_APP_LCD_TYPE    GR_PEACH_4_3INCH_SHIELD
     #elif defined(TARGET_GR_LYCHEE)
       #define MBED_CONF_APP_LCD_TYPE    GR_LYCHEE_LCD
-    #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV)
+    #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
       #define MBED_CONF_APP_LCD_TYPE    RZ_A2M_DVI_STICK
     #endif
   #endif

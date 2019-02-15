@@ -8,7 +8,10 @@
 #include "mbed.h"
 #include "FATFileSystem.h"
 #include "SDBlockDevice_GRBoard.h"
+#include "USBHostConf.h"
+#if USBHOST_MSD
 #include "USBHostMSD.h"
+#endif
 
 /** A class to communicate a StorageConnect
  *
@@ -28,15 +31,19 @@ public:
         if (type == STORAGE_SD) {
             return sd.connected();
         }
+      #if USBHOST_MSD
         if (type == STORAGE_USB) {
             return usb.connected();
         }
+      #endif
         if (storage_type == STORAGE_SD) {
             return sd.connected();
         }
+      #if USBHOST_MSD
         if (storage_type == STORAGE_USB) {
             return usb.connected();
         }
+      #endif
 
         return false;
     }
@@ -46,10 +53,12 @@ public:
             fs.unmount();
             storage_type = STORAGE_NON;
         }
+      #if USBHOST_MSD
         if ((storage_type == STORAGE_USB) && (!usb.connected())) {
             fs.unmount();
             storage_type = STORAGE_NON;
         }
+      #endif
         if ((type == STORAGE_SD) && (storage_type != STORAGE_SD)) {
             if (sd.connect()) {
                 if (storage_type != STORAGE_NON) {
@@ -58,6 +67,7 @@ public:
                 fs.mount(&sd);
                 storage_type = STORAGE_SD;
             }
+      #if USBHOST_MSD
         } else if ((type == STORAGE_USB) && (storage_type != STORAGE_USB)) {
             if (usb.connect()) {
                 if (storage_type != STORAGE_NON) {
@@ -66,13 +76,16 @@ public:
                 fs.mount(&usb);
                 storage_type = STORAGE_USB;
             }
+      #endif
         } else if (storage_type == STORAGE_NON) {
             if (sd.connect()) {
                 fs.mount(&sd);
                 storage_type = STORAGE_SD;
+          #if USBHOST_MSD
             } else if (usb.connect()) {
                 fs.mount(&usb);
                 storage_type = STORAGE_USB;
+          #endif
             } else {
                 // do nothing
             }
@@ -97,12 +110,14 @@ public:
             fs.mount(&sd);
             return true;
         }
+      #if USBHOST_MSD
         if ((storage_type == STORAGE_USB) && (usb.connected())) {
             fs.unmount();
             fs.format(&usb, allocation_unit);
             fs.mount(&usb);
             return true;
         }
+      #endif
         return false;
     }
 
@@ -113,7 +128,9 @@ public:
 private:
     FATFileSystem fs;
     SDBlockDevice_GRBoard sd;
+  #if USBHOST_MSD
     USBHostMSD usb;
+  #endif
     storage_type_t storage_type;
 };
 

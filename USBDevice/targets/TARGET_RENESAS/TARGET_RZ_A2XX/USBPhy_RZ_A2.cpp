@@ -29,7 +29,11 @@ extern "C"
 #include "pinmap.h"
 
 /**** User Selection ****/
+#if defined(TARGET_SEMB1402)
+#define USB_FUNCTION_CH        0
+#else
 #define USB_FUNCTION_CH        1
+#endif
 #define USB_FUNCTION_HISPEED   1        // 1: High-Speed  0: Full-Speed
 
 #if (USB_FUNCTION_CH == 0)
@@ -145,7 +149,11 @@ void USBPhyHw::init(USBPhyEvents *events)
     GIC_DisableIRQ(USBHIX_IRQn);
 
 #if (USB_FUNCTION_CH == 0)
+#if defined(TARGET_SEMB1402)
+    pin_function(PC_1, 1); /* VBUSIN1 */
+#else
     pin_function(P5_2, 3); /* VBUSIN1 */
+#endif
     CPG.STBCR6.BIT.MSTP61 = 0;
 #else
     pin_function(PC_0, 1); /* VBUSIN1 */
@@ -154,7 +162,7 @@ void USBPhyHw::init(USBPhyEvents *events)
     dummy_read = CPG.STBCR6.BYTE;
     (void)dummy_read;
 
-#if defined(TARGET_RZ_A2M_SBEV)
+#if defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
     USBX0.PHYCLK_CTRL.BIT.UCKSEL = 0;       /* EXTAL */
 #else
     USBX0.PHYCLK_CTRL.BIT.UCKSEL = 1;       /* USB_X1 */

@@ -69,7 +69,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     lcd_cntrst.period_us(500);
     #else
     const char send_cmd[3] = {0x08u, 0xbfu, 0x70u};
-    #if defined(TARGET_RZ_A2M_SBEV)
+    #if defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
     I2C mI2c_(PD_5, PD_4);
     #else
     I2C mI2c_(I2C_SDA, I2C_SCL);
@@ -139,7 +139,7 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     ThisThread::sleep_for(10 + 1);
     rstb = 1;
     ThisThread::sleep_for(1 + 1);
-  #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV)
+  #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
     PinName cmos_camera_pin[11] = {
         /* data pin */
         PE_1, PE_2, PE_3, PE_4, PE_5, PE_6, PH_0, PH_1,
