@@ -38,6 +38,8 @@
   #ifndef MBED_CONF_APP_CAMERA_TYPE
     #if defined(TARGET_GR_LYCHEE)
       #define MBED_CONF_APP_CAMERA_TYPE    CAMERA_OV7725
+    #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
+      #define MBED_CONF_APP_CAMERA_TYPE    CAMERA_RASPBERRY_PI
     #else
       #define MBED_CONF_APP_CAMERA_TYPE    CAMERA_MT9V111
     #endif
