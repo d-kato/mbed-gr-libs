@@ -85,38 +85,45 @@ SDHSBlockDevice::SDHSBlockDevice(PinName cd, PinName wp) : sd_ch(-1)
     sd_info.type = SD_MEDIA_UNKNOWN;
     sd_info.iswp = SD_WP_OFF;
 
-    if ((sd_cd == sd_wp) && (sd_cd != NC)) {
+    if (sd_wp != NC) {
+        pinmap_pinout(wp, PinMap_SD_WP);
+    }
+
+    if (sd_cd != NC) {
         sd_ch = sd_cd;
         pinmap_pinout(cd, PinMap_SD_CD);
-        pinmap_pinout(wp, PinMap_SD_WP);
         chk = sd_init((int32_t)sd_ch, sd_base_addr[sd_ch], sd_work_hndl_buff, SD_CD_SOCKET);
-        if (chk != SD_OK) {
-            sd_ch = -1;
-            return;
-        }
-        /* Set the card detect interrupt. */
-        chk = sd_cd_int(sd_ch, SD_CD_INT_ENABLE, NULL);
-        if (chk != SD_OK) {
-            sd_ch = -1;
-            return;
-        }
-        /* Register callback function. */
-        chk = sd_set_intcallback(sd_ch, &SD_status_callback_function);
-        if (chk != SD_OK){
-            sd_ch = -1;
-            return;
-        }
-        chk = sd_set_dma_intcallback(sd_ch, &SD_dma_end_callback_function);
-        if (chk != SD_OK){
-            sd_ch = -1;
-            return;
-        }
-        /* Initialize SD driver work buffer. */
-        chk = sd_set_buffer(sd_ch, sd_work_rw_buff, SD_RW_BUFF_SIZE);
-        if (chk != SD_OK) {
-            sd_ch = -1;
-            return;
-        }
+    } else {
+        sd_ch = 1;
+        chk = sd_init((int32_t)sd_ch, sd_base_addr[sd_ch], sd_work_hndl_buff, SD_CD_DAT3);
+    }
+
+    if (chk != SD_OK) {
+        sd_ch = -1;
+        return;
+    }
+    /* Set the card detect interrupt. */
+    chk = sd_cd_int(sd_ch, SD_CD_INT_ENABLE, NULL);
+    if (chk != SD_OK) {
+        sd_ch = -1;
+        return;
+    }
+    /* Register callback function. */
+    chk = sd_set_intcallback(sd_ch, &SD_status_callback_function);
+    if (chk != SD_OK){
+        sd_ch = -1;
+        return;
+    }
+    chk = sd_set_dma_intcallback(sd_ch, &SD_dma_end_callback_function);
+    if (chk != SD_OK){
+        sd_ch = -1;
+        return;
+    }
+    /* Initialize SD driver work buffer. */
+    chk = sd_set_buffer(sd_ch, sd_work_rw_buff, SD_RW_BUFF_SIZE);
+    if (chk != SD_OK) {
+        sd_ch = -1;
+        return;
     }
 }
 

@@ -199,6 +199,13 @@ int32_t _sd_check_media(SDHNDL *hndl)
         reg = SD_INPLL(hndl,SD_INFO1);
         if(hndl->cd_port == SD_CD_SOCKET){
             reg &= (uint16_t)SD_INFO1_MASK_STATE_CD;    /* check CD level   */
+#if defined(TARGET_RZ_A2M_SBEV) /* mbed */
+            if ((reg & SD_INFO1_MASK_STATE_CD) == 0) {
+                reg |= SD_INFO1_MASK_STATE_CD;
+            } else {
+                reg &= ~SD_INFO1_MASK_STATE_CD;
+            }
+#endif
         }
         else{
             reg &= (uint16_t)SD_INFO1_MASK_STATE_DAT3;  /* check DAT3 level */
