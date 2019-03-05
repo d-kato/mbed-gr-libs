@@ -83,7 +83,11 @@ static const st_r_drv_sdhi_sc_config_t SDHI_SC_TABLE[] =
     { 1, 
         {
             SD_CD_ENABLED, 
+#if defined(TARGET_RZ_A2M_SBEV)
+            SD_WP_DISABLED, 
+#else
             SD_WP_ENABLED, 
+#endif
         }
     },
     /* End of modification */
