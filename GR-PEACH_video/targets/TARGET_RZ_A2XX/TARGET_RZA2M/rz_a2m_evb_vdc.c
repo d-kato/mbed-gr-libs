@@ -1335,7 +1335,7 @@ drv_graphics_error_t DRV_Video_Write_Setting_Mipi (
             break;
     }
 
-    result = R_MIPI_Setup(&wk_vin_setup);
+    result = R_MIPI_Setup((st_vin_setup_t *)&wk_vin_setup);
     if (result != MIPI_OK) {
         drv_error = DRV_GRAPHICS_PARAM_RANGE_ERR;
     }
