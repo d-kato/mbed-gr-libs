@@ -33,6 +33,8 @@ public:
       SDHSBlockDevice(P5_4, P5_5),
 #elif defined(TARGET_RZ_A2M_SBEV)
       SDHSBlockDevice(P5_4, NC),
+#else
+      SDHSBlockDevice(NC, NC),
 #endif
       _connect(false) {
     }
