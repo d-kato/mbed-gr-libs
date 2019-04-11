@@ -264,11 +264,6 @@ DisplayBase::Graphics_Ceu_Port_Init( PinName *pin, unsigned int pin_count )
 DisplayBase::graphics_error_t
 DisplayBase::Graphics_Irq_Handler_Set( int_type_t irq, unsigned short num, void (* callback)(int_type_t)  )
 {
-#if defined(TARGET_RZ_A2XX)
-    if (( _video_input_sel == INPUT_SEL_MIPI ) && (irq == DisplayBase::INT_TYPE_S0_VFIELD)) {
-        num = _video_vin_setup.vin_preclip.vin_preclip_endy - _video_vin_setup.vin_preclip.vin_preclip_starty;
-    }
-#endif
     return (graphics_error_t)DRV_Graphics_Irq_Handler_Set( (vdc5_int_type_t)irq, num, (void (*)(vdc5_int_type_t))callback );
 } /* End of method Graphics_Irq_Handler_Set() */
 

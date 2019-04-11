@@ -267,7 +267,7 @@ static void Ceu_Irq_Handler_wrapper(ceu_int_type_t ceu_int_type) {
 
 static void (* mipi_callback_func)(vdc5_int_type_t);
 static void Mipi_Irq_Handler_wrapper(e_mipi_interrupt_type_t mipi_int_type) {
-    if ((mipi_callback_func != NULL) && ((mipi_int_type & VIN_INT_SCANLINE) != 0)) {
+    if ((mipi_callback_func != NULL) && ((mipi_int_type & VIN_INT_VSYNC_FALL) != 0)) {
         mipi_callback_func(VDC_INT_TYPE_S0_VFIELD);
     }
 }
@@ -309,7 +309,7 @@ drv_graphics_error_t DRV_Graphics_Irq_Handler_Set(
             st_mipi_int_t config;
 
             mipi_callback_func = callback;
-            config.type           = VIN_INT_SCANLINE;
+            config.type           = VIN_INT_VSYNC_FALL;
             config.p_mipiCallback = NULL;
             config.p_vinCallback  = Mipi_Irq_Handler_wrapper;
             config.line_num       = num;
