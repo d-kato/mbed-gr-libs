@@ -67,13 +67,16 @@ Add the following to your ``mbed_app.json`` file:
 | GR_LYCHEE_ATM0430D25       | GR-LYHCEE ATM0430D25               |
 | GR_LYCHEE_FG040346DSSWBG03 | GR-LYHCEE FG040346DSSWBG03         |
 | GR_LYCHEE_LCD              | GR-LYHCEE TF043HV001A0 (For compatibility) |
+| RZ_A2M_LVDS_TO_HDMI        | RZ/A2M LVDS To HDMI Board          |
 | RZ_A2M_EVB_RSK_TFT         | RZ/A2M RSK TFT APP BOARD           |
 | RZ_A2M_DVI_STICK           | RZ/A2M DVI STICK                   |
 
 If camera-type and lcd-type are not specified, the following are specified.
-* GR-PEACH   camera:CAMERA_MT9V111, LCD:GR_PEACH_4_3INCH_SHIELD  
-* GR-LYCHEE  camera:CAMERA_OV7725,  LCD:GR_LYCHEE_LCD  
-* RZ/A2M     camera:CAMERA_MT9V111, LCD:RZ_A2M_DVI_STICK
+* ``GR-PEACH``    camera:CAMERA_MT9V111, LCD:GR_PEACH_4_3INCH_SHIELD  
+* ``GR-LYCHEE``   camera:CAMERA_OV7725,  LCD:GR_LYCHEE_LCD  
+* ``RZ/A2M Evaluation Board Kit`` camera:CAMERA_RASPBERRY_PI, LCD:RZ_A2M_DVI_STICK
+* ``SBEV-RZ/A2M`` camera:CAMERA_RASPBERRY_PI, LCD:RZ_A2M_LVDS_TO_HDMI
+* ``SEMB1402``    camera:CAMERA_RASPBERRY_PI, LCD:RZ_A2M_LVDS_TO_HDMI
 
 
 ## Using Easy Connect Camera from your application
