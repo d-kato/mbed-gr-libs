@@ -72,7 +72,13 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     lcd_cntrst.period_us(500);
     ThisThread::sleep_for(100);
     lcd_pwon = 1;
-  #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000) /* RZ/A2M */
+  #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000) /* RZ/A2M LVDS */
+    PinName lvds_pin[8] = {
+        /* data pin */
+        P4_0, P4_1, P4_2, P4_3, P4_4, P4_5, P4_6, P4_7
+    };
+    Display.Graphics_Lvds_Port_Init(lvds_pin, 8);
+  #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2100) /* RZ/A2M RGB */
     PinName lcd_pin[28] = {
         /* data pin */
         PB_5, PB_4, PB_3, PB_2, PB_1, PB_0, PA_7, PA_6, PA_5, PA_4, PA_3, PA_2, PA_1, PA_0,

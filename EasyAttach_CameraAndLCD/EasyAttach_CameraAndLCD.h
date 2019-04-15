@@ -92,8 +92,9 @@
   #define GR_LYCHEE_TF043HV001A0      0x1000
   #define GR_LYCHEE_ATM0430D25        0x1001
   #define GR_LYCHEE_FG040346DSSWBG03  0x1002
-  #define RZ_A2M_EVB_RSK_TFT          0x2000
-  #define RZ_A2M_DVI_STICK           0x2001
+  #define RZ_A2M_LVDS_TO_HDMI         0x2000
+  #define RZ_A2M_EVB_RSK_TFT          0x2100
+  #define RZ_A2M_DVI_STICK            0x2101
 
   #define GR_LYCHEE_LCD               GR_LYCHEE_TF043HV001A0
 
@@ -102,8 +103,10 @@
       #define MBED_CONF_APP_LCD_TYPE    GR_PEACH_4_3INCH_SHIELD
     #elif defined(TARGET_GR_LYCHEE)
       #define MBED_CONF_APP_LCD_TYPE    GR_LYCHEE_LCD
-    #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
+    #elif defined(TARGET_RZ_A2M_EVB)
       #define MBED_CONF_APP_LCD_TYPE    RZ_A2M_DVI_STICK
+    #elif defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
+      #define MBED_CONF_APP_LCD_TYPE    RZ_A2M_LVDS_TO_HDMI
     #endif
   #endif
 
@@ -128,6 +131,8 @@
     #include "LCD_config_ATM0430D25.h"
   #elif MBED_CONF_APP_LCD_TYPE == GR_LYCHEE_FG040346DSSWBG03
     #include "LCD_config_FG040346DSSWBG03.h"
+  #elif MBED_CONF_APP_LCD_TYPE == RZ_A2M_LVDS_TO_HDMI
+    #include "LCD_config_lvds_to_hdmi.h"
   #elif MBED_CONF_APP_LCD_TYPE == RZ_A2M_EVB_RSK_TFT
     #include "LCD_config_RSK_TFT.h"
   #elif MBED_CONF_APP_LCD_TYPE == RZ_A2M_DVI_STICK

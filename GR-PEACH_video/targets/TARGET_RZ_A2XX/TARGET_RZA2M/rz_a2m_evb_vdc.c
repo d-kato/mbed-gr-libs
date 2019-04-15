@@ -133,6 +133,18 @@ static const PinMap PinMap_LCD_DISP_PIN[] = {
     {NC    , NC   , 0}
 };
 
+static const PinMap PinMap_LVDS_DISP_PIN[] = {
+    {P4_0  , 0, 2}, /* TXOUT0P   */
+    {P4_1  , 0, 2}, /* TXOUT0M   */
+    {P4_2  , 0, 2}, /* TXOUT1P   */
+    {P4_3  , 0, 2}, /* TXOUT1M   */
+    {P4_4  , 0, 2}, /* TXOUT2P   */
+    {P4_5  , 0, 2}, /* TXOUT2P   */
+    {P4_6  , 0, 2}, /* TXCLKOUTP */
+    {P4_7  , 0, 2}, /* TXCLKOUTM */
+    {NC    , NC   , 0}
+};
+
 static const IRQn_Type vdc_irq_set_tbl[] = {
     S0_VI_VSYNC0_IRQn,
     S0_LO_VSYNC0_IRQn,
@@ -371,7 +383,14 @@ drv_graphics_error_t DRV_Graphics_Lcd_Port_Init( PinName *pin, uint32_t pin_coun
 ******************************************************************************/
 drv_graphics_error_t DRV_Graphics_Lvds_Port_Init( PinName *pin, uint32_t pin_count )
 {
-    return DRV_GRAPHICS_VDC5_ERR;
+    drv_graphics_error_t    drv_error   = DRV_GRAPHICS_OK;
+    uint32_t count;
+
+    for( count = 0 ; count < pin_count ; count++ ) {
+        pinmap_peripheral(pin[count], PinMap_LVDS_DISP_PIN);
+        pinmap_pinout(pin[count], PinMap_LVDS_DISP_PIN);
+    }
+    return drv_error;
 } /* End of function DRV_Graphics_Lvds_Port_Init() */
 
 /**************************************************************************//**
