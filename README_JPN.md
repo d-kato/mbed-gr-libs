@@ -7,7 +7,6 @@ GR-PEACH、GR-LYCHEE、RZ/A2Mボード用のライブラリ群です。ライブ
 * RGAライブラリ (GR-PEACHのみ)
 * オーディオ再生
 * USBホスト
-* USBファンクション
 * ESP32 ATコマンド用ライブラリ
 * DisplayApp (USB接続でPCディスプレイに画像表示)
 * ASCIIフォント
@@ -123,10 +122,6 @@ JPEG変換にはDMAが使用されます。上記``キャッシュ制御`` を�
 mbed OSではオフィシャルのUSBホスト機能はまだ実装されていません。mbed classicで使用していたUSBHostをmbed OS 5で使用できるように変更しています。  
 詳細は[USBHost](https://developer.mbed.org/handbook/USBHost)を参照ください。  
 補足：USBHostMSDクラスはmbed OS 5.4の仕様に合わせて大幅に変更しています。USBメモリ接続の際は``SdUsbConnectクラス``を参照ください。  
-
-
-## USBファンクション
-詳細は[USBDevice](https://developer.mbed.org/handbook/USBDevice)を参照ください。  
 
 
 ## ESP32 ATコマンド用ライブラリ

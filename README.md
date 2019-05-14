@@ -8,7 +8,6 @@ GR-PEACH, GR-LYCHEE and RZ/A2M board library group. The library includes the fol
 * RGA library (GR-PEACH only)
 * Audio playback
 * USB Host
-* USB Function
 * ESP32 AT command library
 * DisplayApp (Image display on PC display with USB connection)
 * ASCII font
@@ -125,10 +124,6 @@ Sample code : [GR-Boards_Audio_WAV](https://github.com/d-kato/GR-Boards_Audio_WA
 Official USB host function is not yet implemented in mbed OS. I changed USBHost used by mbed classic so that it can be used with mbed OS 5.  
 Details : [USBHost](https://developer.mbed.org/handbook/USBHost)  
 Supplement: The USBHostMSD class has been changed considerably according to the specification of mbed OS 5.4. Please refer to ``SdUsbConnect class`` for USB memory connection.  
-
-
-## USB Function
-Details : [USBDevice](https://developer.mbed.org/handbook/USBDevice)  
 
 
 ## ESP32 AT command library
