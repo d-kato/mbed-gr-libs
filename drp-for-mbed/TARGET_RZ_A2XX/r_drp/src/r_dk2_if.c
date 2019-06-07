@@ -24,7 +24,6 @@
 /*******************************************************************************
 * System Name  : DRP Driver
 * File Name    : r_dk2_if.c
-* Version      : $Rev: 114 $
 * Device       : RZ
 * Abstract     : Control software of DRP.
 * Tool-Chain   : Renesas e2studio

@@ -21,15 +21,16 @@
 * Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
- * File Name    : r_drp_simple_isp.h
- * Description  : This source code is input image conversion, filter processing simply.
+ * File Name    : r_drp_minutiae_extract.h
+ * Description  : This source code is the header file of
+ *              : Minutiae extract processing.
  ******************************************************************************/
-#ifndef R_DRP_SIMPLE_ISP_H
-#define R_DRP_SIMPLE_ISP_H
+#ifndef R_DRP_MINUTIAE_EXTRACT_H
+#define R_DRP_MINUTIAE_EXTRACT_H
 
-/******************************************************************************
+/*******************************************************************************
 Global Typedef definitions
-*****************************************************************************/
+*******************************************************************************/
 #ifdef BDL
 typedef unsigned long long uint64_t;
 typedef unsigned long uint32_t;
@@ -46,53 +47,24 @@ typedef signed char int8_t;
 /* Structure of interface parameters between CPU and DRP library. */
 typedef struct
 {
-    uint32_t src;
-    uint32_t dst;
-
-    uint32_t accumulate;
-    uint32_t table;
-
-    uint16_t width;
-    uint16_t height;
-    uint16_t area1_offset_x;
-    uint16_t area1_offset_y;
-
-    uint16_t area1_width;
-    uint16_t area1_height;
-    uint16_t area2_offset_x;
-    uint16_t area2_offset_y;
-
-    uint16_t area2_width;
-    uint16_t area2_height;
-    uint16_t area3_offset_x;
-    uint16_t area3_offset_y;
-
-    uint16_t area3_width;
-    uint16_t area3_height;
-    uint16_t gain_r;
-    uint16_t gain_g;
-
-    uint16_t gain_b;
-    uint16_t blend;
-    int8_t   bias_r;
-    int8_t   bias_g;
-    int8_t   bias_b;
-    uint8_t  gamma;
-
-    uint8_t  component;
-    uint8_t  strength;
-    uint8_t  coring;
-}
-r_drp_simple_isp_t;
+    uint32_t src;               /* Address of input image. */
+    uint16_t width;             /* The horizontal size (pixels) of input image. */
+    uint16_t height;            /* The vertical size (pixels) of input image. */
+    uint32_t minutiae_data;     /* Address of minutiae data area. */
+    uint32_t minutiae_num;      /* Address of minutiae data number area. */
+    uint32_t minutiae_max;      /* The number of minutiae max */
+    uint16_t e_area_startx;     /* The point X of extract area */
+    uint16_t e_area_starty;     /* The point Y of extract area */
+    uint16_t e_area_width;      /* The width of extract area */
+    uint16_t e_area_height;     /* The hight of extract area */
+    uint8_t  threshold;         /* The threshold of input image. */
+} r_drp_minutiae_extract_t;
 
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_simple_isp_bayer2grayscale_3[201824];
-extern uint8_t g_drp_lib_simple_isp_bayer2grayscale_6[369088];
-extern uint8_t g_drp_lib_simple_isp_bayer2yuv_3[235328];
-extern uint8_t g_drp_lib_simple_isp_bayer2yuv_6[427424];
+extern uint8_t g_drp_lib_minutiae_extract[135424];
 
-#endif /* R_DRP_SIMPLE_ISP_H */
+#endif /* R_DRP_MINUTIAE_EXTRACT_H */
 
 /* end of file */

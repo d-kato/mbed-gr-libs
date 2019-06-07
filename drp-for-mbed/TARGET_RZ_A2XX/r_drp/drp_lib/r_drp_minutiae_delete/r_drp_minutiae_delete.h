@@ -21,15 +21,16 @@
 * Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
- * File Name    : r_drp_simple_isp.h
- * Description  : This source code is input image conversion, filter processing simply.
+ * File Name    : r_drp_minutiae_delete.h
+ * Description  : This source code is the header file of
+ *              : minutiae delete processing.
  ******************************************************************************/
-#ifndef R_DRP_SIMPLE_ISP_H
-#define R_DRP_SIMPLE_ISP_H
+#ifndef R_DRP_MINUTIAE_DELETE_H
+#define R_DRP_MINUTIAE_DELETE_H
 
-/******************************************************************************
+/*******************************************************************************
 Global Typedef definitions
-*****************************************************************************/
+*******************************************************************************/
 #ifdef BDL
 typedef unsigned long long uint64_t;
 typedef unsigned long uint32_t;
@@ -46,53 +47,33 @@ typedef signed char int8_t;
 /* Structure of interface parameters between CPU and DRP library. */
 typedef struct
 {
-    uint32_t src;
-    uint32_t dst;
-
-    uint32_t accumulate;
-    uint32_t table;
-
-    uint16_t width;
-    uint16_t height;
-    uint16_t area1_offset_x;
-    uint16_t area1_offset_y;
-
-    uint16_t area1_width;
-    uint16_t area1_height;
-    uint16_t area2_offset_x;
-    uint16_t area2_offset_y;
-
-    uint16_t area2_width;
-    uint16_t area2_height;
-    uint16_t area3_offset_x;
-    uint16_t area3_offset_y;
-
-    uint16_t area3_width;
-    uint16_t area3_height;
-    uint16_t gain_r;
-    uint16_t gain_g;
-
-    uint16_t gain_b;
-    uint16_t blend;
-    int8_t   bias_r;
-    int8_t   bias_g;
-    int8_t   bias_b;
-    uint8_t  gamma;
-
-    uint8_t  component;
-    uint8_t  strength;
-    uint8_t  coring;
-}
-r_drp_simple_isp_t;
+    uint32_t trust_map;         /* Address of trust information. */
+    uint16_t width;             /* The horizontal size (pixels) of input image. */
+    uint16_t height;            /* The vertical size (pixels) of input image. */
+    uint32_t i_minutiae_data;     /* Address of input minutiae data. */
+    uint32_t i_minutiae_num;      /* Address of number of minutiae data. */
+    uint32_t i_minutiae_max;      /* The number of the biggest extracion of Minutiae data. */
+    uint32_t o_minutiae_data;     /* Address of output minutiae data. */
+    uint32_t o_minutiae_num;      /* Address of number of output minutiae data. */
+    uint32_t work;                /* Address of work area */
+    uint16_t del1_distance;       /* A variable of minutiae distance for 1st delete */
+    uint8_t del1_probability;     /* A variable of probability for 1st delete */
+    uint8_t del1_bifurcation;     /* A variable for 1st delete of bifurcation */
+    uint16_t del2_distance;       /* A variable of minutiae distance for 2nd delete */
+    uint8_t del2_count;           /* A variable of near minutiae counter for 2nd delete */
+    uint8_t del2_bifurcation;     /* A variable for 2nd delete of bifurcation */
+    uint16_t del3_distance_s;     /* A variable of same minutiae distance for 3rd delete */
+    uint16_t del3_distance_d;     /* A variable of different minutiae distance for 3rd delete */
+    uint8_t del3_probability;     /* A variable of probability for 3rd delete */
+    uint8_t del3_bifurcation;     /* A variable for 3rd delete of bifurcation */
+} r_drp_minutiae_delete_t;
 
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_simple_isp_bayer2grayscale_3[201824];
-extern uint8_t g_drp_lib_simple_isp_bayer2grayscale_6[369088];
-extern uint8_t g_drp_lib_simple_isp_bayer2yuv_3[235328];
-extern uint8_t g_drp_lib_simple_isp_bayer2yuv_6[427424];
+extern uint8_t g_drp_lib_minutiae_delete[113024];
 
-#endif /* R_DRP_SIMPLE_ISP_H */
+#endif /* R_DRP_MINUTIAE_DELETE_H */
+
 
 /* end of file */

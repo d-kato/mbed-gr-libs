@@ -18,18 +18,18 @@
 * you agree to the additional terms and conditions found by accessing the
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
- * File Name    : r_drp_simple_isp.h
- * Description  : This source code is input image conversion, filter processing simply.
+ * File Name    : r_drp_reed_solomon_gf8.h
+ * Description  : This source code is the header file of Reed-Solomon processing.
  ******************************************************************************/
-#ifndef R_DRP_SIMPLE_ISP_H
-#define R_DRP_SIMPLE_ISP_H
+#ifndef R_DRP_REED_SOLOMON_GF8_H
+#define R_DRP_REED_SOLOMON_GF8_H
 
-/******************************************************************************
+/*******************************************************************************
 Global Typedef definitions
-*****************************************************************************/
+*******************************************************************************/
 #ifdef BDL
 typedef unsigned long long uint64_t;
 typedef unsigned long uint32_t;
@@ -46,53 +46,19 @@ typedef signed char int8_t;
 /* Structure of interface parameters between CPU and DRP library. */
 typedef struct
 {
-    uint32_t src;
-    uint32_t dst;
-
-    uint32_t accumulate;
-    uint32_t table;
-
-    uint16_t width;
-    uint16_t height;
-    uint16_t area1_offset_x;
-    uint16_t area1_offset_y;
-
-    uint16_t area1_width;
-    uint16_t area1_height;
-    uint16_t area2_offset_x;
-    uint16_t area2_offset_y;
-
-    uint16_t area2_width;
-    uint16_t area2_height;
-    uint16_t area3_offset_x;
-    uint16_t area3_offset_y;
-
-    uint16_t area3_width;
-    uint16_t area3_height;
-    uint16_t gain_r;
-    uint16_t gain_g;
-
-    uint16_t gain_b;
-    uint16_t blend;
-    int8_t   bias_r;
-    int8_t   bias_g;
-    int8_t   bias_b;
-    uint8_t  gamma;
-
-    uint8_t  component;
-    uint8_t  strength;
-    uint8_t  coring;
-}
-r_drp_simple_isp_t;
+    uint32_t src;           /* Address of input image. */
+    uint32_t dst;           /* Address of output image. */
+    uint32_t correct_addr;  /* Address of output result. */
+    uint16_t src_size;      /* Input data size. */
+    uint16_t check_size;    /* Correct data size. */
+    uint16_t primitive;     /* primitive polynomial for GF(2^8). */
+} r_drp_reed_solomon_gf8_t;
 
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_simple_isp_bayer2grayscale_3[201824];
-extern uint8_t g_drp_lib_simple_isp_bayer2grayscale_6[369088];
-extern uint8_t g_drp_lib_simple_isp_bayer2yuv_3[235328];
-extern uint8_t g_drp_lib_simple_isp_bayer2yuv_6[427424];
+extern uint8_t g_drp_lib_reed_solomon_gf8[120352];
 
-#endif /* R_DRP_SIMPLE_ISP_H */
+#endif /* R_DRP_REED_SOLOMON_GF8_H */
 
 /* end of file */
