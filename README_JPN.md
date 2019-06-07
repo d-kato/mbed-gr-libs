@@ -187,7 +187,7 @@ int main() {
 ```
 
 ## SDカードの通信速度
-RZ/A2MはSDスピードクラスで通信を行います。RZ/A2MでUHSスピードクラスが必要な方は、[こちら]((https://www.renesas.com/jp/ja/support/contact.html)よりお問合せください。  
+RZ/A2MはSDスピードクラスで通信を行います。RZ/A2MでHSスピードクラス、または、UHSスピードクラスが必要な方は、[こちら]((https://www.renesas.com/jp/ja/support/contact.html)よりお問合せください。  
 GR-PEACH、GR-LYCHEEは SPIバスを使ってSDカードにアクセスします。  
 接続については``SdUsbConnectクラス``を参照ください。  
 

@@ -189,7 +189,7 @@ int main() {
 ```
 
 ## Communication speed of SD card
-RZ/A2M communicates with SD speed class. If you need UHS speed class with RZ/A2M, please contact us from [here](https://www.renesas.com/jp/en/support/contact.html).  
+RZ/A2M communicates with SD speed class. If you need HS speed class or UHS speed class with RZ/A2M, please contact us from [here](https://www.renesas.com/jp/en/support/contact.html).  
 GR-PEACH and GR-LYCHEE access an SD Card using SPI bus.  
 Please refer to ``SdUsbConnect class`` for connection.  
 
