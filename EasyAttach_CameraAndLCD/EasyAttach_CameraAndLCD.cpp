@@ -18,14 +18,12 @@
 #include "EasyAttach_CameraAndLCD.h"
 
 #if MBED_CONF_APP_LCD
-#if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000)   /* GR-PEACH LVDS */
+#if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000)    /* GR-PEACH LVDS */
 static DigitalOut lcd_cntrst(P8_15);
-#elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) /* GR-LYCHEE */
+#elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000)  /* GR-LYCHEE */
 static PwmOut lcd_cntrst(P3_12);
-#elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000) /* RZ/A2M */
-#if MBED_CONF_APP_LCD_TYPE != RZ_A2M_DVI_STICK
+#elif (MBED_CONF_APP_LCD_TYPE == RZ_A2M_EVB_RSK_TFT) /* RZ/A2M */
 static PwmOut lcd_cntrst(P7_6);
-#endif
 #endif
 #define MAX_BACKLIGHT_VOL       (33.0f)
 #ifndef TYPICAL_BACKLIGHT_VOL
@@ -36,7 +34,7 @@ static float voltage_adjust = (TYPICAL_BACKLIGHT_VOL / MAX_BACKLIGHT_VOL);
 
 static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
 #if MBED_CONF_APP_LCD
-  #if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000)   /* GR-PEACH LVDS */
+ #if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000)   /* GR-PEACH LVDS */
     PinName lvds_pin[8] = {
         /* data pin */
         P5_7, P5_6, P5_5, P5_4, P5_3, P5_2, P5_1, P5_0
@@ -50,7 +48,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     ThisThread::sleep_for(100);
     lcd_pwon = 1;
     lcd_blon = 1;
-  #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0100) /* GR-PEACH RGB */
+ #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0100) /* GR-PEACH RGB */
     PinName lcd_pin[28] = {
         /* data pin */
         P11_15, P11_14, P11_13, P11_12, P5_7, P5_6, P5_5, P5_4, P5_3, P5_2, P5_1, P5_0,
@@ -58,7 +56,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
         P3_12, P3_11, P3_10, P3_9, P3_8
     };
     Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
-  #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) /* GR-LYCHEE */
+ #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) /* GR-LYCHEE */
     PinName lcd_pin[28] = {
         /* data pin */
         P6_15, P6_14, P6_13, P6_12, P6_11, P6_10, P6_9, P6_8, P6_7, P6_6, P6_5, P6_4,
@@ -72,31 +70,31 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     lcd_cntrst.period_us(500);
     ThisThread::sleep_for(100);
     lcd_pwon = 1;
-  #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000) /* RZ/A2M LVDS */
+ #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000) /* RZ/A2M LVDS */
     PinName lvds_pin[8] = {
         /* data pin */
         P4_0, P4_1, P4_2, P4_3, P4_4, P4_5, P4_6, P4_7
     };
     Display.Graphics_Lvds_Port_Init(lvds_pin, 8);
-  #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2100) /* RZ/A2M RGB */
+ #elif ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2100) /* RZ/A2M RGB */
     PinName lcd_pin[28] = {
         /* data pin */
         PB_5, PB_4, PB_3, PB_2, PB_1, PB_0, PA_7, PA_6, PA_5, PA_4, PA_3, PA_2, PA_1, PA_0,
         P8_0, PF_0, PF_1, PF_2, PF_3, PF_4, PF_5, PF_6, PH_2, PF_7, PC_3, PC_4, P7_7, PJ_6
     };
     Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
-    #if MBED_CONF_APP_LCD_TYPE != RZ_A2M_DVI_STICK
-    lcd_cntrst.period_us(500);
-    #else
+  #if MBED_CONF_APP_LCD_TYPE == RZ_A2M_DVI_STICK
     const char send_cmd[3] = {0x08u, 0xbfu, 0x70u};
-    #if defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
+   #if defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
     I2C mI2c_(PD_5, PD_4);
-    #else
+   #else
     I2C mI2c_(I2C_SDA, I2C_SCL);
-    #endif
+   #endif
     mI2c_.write(0x78, send_cmd, 3);
-    #endif
+  #elif MBED_CONF_APP_LCD_TYPE == RZ_A2M_EVB_RSK_TFT
+    lcd_cntrst.period_us(500);
   #endif
+ #endif
     return &LcdCfgTbl_LCD_shield;
 #else
     return NULL;
@@ -269,10 +267,8 @@ void EasyAttach_LcdBacklight(bool type) {
 
 void EasyAttach_LcdBacklight(float value) {
 #if MBED_CONF_APP_LCD
-#if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000) || ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) || ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x2000)
-    #if MBED_CONF_APP_LCD_TYPE != RZ_A2M_DVI_STICK
+#if ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x0000) || ((MBED_CONF_APP_LCD_TYPE & 0xFF00) == 0x1000) || (MBED_CONF_APP_LCD_TYPE == RZ_A2M_EVB_RSK_TFT)
     lcd_cntrst = (value * voltage_adjust);
-    #endif
 #endif
 #endif
 }
