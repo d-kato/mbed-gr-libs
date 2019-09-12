@@ -77,9 +77,9 @@ void USBHALHost::init() {
 #endif
 
 #if defined(TARGET_RZ_A2M_SBEV)
-    USBX0.PHYCLK_CTRL.BIT.UCKSEL = 0;       /* EXTAL */
+    USBX0.PHYCLK_CTRL.BIT.UCLKSEL = 0;       /* EXTAL */
 #else
-    USBX0.PHYCLK_CTRL.BIT.UCKSEL = 1;       /* USB_X1 */
+    USBX0.PHYCLK_CTRL.BIT.UCLKSEL = 1;       /* USB_X1 */
 #endif
     USBX0.USBCTR.BIT.PLL_RST = 1;
     wait_ms(1);

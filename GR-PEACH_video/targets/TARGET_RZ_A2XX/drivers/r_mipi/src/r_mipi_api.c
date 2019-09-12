@@ -1,33 +1,25 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
+/**********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
+ * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ *********************************************************************************************************************/
 /**************************************************************************
 * File Name : r_mipi_api.c
-* Version : 0.01
+* Version : 1.11
 * Description : RZ/A2M MIPI driver API function
-**************************************************************************/
-/***************************************************************************
-* History : DD.MM.YYYY Version Description
-* : 23.08.2018 0.01 pre version created
 **************************************************************************/
 
 /******************************************************************************
@@ -53,12 +45,20 @@ Macro definitions
 #define VNSI_WRITE_MASK          (0x000007FFu)
 
 /* For stride pixel size check */
-#define VIN_OUTPUT_FORMAT_NUM    ( 1u)
+#define VIN_OUTPUT_FORMAT_NUM    ( 4u)
 #define OUTPUT_FORMAT_ENUM       ( 0u)
 #define STRIDE_ALIGN_SIZE        ( 1u)
 #define PIXEL_ALIGN_32           ( 31u) /* 0x1F is used for align check */
 #define PIXEL_ALIGN_64           ( 63u) /* 0x3F is used for align check */
 #define PIXEL_ALIGN_128          (127u) /* 0x7F is used for align check */
+
+/* For output data mode */
+#define VIN_YMODE_YC_ASIS        ( 0u)    /* Y and C are outputed to memory as is */
+#define VIN_YMODE_Y_8BIT         ( 1u)    /* Only Y is outputed to memory as 8bit */
+#define VIN_YMODE_YC_8BIT        ( 2u)    /* Y and C are outputed to memory, C is converted from 10bit to 8bit */
+#define VIN_YMODE_Y_10BIT        ( 3u)    /* Only Y is outputed to memory as 10bit */
+#define VIN_DTMD_NOT_CONVERT     ( 0u)    /* Do not separate Y and C */
+#define VIN_DTMD_YC_SEPARATE     ( 2u)    /* Separate Y and C */
 
 /******************************************************************************
 Typedef definitions
@@ -96,7 +96,7 @@ typedef enum
     REGBIT_VIN_INT_FIELD            = 0x00000010,
     REGBIT_VIN_INT_SCANLINE         = 0x00000004,
     REGBIT_VIN_INT_FRAME            = 0x00000002,
-    REGBIT_VIN_INT_FIFO_OF          = 0x00000001 
+    REGBIT_VIN_INT_FIFO_OF          = 0x00000001
 } e_bit_vin_int_type_t;
 
 /******************************************************************************
@@ -165,8 +165,12 @@ static const char_t gs_cnvtbl_interlace_toim[4] = {
 
 /* Table for stride pixel size checking */
 static const uint32_t gs_tbl_vin_stride_check[VIN_OUTPUT_FORMAT_NUM][2] = {
-    { VIN_OUTPUT_RAW8       , PIXEL_ALIGN_64     } 
+    { VIN_OUTPUT_YCBCR422_8 , PIXEL_ALIGN_64     },
+    { VIN_OUTPUT_Y8_CbCr8   , PIXEL_ALIGN_128    },
+    { VIN_OUTPUT_Y8         , PIXEL_ALIGN_128    },
+    { VIN_OUTPUT_RAW8       , PIXEL_ALIGN_64     }
 };
+
 
 /**********************************************************************
 *
@@ -175,7 +179,8 @@ static const uint32_t gs_tbl_vin_stride_check[VIN_OUTPUT_FORMAT_NUM][2] = {
 * Arguments :    none
 * Return Value : none
 **********************************************************************/
-void R_MIPI_Initialize(void (* const init_func)(uint32_t), const uint32_t user_num)
+void R_MIPI_Initialize(void (* const init_func)(uint32_t),  // @suppress("Non-API function naming")
+        const uint32_t user_num)
 {
     /* call back function */
     if (NULL != init_func)
@@ -199,7 +204,7 @@ void R_MIPI_Initialize(void (* const init_func)(uint32_t), const uint32_t user_n
 * Arguments :    mipi_data : MIPI setting parameter
 * Return Value : Error code
 **********************************************************************/
-e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data)
+e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data) // @suppress("Non-API function naming")
 {
     e_mipi_error_t merr = MIPI_OK;
     uint32_t cnt;
@@ -247,6 +252,7 @@ e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data)
         else
         {
             /* Do Nothing */
+            ;
         }
     }
 
@@ -259,30 +265,45 @@ e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data)
         for (cnt = (MIPI_1US_WAIT * 5); cnt > 0; cnt--)
         {
             /* Do nothing 5us wait */
+            ;
         }
         /* This implicit casting is valid because unsigned long is acceptable the value */
         CSI2LINK.SRST.BIT.SRST = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        CSI2LINK.PHYTIM3.BIT.THS_PREPARE  = mipi_data->mipi_phy_timing.mipi_ths_prepare;    /* MIPI D-PHY Tths_prepare parameter */
-        CSI2LINK.PHYTIM3.BIT.THS_SETTLE   = mipi_data->mipi_phy_timing.mipi_ths_settle;     /* MIPI D-PHY Tths_settle parameter */
-        CSI2LINK.PHYTIM2.BIT.TCLK_PREPARE = mipi_data->mipi_phy_timing.mipi_tclk_prepare;   /* MIPI D-PHY Tclk_prepare parameter */
-        CSI2LINK.PHYTIM2.BIT.TCLK_SETTLE  = mipi_data->mipi_phy_timing.mipi_tclk_settle;    /* MIPI D-PHY Tclk_settle parameter */
-        CSI2LINK.PHYTIM2.BIT.TCLK_MISS    = mipi_data->mipi_phy_timing.mipi_tclk_miss;      /* MIPI D-PHY Tclk_miss parameter */
-        CSI2LINK.PHYTIM1.BIT.T_INIT_SLAVE = mipi_data->mipi_phy_timing.mipi_t_init_slave;   /* MIPI D-PHY Tint parameter */
-        CSI2LINK.FLD.BIT.FLD_NUM     = mipi_data->mipi_frametop;
+        /* MIPI D-PHY Tths_prepare parameter */
+        CSI2LINK.PHYTIM3.BIT.THS_PREPARE  = mipi_data->mipi_phy_timing.mipi_ths_prepare;
+
+        /* MIPI D-PHY Tths_settle parameter */
+        CSI2LINK.PHYTIM3.BIT.THS_SETTLE   = mipi_data->mipi_phy_timing.mipi_ths_settle;
+
+        /* MIPI D-PHY Tclk_prepare parameter */
+        CSI2LINK.PHYTIM2.BIT.TCLK_PREPARE = mipi_data->mipi_phy_timing.mipi_tclk_prepare;
+
+        /* MIPI D-PHY Tclk_settle parameter */
+        CSI2LINK.PHYTIM2.BIT.TCLK_SETTLE  = mipi_data->mipi_phy_timing.mipi_tclk_settle;
+
+        /* MIPI D-PHY Tclk_miss parameter */
+        CSI2LINK.PHYTIM2.BIT.TCLK_MISS    = mipi_data->mipi_phy_timing.mipi_tclk_miss;
+
+        /* MIPI D-PHY Tint parameter */
+        CSI2LINK.PHYTIM1.BIT.T_INIT_SLAVE = mipi_data->mipi_phy_timing.mipi_t_init_slave;
+
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        CSI2LINK.FLD.BIT.FLD_DET_SEL = 0; /* Top frame */
+        CSI2LINK.FLD.BIT.FLD_NUM     = mipi_data->mipi_frametop;
+
+        /* Top frame */
+        CSI2LINK.FLD.BIT.FLD_DET_SEL = 0;
 
         if (mipi_data->mipi_interlace == MIPI_INTERLACE)
         {
             /* This implicit casting is valid because unsigned long is acceptable the value */
-            CSI2LINK.FLD.BIT.FLD_EN1 = 1; /* Top frame detectable */
+            CSI2LINK.FLD.BIT.FLD_EN = 1; /* Top frame detectable */
         }
         else
         {
             /* This implicit casting is valid because unsigned long is acceptable the value */
-            CSI2LINK.FLD.BIT.FLD_EN1 = 0; /* Top frame undetectable */
+            CSI2LINK.FLD.BIT.FLD_EN = 0; /* Top frame undetectable */
         }
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
@@ -304,6 +325,7 @@ e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data)
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         CSI2LINK.LINKCNT.BIT.MONITOR_EN       = 1;
+
         /* This implicit casting is valid because unsigned long is acceptable the value */
         CSI2LINK.PHYCNT.BIT.SHUTDOWNZ         = 1;
 
@@ -330,6 +352,7 @@ e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data)
         for (cnt = (MIPI_1US_WAIT * 25); cnt > 0; cnt--)
         {
             /* Do nothing (25us wait) */
+            ;
         }
 
         /* MIPI State Update */
@@ -352,7 +375,8 @@ e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data)
 *                user_num  : User defined number
 * Return Value : Error code
 **********************************************************************/
-e_mipi_error_t R_MIPI_Close(void (* const finalize_func)(uint32_t), const uint32_t user_num)
+e_mipi_error_t R_MIPI_Close(void (* const finalize_func)(uint32_t),  // @suppress("Non-API function naming")
+        const uint32_t user_num)
 {
     e_mipi_error_t merr = MIPI_OK;
 
@@ -415,7 +439,7 @@ e_mipi_error_t R_MIPI_Close(void (* const finalize_func)(uint32_t), const uint32
 * Arguments :    vin_setup : VIN setting parameter
 * Return Value : Error code
 **********************************************************************/
-e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
+e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup ) // @suppress("Non-API function naming")
 {
     e_mipi_error_t merr = MIPI_OK;
     uint8_t scale_enable;
@@ -435,22 +459,12 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
             /* NULL CHECK */
             merr = MIPI_PARAM_ERR;
         }
-        else if (vin_setup->vin_yuv_clip > VIN_CLIP_NONE)
+        else if (vin_setup->vin_inputformat > VIN_INPUT_RAW8)
         {
             /* RANGE CHECK */
             merr = MIPI_PARAM_ERR;
         }
-        else if (vin_setup->vin_lut > VIN_LUT_ON)
-        {
-            /* RANGE CHECK */
-            merr = MIPI_PARAM_ERR;
-        }
-        else if (vin_setup->vin_inputformat != VIN_INPUT_RAW8)
-        {
-            /* RANGE CHECK */
-            merr = MIPI_PARAM_ERR;
-        }
-        else if (vin_setup->vin_outputformat != VIN_OUTPUT_RAW8)
+        else if (vin_setup->vin_outputformat > VIN_OUTPUT_RAW8)
         {
             /* RANGE CHECK */
             merr = MIPI_PARAM_ERR;
@@ -460,17 +474,7 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
             /* RANGE CHECK */
             merr = MIPI_PARAM_ERR;
         }
-        else if (vin_setup->vin_dither > VIN_DITHER_ORDERED)
-        {
-            /* RANGE CHECK */
-            merr = MIPI_PARAM_ERR;
-        }
         else if (vin_setup->vin_interlace > VIN_PROGRESSIVE)
-        {
-            /* RANGE CHECK */
-            merr = MIPI_PARAM_ERR;
-        }
-        else if (vin_setup->vin_alpha_val1 > 1)
         {
             /* RANGE CHECK */
             merr = MIPI_PARAM_ERR;
@@ -483,13 +487,8 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
         else
         {
             /* Check stride size */
-            if ((vin_setup->vin_scale.vin_scaleon == VIN_SCALE_ON) &&
-                (vin_setup->vin_stride < vin_setup->vin_afterclip.vin_afterclip_size_x))
-            {
-                /* Minimal than post-clip horizontal size in case of scale on */
-                merr = MIPI_PARAM_ERR;
-            }
-            else if (vin_setup->vin_stride < (vin_setup->vin_preclip.vin_preclip_endx - vin_setup->vin_preclip.vin_preclip_startx))
+            if (vin_setup->vin_stride <
+                (vin_setup->vin_preclip.vin_preclip_endx - vin_setup->vin_preclip.vin_preclip_startx))
             {
                 /* Minimal than pre-clip horizontal size in case of scale off */
                 merr = MIPI_PARAM_ERR;
@@ -512,32 +511,17 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
 
     if (merr == MIPI_OK)
     {
-        /* This driver does not support scaling function */
-        if (vin_setup->vin_scale.vin_scaleon == VIN_SCALE_ON)
-        {
-            merr = MIPI_PARAM_ERR;
-        }
-    }
-
-    if (merr == MIPI_OK)
-    {
         /* Check PreClip Parameter */
-        uint8_t min_y = 1;
-        if (vin_setup->vin_scale.vin_scaleon == VIN_SCALE_ON)
-        {
-            min_y = 3;
-        }
-
         if ((vin_setup->vin_preclip.vin_preclip_starty > vin_setup->vin_preclip.vin_preclip_endy) ||
-            ((vin_setup->vin_preclip.vin_preclip_endy - vin_setup->vin_preclip.vin_preclip_starty) < min_y))
+            ((vin_setup->vin_preclip.vin_preclip_endy - vin_setup->vin_preclip.vin_preclip_starty) < 1))
         {
             /* RANGE CHECK */
             merr = MIPI_PARAM_ERR;
         }
         else if ((vin_setup->vin_preclip.vin_preclip_startx > vin_setup->vin_preclip.vin_preclip_endx) ||
-                 ((vin_setup->vin_preclip.vin_preclip_endx - vin_setup->vin_preclip.vin_preclip_startx) < 6) ||
-                 ((vin_setup->vin_preclip.vin_preclip_startx % 2) != 0) ||
-                 (((vin_setup->vin_preclip.vin_preclip_endx - vin_setup->vin_preclip.vin_preclip_startx) % 2) == 0))
+            ((vin_setup->vin_preclip.vin_preclip_endx - vin_setup->vin_preclip.vin_preclip_startx) < 6) ||
+            ((vin_setup->vin_preclip.vin_preclip_startx % 2) != 0) ||
+            (((vin_setup->vin_preclip.vin_preclip_endx - vin_setup->vin_preclip.vin_preclip_startx) % 2) == 0))
         {
             /* RANGE CHECK */
             merr = MIPI_PARAM_ERR;
@@ -545,86 +529,25 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
         else
         {
             /* Do Nothing */
-        }
-    }
-
-    if (merr == MIPI_OK)
-    {
-        /* Check Scale Parameter */
-        if (vin_setup->vin_scale.vin_scaleon == VIN_SCALE_ON)
-        {
-            if ((vin_setup->vin_scale.vin_scale_h < 0x0800) || (vin_setup->vin_scale.vin_scale_v < 0x0556))
-            {
-                /* RANGE CHECK */
-                merr = MIPI_PARAM_ERR;
-            }
-            else if ((vin_setup->vin_scale.vin_interpolation == VIN_NEAREST)
-                       && ((vin_setup->vin_scale.vin_scale_h < 0x1000)
-                       ||  (vin_setup->vin_scale.vin_scale_h > 0x4000)
-                       ||  (vin_setup->vin_scale.vin_scale_v < 0x1000)
-                       ||  (vin_setup->vin_scale.vin_scale_v > 0x4000)))
-            {
-                /* RANGE CHECK */
-                merr = MIPI_PARAM_ERR;
-            }
-            else
-            {
-                /* Do Nothing */
-            }
-        }
-    }
-
-    if (merr == MIPI_OK)
-    {
-        /* Check AfterClip Parameter */
-        if (vin_setup->vin_scale.vin_scaleon == VIN_SCALE_ON)
-        {
-            float32_t pre_clip_size_x;
-            float32_t pre_clip_size_y;
-            uint16_t  scale_size_x;
-            uint16_t  scale_size_y;
-
-            /* Get pre clip size */
-            pre_clip_size_x = (float32_t)(vin_setup->vin_preclip.vin_preclip_endx - vin_setup->vin_preclip.vin_preclip_startx);
-            /* Get scale size */
-            scale_size_x    = (uint16_t)(pre_clip_size_x * (0x1000 / (vin_setup->vin_scale.vin_scale_h)));
-
-            /* Get scaling factor of vartical */
-            pre_clip_size_y = (float32_t)(vin_setup->vin_preclip.vin_preclip_endy - vin_setup->vin_preclip.vin_preclip_starty);
-            /* Get scale size */
-            scale_size_y    = (uint16_t)(pre_clip_size_y * (0x1000 / (vin_setup->vin_scale.vin_scale_v)));
-
-            if ((scale_size_x < vin_setup->vin_afterclip.vin_afterclip_size_x) ||
-                (scale_size_y < vin_setup->vin_afterclip.vin_afterclip_size_y) ||
-                (vin_setup->vin_afterclip.vin_afterclip_size_x < 4)    ||
-                (vin_setup->vin_afterclip.vin_afterclip_size_x > 2048) ||
-                (vin_setup->vin_afterclip.vin_afterclip_size_y < 4)    ||
-                (vin_setup->vin_afterclip.vin_afterclip_size_y > 2048))
-            {
-                /* RANGE CHECK */
-                merr = MIPI_PARAM_ERR;
-            }
+            ;
         }
     }
 
     if( merr == MIPI_OK )
     {
-        int32_t in_rgb;
-        int32_t out_rgb;
-
         /* VIN Initial Setting */
-        VIN.V0MC.BIT.CLP   = vin_setup->vin_yuv_clip;          /* YUV Clip */
-        VIN.V0MC.BIT.SCLE  = vin_setup->vin_scale.vin_scaleon; /* Scaling On or Off */
-        VIN.V0MC.BIT.LUTE  = vin_setup->vin_lut;               /* LUT conversion */
+        VIN.V0MC.BIT.CLP   = 0;          /* YUV Clip default setting */
+        VIN.V0MC.BIT.SCLE  = 0;          /* Scaling Off */
+        VIN.V0MC.BIT.LUTE  = 0;          /* LUT conversion Off */
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0MC.BIT.YCAL  = (vin_setup->vin_inputformat == VIN_INPUT_YCBCR422_8I) ? 1 : 0;
+        VIN.V0MC.BIT.YCAL  = vin_setup->vin_input_align;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0MC.BIT.INF   = gs_cnvtbl_inputformat_toinf[vin_setup->vin_inputformat];
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0MC.BIT.DC    = vin_setup->vin_dither;
+        VIN.V0MC.BIT.DC    = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0MC.BIT.EN    = vin_setup->vin_outputendian;
@@ -632,32 +555,14 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0MC.BIT.IM    = gs_cnvtbl_interlace_toim[vin_setup->vin_interlace];
 
-        if (vin_setup->vin_inputformat == VIN_INPUT_RGB888)
-        {
-            in_rgb = 1; /* RGB*/
-        }
-        else if (vin_setup->vin_inputformat == VIN_INPUT_RAW8)
-        {
-            in_rgb = 2;          /* Not RGB or YUV */
-        }
-        else
-        {
-            in_rgb = 0; /* YUV */
-        }
-
-        out_rgb                 = (vin_setup->vin_outputformat) >> 4;
-
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0MC.BIT.BPS        = ((in_rgb + out_rgb) == 1 ) ? 0 : 1;   /* 0 : YUV <=> RGB Convert */
+        VIN.V0MC.BIT.BPS        = 1;   /* Do not convert */
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0MC.BIT.ME         = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0CSI_IFMD.BIT.DES0 = 1;                                  /* Eexpand bit to '0' (8 or 10bit -> 12bit) */
-
-        /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0DMR2.BIT.DES      = 1;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0DMR2.BIT.FTEV     = 1;
@@ -696,119 +601,95 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
         VIN.V0EPPrC.LONG        = vin_setup->vin_preclip.vin_preclip_endx;
 
         /* Scaling Setting */
-        VIN.V0UDS_CTRL.BIT.AMD  =1;
-        if (vin_setup->vin_scale.vin_interpolation == VIN_NEAREST)
-        {
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.BC     = 0;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_RCR = 1;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_BCB = 1;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_GY  = 1;
-        }
-        else if (vin_setup->vin_scale.vin_interpolation == VIN_BILINEAR)
-        {
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.BC     = 0;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_RCR = 0;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_BCB = 0;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_GY  = 0;
-        }
-        else
-        {
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.BC     = 1;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_RCR = 0;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_BCB = 0;
-
-            /* This implicit casting is valid because unsigned long is acceptable the value */
-            VIN.V0UDS_CTRL.BIT.NE_GY  = 0;
-        }
+        VIN.V0UDS_CTRL.BIT.AMD    = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0UDS_SCALE.LONG = (vin_setup->vin_scale.vin_scale_h << 16) | (vin_setup->vin_scale.vin_scale_v);
-        {
-            uint16_t scale_integral;
-            uint16_t scale_fractional;
-            uint8_t  passband_width;
-
-            scale_integral   = (vin_setup->vin_scale.vin_scale_h & 0xF000) >> 12;  /* Get HMANT part value */
-            scale_fractional = (vin_setup->vin_scale.vin_scale_h & 0x0FFF);        /* Get HFRAC part value */
-            /* Set BWIDTH_H */
-            if (scale_integral == 0) /* enlarge */
-            {
-                /* This implicit casting is valid because unsigned long is acceptable the value */
-                VIN.V0UDS_PASS_BWIDTH.BIT.BWIDTH_H = 64;
-            }
-            else
-            {
-                passband_width = calc_scale_passband(scale_integral, scale_fractional);
-
-                /* This implicit casting is valid because unsigned long is acceptable the value */
-                VIN.V0UDS_PASS_BWIDTH.BIT.BWIDTH_H = passband_width;
-            }
-
-            scale_integral   = (vin_setup->vin_scale.vin_scale_v & 0xF000) >> 12;  /* Get VMANT part value */
-            scale_fractional = (vin_setup->vin_scale.vin_scale_v & 0x0FFF);        /* Get VFRAC part value */
-            /* Set BWIDTH_V */
-            if (scale_integral == 0) /* enlarge */
-            {
-                /* This implicit casting is valid because unsigned long is acceptable the value */
-                VIN.V0UDS_PASS_BWIDTH.BIT.BWIDTH_V = 64;
-            }
-            else
-            {
-                passband_width = calc_scale_passband(scale_integral, scale_fractional);
-
-                /* This implicit casting is valid because unsigned long is acceptable the value */
-                VIN.V0UDS_PASS_BWIDTH.BIT.BWIDTH_V = passband_width;
-            }
-        }
+        VIN.V0UDS_CTRL.BIT.BC     = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0UDS_CLIP_SIZE.BIT.CL_HSIZE = vin_setup->vin_afterclip.vin_afterclip_size_x;
+        VIN.V0UDS_CTRL.BIT.NE_RCR = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0UDS_CLIP_SIZE.BIT.CL_VSIZE = vin_setup->vin_afterclip.vin_afterclip_size_y;
+        VIN.V0UDS_CTRL.BIT.NE_BCB = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0DMR.BIT.A8BIT              = vin_setup->vin_alpha_val8;
+        VIN.V0UDS_CTRL.BIT.NE_GY  = 0;
+
+        /* This implicit casting is valid because unsigned long is acceptable the value */
+        VIN.V0UDS_SCALE.LONG = 0;
+
+        /* This implicit casting is valid because unsigned long is acceptable the value */
+        VIN.V0UDS_PASS_BWIDTH.BIT.BWIDTH_H = 0;
+
+        /* This implicit casting is valid because unsigned long is acceptable the value */
+        VIN.V0UDS_PASS_BWIDTH.BIT.BWIDTH_V = 0;
+
+        /* This implicit casting is valid because unsigned long is acceptable the value */
+        VIN.V0UDS_CLIP_SIZE.BIT.CL_HSIZE = 0;
+
+        /* This implicit casting is valid because unsigned long is acceptable the value */
+        VIN.V0UDS_CLIP_SIZE.BIT.CL_VSIZE = 0;
+
+        /* This implicit casting is valid because unsigned long is acceptable the value */
+        VIN.V0DMR.BIT.A8BIT              = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0DMR.BIT.EVA                = 0;
 
-        /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0DMR.BIT.YMODE   = 0;
+        switch (vin_setup->vin_inputformat)
+        {
+            case VIN_INPUT_YCBCR422_8:
+            case VIN_INPUT_YCBCR422_8I:
+                if (vin_setup->vin_outputformat == VIN_OUTPUT_Y8_CbCr8)
+                {
+                    /* Output Y and C, and those are separated */
+                    VIN.V0DMR.BIT.YMODE = VIN_YMODE_YC_ASIS;    /* Both of Y and C are outputed to memory */
+                    VIN.V0DMR.BIT.DTMD  = VIN_DTMD_YC_SEPARATE; /* Separate Y and C */
+                }
+                else if (vin_setup->vin_outputformat == VIN_OUTPUT_Y8)
+                {
+                    /* Output only Y */
+                    VIN.V0DMR.BIT.YMODE = VIN_YMODE_Y_8BIT;     /* Only Y is outputed to memory as 8bit data */
+                    VIN.V0DMR.BIT.DTMD  = VIN_DTMD_YC_SEPARATE; /* Separate Y and C */
+                }
+                else if (vin_setup->vin_outputformat == VIN_OUTPUT_YCBCR422_8)
+                {
+                    /* Output Y and C, and those are not separated */
+                    VIN.V0DMR.BIT.YMODE = VIN_YMODE_YC_ASIS;    /* Both of Y and C are outputed to memory */
+                    VIN.V0DMR.BIT.DTMD  = VIN_DTMD_NOT_CONVERT; /* Do not separate Y and C */
+                }
+                else
+                {
+                    /* This driver do not support other format conversion */
+                    merr = MIPI_PARAM_ERR;
+                }
+            break;
+            case VIN_INPUT_RAW8:
+
+                /* Set as default */
+                VIN.V0DMR.BIT.YMODE = VIN_YMODE_YC_ASIS;    /* Both of Y and C are outputed to memory */
+                VIN.V0DMR.BIT.DTMD  = VIN_DTMD_NOT_CONVERT; /* Do not separate Y and C */
+            break;
+            case VIN_INPUT_YCBCR422_10:
+            case VIN_INPUT_RGB888:
+            default:
+
+                /* Not support */
+                merr = MIPI_PARAM_ERR;
+            break;
+        }
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0DMR.BIT.EXRGB   = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0DMR.BIT.BPSM    = 0;
+        VIN.V0DMR.BIT.BPSM    = vin_setup->vin_output_swap;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
         VIN.V0DMR.BIT.ABIT    = 0;
 
         /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0DMR.BIT.DTMD    = 0;
-
-        /* This implicit casting is valid because unsigned long is acceptable the value */
-        VIN.V0UVAOF.BIT.UVAOF = 0;
+        VIN.V0UVAOF.BIT.UVAOF = vin_setup->vin_ycoffset;
     }
 
     return merr;
@@ -824,7 +705,8 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup )
 *                bufferBase : Buffer base address
 * Return Value : Error code
 **********************************************************************/
-e_mipi_error_t R_MIPI_SetBufferAdr(const uint8_t buffer_no, const uint8_t * const bufferBase)
+e_mipi_error_t R_MIPI_SetBufferAdr(const uint8_t buffer_no,  // @suppress("Non-API function naming")
+        const uint8_t * const bufferBase)
 {
     e_mipi_error_t merr  = MIPI_OK;
 
@@ -900,7 +782,7 @@ e_mipi_error_t R_MIPI_SetBufferAdr(const uint8_t buffer_no, const uint8_t * cons
 * Arguments :    param : Interrupt settings
 * Return Value : none
 **********************************************************************/
-void R_MIPI_InterruptEnable(const st_mipi_int_t * const param)
+void R_MIPI_InterruptEnable(const st_mipi_int_t * const param) // @suppress("Non-API function naming")
 {
     uint32_t int_type      = param->type;
     uint32_t mipi_int_type = 0;
@@ -919,7 +801,8 @@ void R_MIPI_InterruptEnable(const st_mipi_int_t * const param)
     /* check interrupt type of MIPI */
     for (count = 0; count < MIPI_INTERRUPT_TYPE_NUM; count++)
     {
-        if((int_type & gs_tbl_mipi_interrupt_bit[count][INTERRUPT_FLAG]) == gs_tbl_mipi_interrupt_bit[count][INTERRUPT_FLAG])
+        if((int_type & gs_tbl_mipi_interrupt_bit[count][INTERRUPT_FLAG]) ==
+            gs_tbl_mipi_interrupt_bit[count][INTERRUPT_FLAG])
         {
             mipi_int_type |= gs_tbl_mipi_interrupt_bit[count][INTERRUPT_REGBIT];
         }
@@ -928,7 +811,8 @@ void R_MIPI_InterruptEnable(const st_mipi_int_t * const param)
     /* check interrupt type of VIN */
     for (count = 0; count < VIN_INTERRUPT_TYPE_NUM; count++)
     {
-        if((int_type & gs_tbl_vin_interrupt_bit[count][INTERRUPT_FLAG]) == gs_tbl_vin_interrupt_bit[count][INTERRUPT_FLAG])
+        if((int_type & gs_tbl_vin_interrupt_bit[count][INTERRUPT_FLAG]) ==
+            gs_tbl_vin_interrupt_bit[count][INTERRUPT_FLAG])
         {
             vin_int_type |= gs_tbl_vin_interrupt_bit[count][INTERRUPT_REGBIT];
             if (gs_tbl_vin_interrupt_bit[count][1] == VIN_INT_SCANLINE)
@@ -956,7 +840,7 @@ void R_MIPI_InterruptEnable(const st_mipi_int_t * const param)
 * Arguments :    none
 * Return Value : none
 **********************************************************************/
-void R_MIPI_InterruptDisable(void)
+void R_MIPI_InterruptDisable(void) // @suppress("Non-API function naming")
 {
     /* Callback function pointer clear */
     Mipi_Callback = 0;
@@ -976,7 +860,7 @@ void R_MIPI_InterruptDisable(void)
 * Arguments :    infoType : registers status
 * Return Value : Error code
 **********************************************************************/
-e_mipi_error_t R_MIPI_GetInfo(st_vin_info_type_t * infoType)
+e_mipi_error_t R_MIPI_GetInfo(st_vin_info_type_t * infoType) // @suppress("Non-API function naming")
 {
     e_mipi_error_t merr = MIPI_OK;
 
@@ -1002,7 +886,7 @@ e_mipi_error_t R_MIPI_GetInfo(st_vin_info_type_t * infoType)
 * Arguments :    captureMode : Single or Continuous
 * Return Value : Error code
 **********************************************************************/
-e_mipi_error_t R_MIPI_CaptureStart(const e_mipi_capture_mode_t captureMode)
+e_mipi_error_t R_MIPI_CaptureStart(const e_mipi_capture_mode_t captureMode) // @suppress("Non-API function naming")
 {
     e_mipi_error_t merr = MIPI_OK;
     uint32_t intstate;
@@ -1078,7 +962,7 @@ e_mipi_error_t R_MIPI_CaptureStart(const e_mipi_capture_mode_t captureMode)
 * Arguments :    none
 * Return Value : Error code
 **********************************************************************/
-e_mipi_error_t R_MIPI_CaptureStop(void)
+e_mipi_error_t R_MIPI_CaptureStop(void) // @suppress("Non-API function naming")
 {
     e_mipi_error_t merr      = MIPI_OK;
 
@@ -1125,7 +1009,7 @@ e_mipi_error_t R_MIPI_CaptureStop(void)
 * Arguments :    int_sense   : sense
 * Return Value : none
 **********************************************************************/
-void R_MIPI_InterruptHandler( uint32_t int_sense )
+void R_MIPI_InterruptHandler( uint32_t int_sense ) // @suppress("Non-API function naming")
 {
     volatile uint32_t intdata;
     uint32_t          mipi_cnt;
@@ -1140,7 +1024,8 @@ void R_MIPI_InterruptHandler( uint32_t int_sense )
     /* check interrupt type of MIPI */
     for (mipi_cnt = 0; mipi_cnt < MIPI_INTERRUPT_TYPE_NUM; mipi_cnt++)
     {
-        if((intdata & gs_tbl_mipi_interrupt_bit[mipi_cnt][INTERRUPT_REGBIT]) == gs_tbl_mipi_interrupt_bit[mipi_cnt][INTERRUPT_REGBIT])
+        if((intdata & gs_tbl_mipi_interrupt_bit[mipi_cnt][INTERRUPT_REGBIT]) ==
+            gs_tbl_mipi_interrupt_bit[mipi_cnt][INTERRUPT_REGBIT])
         {
             mipi_int_type |= gs_tbl_mipi_interrupt_bit[mipi_cnt][INTERRUPT_FLAG];
         }
@@ -1163,7 +1048,7 @@ void R_MIPI_InterruptHandler( uint32_t int_sense )
 * Arguments :    int_sense   : sense
 * Return Value : none
 **********************************************************************/
-void R_VIN_InterruptHandler( uint32_t int_sense )
+void R_VIN_InterruptHandler( uint32_t int_sense ) // @suppress("Non-API function naming")
 {
     volatile uint32_t intdata;
     uint32_t          vin_cnt;
@@ -1178,7 +1063,8 @@ void R_VIN_InterruptHandler( uint32_t int_sense )
     /* check interrupt type of VIN */
     for (vin_cnt = 0; vin_cnt < VIN_INTERRUPT_TYPE_NUM; vin_cnt++)
     {
-        if((intdata & gs_tbl_vin_interrupt_bit[vin_cnt][INTERRUPT_REGBIT]) == gs_tbl_vin_interrupt_bit[vin_cnt][INTERRUPT_REGBIT])
+        if((intdata & gs_tbl_vin_interrupt_bit[vin_cnt][INTERRUPT_REGBIT]) ==
+            gs_tbl_vin_interrupt_bit[vin_cnt][INTERRUPT_REGBIT])
         {
             vin_int_type |= gs_tbl_vin_interrupt_bit[vin_cnt][INTERRUPT_FLAG];
         }
@@ -1204,7 +1090,7 @@ static uint8_t calc_scale_passband(uint16_t scale_int, uint16_t scale_fra)
 {
     uint8_t mulm;
     uint8_t width;
-    
+
     mulm = 1;
     if (scale_int >= 8)
     {
@@ -1216,6 +1102,6 @@ static uint8_t calc_scale_passband(uint16_t scale_int, uint16_t scale_fra)
     }
     /****** Calculate passband width ******/
     width = (uint8_t) ((64 * (4096 * mulm)) / ((4096 * scale_int) + scale_fra));
-    
+
     return width;
 }   /* End of function calc_scale_passband() */

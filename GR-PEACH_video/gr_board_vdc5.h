@@ -328,6 +328,20 @@ typedef struct
     uint16_t vin_afterclip_size_y;  /*!< After Area Clip vertical size */
 } drv_vin_afterclip_t;
 
+/*! YCbCr422 input data alignment */
+typedef enum
+{
+    __VIN_Y_UPPER = 0,  /*!< Upper bit is Y, lower bit is CbCr */
+    __VIN_CB_UPPER,     /*!< Upper bit is CbCr, lower bit is Y */
+} drv_vin_input_align_t;
+
+/*! Output data byte swap mode */
+typedef enum
+{
+    __VIN_SWAP_OFF = 0,   /*!< Not swap */
+    __VIN_SWAP_ON,        /*!< Swap */
+} drv_vin_output_swap_t;
+
 typedef struct
 {
     drv_vin_preclip_t   vin_preclip;     /*!< Pre Area Clip Parameter */
@@ -343,7 +357,9 @@ typedef struct
     uint8_t         vin_alpha_val8;     /*!< (for ARGB8888)Alpha Value */
     uint8_t         vin_alpha_val1;     /*!< (for ARGB1555)Alpha Value */
     uint16_t        vin_stride;         /*!< Stride (byte) */
-    uint16_t        vin_ycoffset;       /*!< (for YC separate output)Address Offset Value */
+    uint32_t        vin_ycoffset;       /*!< (for YC separate output)Address Offset Value */
+    drv_vin_input_align_t  vin_input_align;  /*!< YCbCr422 input data alignment */
+    drv_vin_output_swap_t  vin_output_swap;  /*!< Output data byte swap mode */
 } drv_vin_setup_t;
 
 /******************************************************************************

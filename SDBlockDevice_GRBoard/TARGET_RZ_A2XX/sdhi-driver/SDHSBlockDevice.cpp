@@ -53,8 +53,8 @@ static uint8_t sd_work_buff[SD_SECTOR_SIZE]__attribute((aligned(32)));
 #endif
 
 static const uint32_t sd_base_addr[2] = {
-     SDCFG_IP0_BASE
-    ,SDCFG_IP1_BASE
+     SD_CFG_IP0_BASE
+    ,SD_CFG_IP1_BASE
 };
 
 SDHSBlockDevice::SDHSBlockDevice(PinName cd, PinName wp) : sd_ch(-1)
@@ -161,7 +161,7 @@ int SDHSBlockDevice::init()
         return BD_ERROR_DEVICE_ERROR;
     } else {
         /* Mount SD card. */
-        chk = sd_mount(sd_ch, SDCFG_DRIVER_MODE, SD_VOLT_3_3);
+        chk = sd_mount(sd_ch, SD_CFG_DRIVER_MODE, SD_VOLT_3_3);
         if (chk != SD_OK) {
             unlock();
             return BD_ERROR_DEVICE_ERROR;

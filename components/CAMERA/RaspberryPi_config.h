@@ -59,47 +59,62 @@ public:
         return true;
     }
 
-    void SetMipiConfig(DisplayBase::video_mipi_param_t * p_cfg) {
-        p_cfg->mipi_lanenum    = 2;
-        p_cfg->mipi_vc         = 0;
-        p_cfg->mipi_interlace  = 0;
-        p_cfg->mipi_laneswap   = 0; /* Progressive */
-        p_cfg->mipi_frametop   = 0;
-        p_cfg->mipi_outputrate = 80;
+    /* MIPI camera setting */
+    #define     CAM_MIPI_LANE_NUM        ( 2u)          /* Number of data lane */
+    #define     CAM_MIPI_LANE_SWAP       ( 0u)          /* Lane swap enable */
+    #define     CAM_MIPI_SEL_VC          ( 0u)          /* Vertual channel number */
+    #define     CAM_MIPI_TRANSFER_RATE   (80u)          /* Data transfer rate (Mbit per sec) */
 
-        p_cfg->mipi_phy_timing.mipi_ths_prepare  = 0x00000012u;
-        p_cfg->mipi_phy_timing.mipi_ths_settle   = 0x00000019u;
-        p_cfg->mipi_phy_timing.mipi_tclk_prepare = 0x0000000Fu;
-        p_cfg->mipi_phy_timing.mipi_tclk_settle  = 0x0000001Eu;
-        p_cfg->mipi_phy_timing.mipi_tclk_miss    = 0x00000008u;
-        p_cfg->mipi_phy_timing.mipi_t_init_slave = 0x0000338Fu;
+    /* PHY timing */
+    #define     CAM_MIPI_THS_PREPARE     (0x00000012u)  /* Setting of the duration of the LP-00 state (immediately before entry to the HS-0 state) */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_THS_SETTLE      (0x00000019u)  /* Setting of the period in which a transition to the HS state is ignored after the TTHS_PREPARE period begins */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_TCLK_PREPARE    (0x0000000Fu)  /* Setting of the duration of the LP-00 state (immediately before entry to the HS-0) */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_TCLK_SETTLE     (0x0000001Eu)  /* Setting of the period in which a transition to the HS state is ignored after the TCLK_PREPARE period begins */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_TCLK_MISS       (0x00000008u)  /* Setting of the period in which the absence of the clock is detected, and the HS-RX is disabled */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_T_INIT_SLAVE    (0x0000338Fu)  /* Minimum duration of the INIT state */
+
+    /* VIN capture setting */
+    #define     CAM_VIN_PRECLIP_START_Y  ( 24u)                 /* Start line  of pre clip area */
+    #define     CAM_VIN_PRECLIP_WIDTH_Y  (480u)                 /* Line width of pre clip area */
+    #define     CAM_VIN_PRECLIP_START_X  (100u)                 /* Start pixel of pre clip area */
+    #define     CAM_VIN_PRECLIP_WIDTH_X  (640u)                 /* Pixel width of pre clip area */
+    #define     CAM_VIN_INPUT_YCAL       (DisplayBase::VIN_Y_UPPER)          /* YCbCr422 data alignment */
+    #define     CAM_VIN_INPUT_FORMAT     (VIN_INPUT_RAW8)       /* Input image format */
+    #define     CAM_VIN_OUTPUT_FORMAT    (VIN_OUTPUT_RAW8)      /* Output image format */
+    #define     CAM_VIN_OUTPUT_ENDIAN    (VIN_OUTPUT_EN_LITTLE) /* Output data endian */
+    #define     CAM_VIN_OUTPUT_BPSM      (DisplayBase::VIN_SWAP_OFF)         /* Output data byte swap mode */
+    #define     CAM_VIN_OUTPUT_IS        (640u)                 /* Image Stride size */
+
+    void SetMipiConfig(DisplayBase::video_mipi_param_t * p_cfg) {
+        memset(p_cfg, 0, sizeof(DisplayBase::video_mipi_param_t));
+        p_cfg->mipi_lanenum    = CAM_MIPI_LANE_NUM;
+        p_cfg->mipi_vc         = CAM_MIPI_SEL_VC;
+        p_cfg->mipi_interlace  = MIPI_PROGRESSIVE;
+        p_cfg->mipi_laneswap   = CAM_MIPI_LANE_SWAP;
+        p_cfg->mipi_frametop   = 0;
+        p_cfg->mipi_outputrate = CAM_MIPI_TRANSFER_RATE;
+        p_cfg->mipi_phy_timing.mipi_ths_prepare  = CAM_MIPI_THS_PREPARE;
+        p_cfg->mipi_phy_timing.mipi_ths_settle   = CAM_MIPI_THS_SETTLE;
+        p_cfg->mipi_phy_timing.mipi_tclk_prepare = CAM_MIPI_TCLK_PREPARE;
+        p_cfg->mipi_phy_timing.mipi_tclk_settle  = CAM_MIPI_TCLK_SETTLE;
+        p_cfg->mipi_phy_timing.mipi_tclk_miss    = CAM_MIPI_TCLK_MISS;
+        p_cfg->mipi_phy_timing.mipi_t_init_slave = CAM_MIPI_T_INIT_SLAVE;
     }
 
     void SetVinSetup(DisplayBase::video_vin_setup_t * p_setup) {
-        p_setup->vin_preclip.vin_preclip_starty = 24u;
-        p_setup->vin_preclip.vin_preclip_endy   = 503u;
-        p_setup->vin_preclip.vin_preclip_startx = 100u;
-        p_setup->vin_preclip.vin_preclip_endx   = 739u;
-
-        p_setup->vin_scale.vin_scaleon          = 0;
-        p_setup->vin_scale.vin_interpolation    = 0;
-        p_setup->vin_scale.vin_scale_h          = 0;
-        p_setup->vin_scale.vin_scale_v          = 0;
-
-        p_setup->vin_afterclip.vin_afterclip_size_x = 0;
-        p_setup->vin_afterclip.vin_afterclip_size_y = 0;
-
-        p_setup->vin_yuv_clip                   = VIN_CLIP_NONE;
-        p_setup->vin_lut                        = VIN_LUT_OFF;
-        p_setup->vin_inputformat                = VIN_INPUT_RAW8;
-        p_setup->vin_outputformat               = VIN_OUTPUT_RAW8;
-        p_setup->vin_outputendian               = VIN_OUUPUT_EN_LITTLE;
-        p_setup->vin_dither                     = VIN_DITHER_CUMULATIVE;
-        p_setup->vin_interlace                  = VIN_PROGRESSIVE;
-        p_setup->vin_alpha_val8                 = 0;
-        p_setup->vin_alpha_val1                 = 0;
-        p_setup->vin_stride                     = (p_setup->vin_preclip.vin_preclip_endx - p_setup->vin_preclip.vin_preclip_startx + 0x3F) & ~0x3F;
-        p_setup->vin_ycoffset                   = 0;
+        memset(p_setup, 0, sizeof(DisplayBase::video_vin_setup_t));
+        p_setup->vin_preclip.vin_preclip_starty = CAM_VIN_PRECLIP_START_Y;
+        p_setup->vin_preclip.vin_preclip_endy   = ((CAM_VIN_PRECLIP_START_Y + CAM_VIN_PRECLIP_WIDTH_Y) - 1);
+        p_setup->vin_preclip.vin_preclip_startx = CAM_VIN_PRECLIP_START_X;
+        p_setup->vin_preclip.vin_preclip_endx   = ((CAM_VIN_PRECLIP_START_X + CAM_VIN_PRECLIP_WIDTH_X) - 1);
+        p_setup->vin_inputformat  = CAM_VIN_INPUT_FORMAT;
+        p_setup->vin_outputformat = CAM_VIN_OUTPUT_FORMAT;
+        p_setup->vin_outputendian = CAM_VIN_OUTPUT_ENDIAN;
+        p_setup->vin_interlace    = VIN_PROGRESSIVE;
+        p_setup->vin_stride       = CAM_VIN_OUTPUT_IS;
+        p_setup->vin_ycoffset     = (CAM_VIN_OUTPUT_IS * CAM_VIN_PRECLIP_WIDTH_Y);
+        p_setup->vin_input_align  = CAM_VIN_INPUT_YCAL;
+        p_setup->vin_output_swap  = CAM_VIN_OUTPUT_BPSM;
     }
 
 };

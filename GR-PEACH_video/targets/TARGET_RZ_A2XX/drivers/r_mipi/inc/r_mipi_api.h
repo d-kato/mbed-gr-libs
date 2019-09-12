@@ -1,33 +1,25 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
+/**********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
+ * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ *********************************************************************************************************************/
 /**************************************************************************
 * File Name : r_mipi_api.h
-* Version : 0.01
+* Version : 1.11
 * Description : RZ/A2M MIPI driver API definitions
-**************************************************************************/
-/***************************************************************************
-* History : DD.MM.YYYY Version Description
-* : 23.08.2018 0.01 pre version created
 **************************************************************************/
 
 /******************************************************************************
@@ -73,20 +65,20 @@ typedef enum
     MIPI_INTERLACE,         /*!< Capture Interlace Data */
 } e_mipi_inter_t;
 
-/*! YUV Range Clip Parameter */
+/*! YUV Range Clip Parameter (Not supported) */
 typedef enum
 {
-    VIN_CLIP_C_16_240 = 0, /*!< Clip C, Between 16 and 240 */
-    VIN_CLIP_YC_16_240,    /*!< Clip YC, Between 16 and 240 */
-    VIN_CLIP_C_128_128,    /*!< Clip C, Between 16 and 240 ( if Out of Range, Set to 128 ) */
-    VIN_CLIP_NONE,         /*!< No Clip */
+    VIN_CLIP_C_16_240 = 0, /*!< Not supported parameter (Clip C, Between 16 and 240) */
+    VIN_CLIP_YC_16_240,    /*!< Not supported parameter (Clip YC, Between 16 and 240) */
+    VIN_CLIP_C_128_128,    /*!< Not supported parameter (Clip C, Between 16 and 240 ( if Out of Range, Set to 128 )) */
+    VIN_CLIP_NONE,         /*!< Not supported parameter (No Clip) */
 } e_vin_yuv_clip_t;
 
-/*! LUT Conversion On or OFF */
+/*! LUT Conversion On or OFF (Not supported) */
 typedef enum
 {
-    VIN_LUT_OFF = 0,    /*!< No LUT Conversion */
-    VIN_LUT_ON,         /*!< LUT Conversion */
+    VIN_LUT_OFF = 0,    /*!< Not supported parameter (No LUT Conversion) */
+    VIN_LUT_ON,         /*!< Not supported parameter (LUT Conversion) */
 } e_vin_lut_t;
 
 /*! Input Image Format */
@@ -94,43 +86,43 @@ typedef enum
 {
     VIN_INPUT_YCBCR422_8 = 0,   /*!< YUV(=YCbCr422 8bit) */
     VIN_INPUT_YCBCR422_8I,      /*!< UYVY */
-    VIN_INPUT_YCBCR422_10,      /*!< YCbCr422 10bit */
-    VIN_INPUT_RGB888,           /*!< RGB888 */
+    VIN_INPUT_YCBCR422_10,      /*!< Not supported parameter (YCbCr422 10bit) */
+    VIN_INPUT_RGB888,           /*!< Not supported parameter (RGB888) */
     VIN_INPUT_RAW8,             /*!< RAW8 */
 } e_vin_inputformat_t;
 
-/*! Output Image Format (for "Vin_Setup_t.Vin_OutputFormat") */
+/*! Output Image Format */
 typedef enum
 {
     VIN_OUTPUT_YCBCR422_8  = (0x00),    /*!< YUV(=YCbCr422 8bit) */
-    VIN_OUTPUT_YCBCR422_10 = (0x01),    /*!< YUV(=YCbCr422 10bit) */
+    VIN_OUTPUT_YCBCR422_10 = (0x01),    /*!< Not supported parameter (YUV(=YCbCr422 10bit) */
     VIN_OUTPUT_Y8_CbCr8    = (0x02),    /*!< YC separate output, Y=8bit, C=8bit */
     VIN_OUTPUT_Y8          = (0x03),    /*!< 8bit Gray scale */
-    VIN_OUTPUT_Y10_CbCr10  = (0x04),    /*!< YC separate output, Y=10bit, C=10bit */
-    VIN_OUTPUT_Y10         = (0x05),    /*!< 10bit Gray scale */
-    VIN_OUTPUT_Y10_CbCr8   = (0x06),    /*!< YC separate output, Y=10bit, C=8bit */
-    VIN_OUTPUT_ARGB8888    = (0x10),    /*!< ARGB8888 */
-    VIN_OUTPUT_XRGB8888    = (0x11),    /*!< XRGB8888 */
-    VIN_OUTPUT_ARGB1555    = (0x12),    /*!< ARGB1555 */
-    VIN_OUTPUT_RGB565      = (0x13),    /*!< RGB565 */
+    VIN_OUTPUT_Y10_CbCr10  = (0x04),    /*!< Not supported parameter (YC separate output, Y=10bit, C=10bit) */
+    VIN_OUTPUT_Y10         = (0x05),    /*!< Not supported parameter (10bit Gray scale) */
+    VIN_OUTPUT_Y10_CbCr8   = (0x06),    /*!< Not supported parameter (YC separate output, Y=10bit, C=8bit) */
+    VIN_OUTPUT_ARGB8888    = (0x10),    /*!< Not supported parameter (ARGB8888) */
+    VIN_OUTPUT_XRGB8888    = (0x11),    /*!< Not supported parameter (XRGB8888) */
+    VIN_OUTPUT_ARGB1555    = (0x12),    /*!< Not supported parameter (ARGB1555) */
+    VIN_OUTPUT_RGB565      = (0x13),    /*!< Not supported parameter (RGB565) */
     VIN_OUTPUT_RAW8        = (0x20),    /*!< RAW8 */
 } e_vin_outputformat_t;
 
-/*! Output Image Endian (for "Vin_Setup_t.Vin_OutputEndian") */
+/*! Output Image Endian */
 typedef enum
 {
-    VIN_OUUPUT_EN_LITTLE = 0,   /*!< Little Endian */
+    VIN_OUTPUT_EN_LITTLE = 0,   /*!< Little Endian */
     VIN_OUTPUT_EN_BIG,          /*!< Big Endian */
 } e_vin_outputendian_t;
 
-/*! Output Data Dithering On or Off (for "Vin_Setup_t.Vin_Dither") */
+/*! Output Data Dithering On or Off (Not supported) */
 typedef enum
 {
-    VIN_DITHER_CUMULATIVE = 0,  /*!< Cumulative Mode */
-    VIN_DITHER_ORDERED,         /*!< Ordered Mode */
+    VIN_DITHER_CUMULATIVE = 0,  /*!< Not supported parameter (Cumulative Mode) */
+    VIN_DITHER_ORDERED,         /*!< Not supported parameter (Ordered Mode) */
 } e_vin_dither_t;
 
-/*! Capture Method (for "Vin_Setup_t.Vin_Interlace") */
+/*! Capture Method */
 typedef enum
 {
     VIN_INTERLACE_ODD = 0,  /*!< Capture Odd field of Interlace data */
@@ -139,33 +131,42 @@ typedef enum
     VIN_PROGRESSIVE,        /*!< Capture Progressive data */
 } e_vin_interlace_t;
 
-/*! Scaling On or OFF (for "Vin_Setup_t.Vin_Scale.Vin_ScaleOn") */
+/*! Scaling On or OFF (Not supported) */
 typedef enum
 {
-    VIN_SCALE_OFF = 0,  /*!< Scaling is Valid */
-    VIN_SCALE_ON,       /*!< Scaling is Invalid */
+    VIN_SCALE_OFF = 0,  /*!< Not supported parameter (Scaling is Valid) */
+    VIN_SCALE_ON,       /*!< Not supported parameter (Scaling is Invalid) */
 } e_vin_scaleon_t;
 
-/*! Scaling Interpolation (for "Vin_Setup_t.Vin_Scale.Vin_Interpolation") */
+/*! Scaling Interpolation (Not supported) */
 typedef enum
 {
-    VIN_BILINEAR = 0,   /*!< Bilinear interpolation */
-    VIN_NEAREST,        /*!< Nearest interpolation */
-    VIN_MULTITAPS,      /*!< Multi taps interpolation */
+    VIN_BILINEAR = 0,   /*!< Not supported parameter (Bilinear interpolation) */
+    VIN_NEAREST,        /*!< Not supported parameter (Nearest interpolation) */
+    VIN_MULTITAPS,      /*!< Not supported parameter (Multi taps interpolation) */
 } e_vin_interpolation_t;
 
-/*! Information Captured Now (for "Vin_Info_type_t.Vin_NowCaptureField") */
+/*! YCbCr422 input data alignment */
 typedef enum
 {
-    VIN_NOW_FIELD_ODD = 0,  /*!< Now capturing Odd field */
-    VIN_NOW_FIELD_EVEN,     /*!< Now capturing Even field */
-} e_vin_nowcapturefield_t;
+    VIN_Y_UPPER = 0,  /*!< Upper bit is Y, lower bit is CbCr */
+    VIN_CB_UPPER,     /*!< Upper bit is CbCr, lower bit is Y */
+} e_vin_input_align_t;
+
+/*! Output data byte swap mode */
+typedef enum
+{
+    VIN_SWAP_OFF = 0,   /*!< Not swap */
+    VIN_SWAP_ON,        /*!< Swap */
+} e_vin_output_swap_t;
 
 /*! MIPI Interrupt Factor */
 typedef enum
 {
-    MIPI_INT_LESS_THAN_WC    = 0x00000001,  /*!< Error interrupt that is generated when the length of payload data of a long packet is less than the WC value. */
-    MIPI_INT_AFIFO_OF        = 0x00000002,  /*!< Error Interrupt that is generated by an overflow of the asynchronous FIFO, which stores the HS data sent from the PHY.*/
+    MIPI_INT_LESS_THAN_WC    = 0x00000001,  /*!< Error interrupt that is generated when the length of payload data
+                                                 of a long packet is less than the WC value. */
+    MIPI_INT_AFIFO_OF        = 0x00000002,  /*!< Error Interrupt that is generated by an overflow of
+                                                 the asynchronous FIFO, which stores the HS data sent from the PHY.*/
     MIPI_INT_VD_START        = 0x00000004,  /*!< Frame start interrupt.*/
     MIPI_INT_VD_END          = 0x00000008,  /*!< Frame end interrupt).*/
     MIPI_INT_SHP_STB         = 0x00000010,  /*!< Short packet reception interrupt. */
@@ -179,8 +180,10 @@ typedef enum
     MIPI_INT_ECC_CRCT_ERR    = 0x00001000,  /*!< ECC 1-bit correction interrupt. */
     MIPI_INT_ULPS_START      = 0x00002000,  /*!< Ultra-low power data transfer start interrupt. */
     MIPI_INT_ULPS_END        = 0x00004000,  /*!< Ultra-low power data transfer end interrupt. */
-    MIPI_INT_ERRSOTHS        = 0x00008000,  /*!< Synchronized SOT (start of transfer) error interrupt during HS reception. */
-    MIPI_INT_ERRSOTSYNCHS    = 0x00010000,  /*!< Non-synchronizable SOT (start of transfer) error interrupt during HS reception. */
+    MIPI_INT_ERRSOTHS        = 0x00008000,  /*!< Synchronized SOT (start of transfer) error interrupt
+                                                 during HS reception. */
+    MIPI_INT_ERRSOTSYNCHS    = 0x00010000,  /*!< Non-synchronizable SOT (start of transfer) error
+                                                 interrupt during HS reception. */
     MIPI_INT_ERRESC          = 0x00020000,  /*!< Escape mode entry error interrupt. */
     MIPI_INT_ERRCONTROL      = 0x00040000,  /*!< PHY control error interrupt. */
     VIN_INT_FIELD2           = 0x00100000,  /*!< Field interrupts. */
@@ -197,18 +200,24 @@ typedef enum
 {
     MIPI_OK             = 0x0000,   /*!< Normal termination. */
     MIPI_STATUS_ERR     = 0x0001,   /*!< An API function is called under unauthorized conditions. */
-    MIPI_PARAM_ERR      = 0x0002,   /*!< A parameter is specified under conditions that are not authorized by the specification. */
+    MIPI_PARAM_ERR      = 0x0002,   /*!< A parameter is specified under conditions that
+                                         are not authorized by the specification. */
 } e_mipi_error_t;
 
 /***********************    For R_VDC_VideoInput       ***********************/
 /*! mipi phy timing struct */
 typedef struct
 {
-    uint16_t mipi_ths_prepare;  /*!< Setting of the duration of the LP-00 state (immediately before entry to the HS-0 state) */
-    uint16_t mipi_ths_settle;   /*!< Setting of the period in which a transition to the HS state is ignored after the TTHS_PREPARE period begins */
-    uint16_t mipi_tclk_prepare; /*!< Setting of the duration of the LP-00 state (immediately before entry to the HS-0) */
-    uint16_t mipi_tclk_settle;  /*!< Setting of the period in which a transition to the HS state is ignored after the TCLK_PREPARE period begins */
-    uint16_t mipi_tclk_miss;    /*!< Setting of the period in which the absence of the clock is detected, and the HS-RX is disabled */
+    uint16_t mipi_ths_prepare;  /*!< Setting of the duration of the LP-00 state
+                                     (immediately before entry to the HS-0 state) */
+    uint16_t mipi_ths_settle;   /*!< Setting of the period in which a transition to the HS state is
+                                     ignored after the TTHS_PREPARE period begins */
+    uint16_t mipi_tclk_prepare; /*!< Setting of the duration of the LP-00 state
+                                     (immediately before entry to the HS-0) */
+    uint16_t mipi_tclk_settle;  /*!< Setting of the period in which a transition to the HS state is
+                                     ignored after the TCLK_PREPARE period begins */
+    uint16_t mipi_tclk_miss;    /*!< Setting of the period in which the absence of the clock is detected,
+                                     and the HS-RX is disabled */
     uint16_t mipi_t_init_slave; /*!< Minimum duration of the INIT state */
 } st_mipi_phy_timing_t;
 
@@ -244,34 +253,36 @@ typedef struct
 
 typedef struct
 {
-    uint8_t  vin_scaleon;           /*!< Scaling On or OFF */
-    uint8_t  vin_interpolation;     /*!< Scaling Interpolation */
-    uint16_t vin_scale_h;           /*!< Horizontal multiple */
-    uint16_t vin_scale_v;           /*!< vertical multiple */
+    uint8_t  vin_scaleon;           /*!< Not supported parameter (Scaling On or OFF) */
+    uint8_t  vin_interpolation;     /*!< Not supported parameter (Scaling Interpolation) */
+    uint16_t vin_scale_h;           /*!< Not supported parameter (Horizontal multiple) */
+    uint16_t vin_scale_v;           /*!< Not supported parameter (vertical multiple) */
 } st_vin_scale_t;
 
 typedef struct
 {
-    uint16_t vin_afterclip_size_x;  /*!< After Area Clip horizontal size */
-    uint16_t vin_afterclip_size_y;  /*!< After Area Clip vertical size */
+    uint16_t vin_afterclip_size_x;  /*!< Not supported parameter (After Area Clip horizontal size) */
+    uint16_t vin_afterclip_size_y;  /*!< Not supported parameter (After Area Clip vertical size) */
 } st_vin_afterclip_t;
 
 typedef struct
 {
-    st_vin_preclip_t   vin_preclip;     /*!< Pre Area Clip Parameter */
-    st_vin_scale_t     vin_scale;       /*!< Scale Parameter */
-    st_vin_afterclip_t vin_afterclip;   /*!< After Area Clip Parameter */
-    uint8_t         vin_yuv_clip;       /*!< YUV Range Clip Parameter */
-    uint8_t         vin_lut;            /*!< LUT Conversion On or OFF */
-    uint8_t         vin_inputformat;    /*!< Input Image Format */
-    uint8_t         vin_outputformat;   /*!< Output Image Format */
-    uint8_t         vin_outputendian;   /*!< Output Data Endian*/
-    uint8_t         vin_dither;         /*!< (for RGB565 or ARGB1555)Output Data Dithering On or Off */
-    uint8_t         vin_interlace;      /*!< (for Interlace input)Capture Method */
-    uint8_t         vin_alpha_val8;     /*!< (for ARGB8888)Alpha Value */
-    uint8_t         vin_alpha_val1;     /*!< (for ARGB1555)Alpha Value */
-    uint16_t        vin_stride;         /*!< Stride (byte) */
-    uint16_t        vin_ycoffset;       /*!< (for YC separate output)Address Offset Value */
+    st_vin_preclip_t   vin_preclip;        /*!< Pre Area Clip Parameter */
+    st_vin_scale_t     vin_scale;          /*!< Not supported parameter */
+    st_vin_afterclip_t vin_afterclip;      /*!< Not supported parameter */
+    uint8_t            vin_yuv_clip;       /*!< Not supported parameter */
+    uint8_t            vin_lut;            /*!< Not supported parameter */
+    uint8_t            vin_inputformat;    /*!< Input Image Format */
+    uint8_t            vin_outputformat;   /*!< Output Image Format */
+    uint8_t            vin_outputendian;   /*!< Output Data Endian*/
+    uint8_t            vin_dither;         /*!< Not supported parameter */
+    uint8_t            vin_interlace;      /*!< (for Interlace input)Capture Method */
+    uint8_t            vin_alpha_val8;     /*!< Not supported parameter */
+    uint8_t            vin_alpha_val1;     /*!< Not supported parameter */
+    uint16_t           vin_stride;         /*!< Stride (byte) */
+    uint32_t           vin_ycoffset;       /*!< (for YC separate output)Address Offset Value */
+    e_vin_input_align_t  vin_input_align;  /*!< YCbCr422 input data alignment */
+    e_vin_output_swap_t  vin_output_swap;  /*!< Output data byte swap mode */
 } st_vin_setup_t;
 
 /* Vin Information Struct */
@@ -291,6 +302,7 @@ Exported global functions (to be accessed by other files)
 ******************************************************************************/
 
 /**************************************************************************//**
+ * @fn          R_MIPI_Initialize
  * @brief       MIPI driver initialize
  *
  *              Description:<br>
@@ -302,6 +314,7 @@ Exported global functions (to be accessed by other files)
 void R_MIPI_Initialize(void (* const init_func)(uint32_t), const uint32_t user_num);
 
 /**************************************************************************//**
+ * @fn          R_MIPI_Open
  * @brief       MIPI driver open
  *
  *              Description:<br>
@@ -315,6 +328,7 @@ void R_MIPI_Initialize(void (* const init_func)(uint32_t), const uint32_t user_n
 e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data);
 
 /**************************************************************************//**
+ * @fn          R_MIPI_Close
  * @brief       MIPI driver close
  *
  *              Description:<br>
@@ -331,6 +345,7 @@ e_mipi_error_t R_MIPI_Open(const st_mipi_param_t * const mipi_data);
 e_mipi_error_t R_MIPI_Close(void (* const finalize_func)(uint32_t), const uint32_t user_num);
 
 /**************************************************************************//**
+ * @fn          R_MIPI_Setup
  * @brief       MIPI driver VIN setup
  *
  *              Description:<br>
@@ -345,6 +360,7 @@ e_mipi_error_t R_MIPI_Close(void (* const finalize_func)(uint32_t), const uint32
 e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup );
 
 /**************************************************************************//**
+ * @fn          R_MIPI_SetBufferAdr
  * @brief       MIPI driver VIN set buffer
  *
  *              Description:<br>
@@ -358,6 +374,7 @@ e_mipi_error_t R_MIPI_Setup(const st_vin_setup_t * const vin_setup );
 e_mipi_error_t R_MIPI_SetBufferAdr(const uint8_t buffer_no, const uint8_t * const bufferBase);
 
 /**************************************************************************//**
+ * @fn          R_MIPI_InterruptEnable
  * @brief       MIPI driver interruput enable (MIPI and VIN).
  *
  *              Description:<br>
@@ -368,6 +385,7 @@ e_mipi_error_t R_MIPI_SetBufferAdr(const uint8_t buffer_no, const uint8_t * cons
 void R_MIPI_InterruptEnable(const st_mipi_int_t * const param );
 
 /**************************************************************************//**
+ * @fn          R_MIPI_InterruptDisable
  * @brief       MIPI driver interruput disable (MIPI and VIN).
  *
  *              Description:<br>
@@ -378,6 +396,7 @@ void R_MIPI_InterruptEnable(const st_mipi_int_t * const param );
 void R_MIPI_InterruptDisable(void);
 
 /**************************************************************************//**
+ * @fn          R_MIPI_GetInfo
  * @brief       MIPI driver getting registers status.
  *
  *              Description:<br>
@@ -389,6 +408,7 @@ void R_MIPI_InterruptDisable(void);
 e_mipi_error_t R_MIPI_GetInfo(st_vin_info_type_t * infoType);
 
 /**************************************************************************//**
+ * @fn          R_MIPI_CaptureStart
  * @brief       MIPI driver capture start.
  *
  *              Description:<br>
@@ -401,6 +421,7 @@ e_mipi_error_t R_MIPI_GetInfo(st_vin_info_type_t * infoType);
 e_mipi_error_t R_MIPI_CaptureStart(const e_mipi_capture_mode_t captureMode);
 
 /**************************************************************************//**
+ * @fn          R_MIPI_CaptureStop
  * @brief       MIPI driver capture stop.
  *
  *              Description:<br>
@@ -412,6 +433,7 @@ e_mipi_error_t R_MIPI_CaptureStart(const e_mipi_capture_mode_t captureMode);
 e_mipi_error_t R_MIPI_CaptureStop(void);
 
 /**************************************************************************//**
+ * @fn          R_MIPI_InterruptHandler
  * @brief       MIPI driver interrupt handler for MIPI.
  *
  *              Description:<br>
@@ -424,6 +446,7 @@ e_mipi_error_t R_MIPI_CaptureStop(void);
 void R_MIPI_InterruptHandler( uint32_t int_sense );
 
 /**************************************************************************//**
+ * @fn          R_VIN_InterruptHandler
  * @brief       MIPI driver interrupt handler for VIN.
  *
  *              Description:<br>

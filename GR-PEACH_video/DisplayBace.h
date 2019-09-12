@@ -363,6 +363,20 @@ public:
         uint16_t vin_afterclip_size_y;  /*!< After Area Clip vertical size */
     } video_vin_afterclip_t;
 
+    /*! YCbCr422 input data alignment */
+    typedef enum
+    {
+        VIN_Y_UPPER = 0,  /*!< Upper bit is Y, lower bit is CbCr */
+        VIN_CB_UPPER,     /*!< Upper bit is CbCr, lower bit is Y */
+    } video_vin_input_align_t;
+
+    /*! Output data byte swap mode */
+    typedef enum
+    {
+        VIN_SWAP_OFF = 0,   /*!< Not swap */
+        VIN_SWAP_ON,        /*!< Swap */
+    } video_vin_output_swap_t;
+
     typedef struct {
         video_vin_preclip_t   vin_preclip;     /*!< Pre Area Clip Parameter */
         video_vin_scale_t     vin_scale;       /*!< Scale Parameter */
@@ -377,9 +391,10 @@ public:
         uint8_t         vin_alpha_val8;     /*!< (for ARGB8888)Alpha Value */
         uint8_t         vin_alpha_val1;     /*!< (for ARGB1555)Alpha Value */
         uint16_t        vin_stride;         /*!< Stride (byte) */
-        uint16_t        vin_ycoffset;       /*!< (for YC separate output)Address Offset Value */
+        uint32_t        vin_ycoffset;       /*!< (for YC separate output)Address Offset Value */
+        video_vin_input_align_t  vin_input_align;  /*!< YCbCr422 input data alignment */
+        video_vin_output_swap_t  vin_output_swap;  /*!< Output data byte swap mode */
     } video_vin_setup_t;
-
 
     /** Constructor method of display base object
      */
