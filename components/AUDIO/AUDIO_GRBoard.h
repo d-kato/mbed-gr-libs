@@ -70,7 +70,7 @@ public:
     }
 };
 
-#elif defined(TARGET_RZ_A2M_EVB)
+#elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
 
 #include "mbed.h"
 #include "WM8978_RBSP.h"

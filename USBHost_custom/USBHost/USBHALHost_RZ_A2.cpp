@@ -22,7 +22,7 @@
 #include "pinmap.h"
 
 /**** User Selection ****/
-#if defined(TARGET_RZ_A2M_EVB)
+#if defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
 #define USB_HOST_CH        1
 #elif defined(TARGET_RZ_A2M_SBEV)
 #define USB_HOST_CH        0

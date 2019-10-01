@@ -157,7 +157,7 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     ThisThread::sleep_for(10 + 1);
     rstb = 1;
     ThisThread::sleep_for(1 + 1);
-  #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
+  #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
     PinName cmos_camera_pin[11] = {
         /* data pin */
         PE_1, PE_2, PE_3, PE_4, PE_5, PE_6, PH_0, PH_1,

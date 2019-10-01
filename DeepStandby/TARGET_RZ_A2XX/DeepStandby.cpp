@@ -19,7 +19,7 @@
 
 #include "DeepStandby.h"
 
-#if defined(TARGET_RZ_A2M_EVB)
+#if defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
 #define CANCEL_SRC_BIT_BUTTON0  (1 << 11) // PJ_1
 #define CANCEL_SRC_BIT_BUTTON1  (1 << 8)  // NMI
 #elif defined(TARGET_RZ_A2M_SBEV)

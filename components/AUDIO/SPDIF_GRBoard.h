@@ -24,7 +24,7 @@
 #ifndef MBED_SPDIF_GRBOARD_H
 #define MBED_SPDIF_GRBOARD_H
 
-#if defined(TARGET_RZ_A2M_EVB)
+#if defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
 
 #include "mbed.h"
 #include "SPDIF_RBSP.h"
