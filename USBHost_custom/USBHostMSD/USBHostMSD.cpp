@@ -277,6 +277,10 @@ int USBHostMSD::SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t 
     }
 
     // status stage
+    uint8_t wk_cmd0 = 0;
+    if (cmd) {
+        wk_cmd0 = cmd[0];
+    }
 #if defined(TARGET_RZ_A2XX)
     p_csw->Signature = 0;
     USB_DBG("Read CSW");
@@ -291,13 +295,13 @@ int USBHostMSD::SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t 
     USB_DBG("recv csw: status: %d", p_csw->Status);
 
     // ModeSense?
-    if ((p_csw->Status == 1) && (cmd[0] != 0x03)) {
+    if ((p_csw->Status == 1) && (wk_cmd0 != 0x03)) {
         USB_DBG("request mode sense");
         return SCSIRequestSense();
     }
 
     // perform reset recovery
-    if ((p_csw->Status == 2) && (cmd[0] != 0x03)) {
+    if ((p_csw->Status == 2) && (wk_cmd0 != 0x03)) {
 
         // send Bulk-Only Mass Storage Reset request
         res = host->controlWrite(   dev,
@@ -333,13 +337,13 @@ int USBHostMSD::SCSITransfer(uint8_t * cmd, uint8_t cmd_len, int flags, uint8_t 
     USB_DBG("recv csw: status: %d", csw.Status);
 
     // ModeSense?
-    if ((csw.Status == 1) && (cmd[0] != 0x03)) {
+    if ((csw.Status == 1) && (wk_cmd0 != 0x03)) {
         USB_DBG("request mode sense");
         return SCSIRequestSense();
     }
 
     // perform reset recovery
-    if ((csw.Status == 2) && (cmd[0] != 0x03)) {
+    if ((csw.Status == 2) && (wk_cmd0 != 0x03)) {
 
         // send Bulk-Only Mass Storage Reset request
         res = host->controlWrite(   dev,

@@ -29,9 +29,11 @@
 #endif
 
 #if USB_HOST_CH == 0
+#define USB_MX       USB01
 #define USBX0        USB00
 #define USBHIX_IRQn  USBHI0_IRQn
 #else
+#define USB_MX       USB11
 #define USBX0        USB10
 #define USBHIX_IRQn  USBHI1_IRQn
 #endif
@@ -63,32 +65,36 @@ void USBHALHost::init() {
 
     GIC_DisableIRQ(USBHIX_IRQn);
 
-    CPG.STBCR6.BIT.MSTP60 = 0;
-    dummy_8 = CPG.STBCR6.BYTE;
-    (void)dummy_8;
-
 #if USB_HOST_CH == 0
     pin_function(PC_6, 1); // VBUSEN0
     pin_function(PC_7, 1); // OVRCUR0
+    CPG.STBCR6.BIT.MSTP61 = 0;
+    dummy_8 = CPG.STBCR6.BYTE;
+    CPG.STBREQ3.BYTE &= ~0x03;
+    dummy_8 = CPG.STBREQ3.BYTE;
 #else
     pin_function(PC_0, 1); // VBUSIN1
     pin_function(PC_5, 1); // VBUSEN1
     pin_function(P7_5, 5); // OVRCUR1
+    CPG.STBCR6.BIT.MSTP60 = 0;
+    dummy_8 = CPG.STBCR6.BYTE;
+    CPG.STBREQ3.BYTE &= ~0x0C;
+    dummy_8 = CPG.STBREQ3.BYTE;
 #endif
+    (void)dummy_8;
 
 #if defined(TARGET_RZ_A2M_SBEV)
     USBX0.PHYCLK_CTRL.BIT.UCLKSEL = 0;       /* EXTAL */
 #else
     USBX0.PHYCLK_CTRL.BIT.UCLKSEL = 1;       /* USB_X1 */
 #endif
-    USBX0.USBCTR.BIT.PLL_RST = 1;
-    wait_ms(1);
-    USBX0.PHYIF_CTRL.BIT.FIXPHY = 0;
-    wait_ms(1);
-    USBX0.USBCTR.BIT.PLL_RST = 0;
-    wait_ms(1);
 
-    USBX0.COMMCTRL.BIT.OTG_PERI = 0; // Host mode
+    USBX0.PHYIF_CTRL.LONG = 0x00000000;
+    USBX0.COMMCTRL.BIT.OTG_PERI = 0;        /* 0 : Host, 1 : Peri */
+    USB_MX.LPSTS.WORD   |= 0x4000u;
+    USBX0.USBCTR.LONG = 0x00000000;
+    wait_ms(1);
+    USBX0.LINECTRL1.LONG = 0;
 
     USBX0.HCCONTROL.LONG       = 0; // HARDWARE RESET
     USBX0.HCCONTROLHEADED.LONG = 0; // Initialize Control list head to Zero
