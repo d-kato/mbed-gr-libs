@@ -50,7 +50,10 @@ extern "C" {
  Typedefs
 *************************************************************************/
 
+#if(1) /* mbed */
+#else  /* not mbed */
 typedef void *      pthread_attr_t;     /**< unsupported */
+#endif /* end mbed */
 
 union sigval
 {
