@@ -75,7 +75,7 @@ bool AlarmTimer::set(time_t seconds) {
     RTC_BCNT1.BCNT2AER.WORD = 0x00FF;
     RTC_BCNT1.BCNT3AER.BYTE = 0xFF;
 
-    wait_ms(4);
+    ThisThread::sleep_for(4);
 
     RTC_BCNT1.RSR.BIT.AF = 0;
     RTC_BCNT1.RCR1.BIT.AIE = 1;

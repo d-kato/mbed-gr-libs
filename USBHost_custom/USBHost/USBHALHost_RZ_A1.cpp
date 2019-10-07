@@ -54,7 +54,7 @@ void USBHALHost::init() {
     ohciwrapp_reg_w(OHCI_REG_BULKHEADED, 0);    // Initialize Bulk list head to Zero
 
     // Wait 100 ms before apply reset
-    wait_ms(100);
+    ThisThread::sleep_for(100);
 
     // software reset
     ohciwrapp_reg_w(OHCI_REG_COMMANDSTATUS, OR_CMD_STATUS_HCR);
@@ -82,7 +82,7 @@ void USBHALHost::init() {
     // Check for any connected devices
     if (ohciwrapp_reg_r(OHCI_REG_RHPORTSTATUS1) & OR_RH_PORT_CCS) {
         //Device connected
-        wait_ms(150);
+        ThisThread::sleep_for(150);
         USB_DBG("Device connected (%08x)\n\r", ohciwrapp_reg_r(OHCI_REG_RHPORTSTATUS1));
         deviceConnected(0, 1, ohciwrapp_reg_r(OHCI_REG_RHPORTSTATUS1) & OR_RH_PORT_LSDA);
     }
@@ -252,7 +252,7 @@ void USBHALHost::UsbIrqhandler() {
                     if (ohciwrapp_reg_r(OHCI_REG_RHPORTSTATUS1) & OR_RH_PORT_CCS) {
 
                         // wait 150ms to avoid bounce
-                        wait_ms(150);
+                        ThisThread::sleep_for(150);
 
                         //Hub 0 (root hub), Port 1 (count starts at 1), Low or High speed
                         data = ohciwrapp_reg_r(OHCI_REG_RHPORTSTATUS1) & OR_RH_PORT_LSDA;

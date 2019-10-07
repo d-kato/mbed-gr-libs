@@ -62,7 +62,7 @@ public:
     void Reset(void) {
         if (p_touch_reset != NULL) {
             *p_touch_reset = 0;
-            wait_ms(1);
+            ThisThread::sleep_for(1);
             *p_touch_reset = 1;
         }
     }

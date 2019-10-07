@@ -93,18 +93,18 @@ void USBHALHost::init() {
     USBX0.COMMCTRL.BIT.OTG_PERI = 0;        /* 0 : Host, 1 : Peri */
     USB_MX.LPSTS.WORD   |= 0x4000u;
     USBX0.USBCTR.LONG = 0x00000000;
-    wait_ms(1);
+    ThisThread::sleep_for(1);
     USBX0.LINECTRL1.LONG = 0;
 
     USBX0.HCCONTROL.LONG       = 0; // HARDWARE RESET
     USBX0.HCCONTROLHEADED.LONG = 0; // Initialize Control list head to Zero
     USBX0.HCBULKHEADED.LONG    = 0; // Initialize Bulk list head to Zero
 
-    wait_ms(1);
+    ThisThread::sleep_for(1);
     USBX0.HCRHPORTSTATUS1.LONG = 0x00000100;
 
     // Wait 100 ms before apply reset
-    wait_ms(100);
+    ThisThread::sleep_for(100);
 
     // software reset
     USBX0.HCCOMMANDSTATUS.LONG = OR_CMD_STATUS_HCR;
@@ -141,7 +141,7 @@ void USBHALHost::init() {
     // Check for any connected devices
     if (USBX0.HCRHPORTSTATUS1.LONG & OR_RH_PORT_CCS) {
         //Device connected
-        wait_ms(150);
+        ThisThread::sleep_for(150);
         USB_DBG("Device connected (%08x)\n\r", USBX0.HCRHPORTSTATUS1.LONG);
         deviceConnected(0, 1, USBX0.HCRHPORTSTATUS1.LONG & OR_RH_PORT_LSDA);
     }

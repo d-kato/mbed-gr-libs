@@ -721,7 +721,7 @@ int32_t sddev_power_on(int32_t sd_port)
 
     /* ---- Wait for  SD Wake up ---- */
 #if(1) // mbed
-    wait_ms(SDHI_PRV_POWERON_TIME);
+    osDelay(SDHI_PRV_POWERON_TIME);
 #else
     R_OS_TaskSleep(SDHI_PRV_POWERON_TIME);
 #endif
@@ -1039,7 +1039,7 @@ int32_t sddev_int_wait(int32_t sd_port, int32_t time)
     /* interrupt generated? */
     ret = sd_check_int(sd_port);
     while ((ret == SD_ERR) && (waittime > 0uL)) {
-        wait_ms(SDHI_PRV_1MSEC);
+        osDelay(SDHI_PRV_1MSEC);
         waittime--;
 
         /* interrupt generated? */
@@ -1194,7 +1194,7 @@ int32_t sddev_wait_dma_end(int32_t sd_port, int32_t cnt)
     ret = sd_check_int_dm(sd_port);
     while ((ret == SD_ERR) && (waittime > 0uL))
     {
-        wait_ms(SDHI_PRV_1MSEC);
+        osDelay(SDHI_PRV_1MSEC);
         waittime--;
 
         /* interrupt generated? */

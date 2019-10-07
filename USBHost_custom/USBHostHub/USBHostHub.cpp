@@ -130,7 +130,7 @@ bool USBHostHub::connect(USBDeviceConnected * dev)
         for (uint8_t j = 1; j <= nb_port; j++) {
             setPortFeature(PORT_POWER_FEATURE, j);
         }
-        wait_ms(buf[5]*2);
+        ThisThread::sleep_for(buf[5]*2);
 
         host->interruptRead(dev, int_in, buf, 1, false);
         dev_connected = true;
