@@ -99,20 +99,31 @@ void DeepStandby::SetDeepStandbyDirect(cancel_src_direct_t *src)
     //    this processing after the last write to the on-chip dataretention RAM.
     L1C_CleanInvalidateDCacheAll();  // Clean and invalidate the whole data cache.
 
-    // On-Chip Data Retention RAM   Page 1 of bank 0
-    dummy_32 = *((uint32_t *)0x20004000);  // Read
-    *((uint32_t *)0x20004000) = dummy_32;  // Write
-
-    // On-Chip Data Retention RAM   Page 2 of bank 0
-    dummy_32 = *((uint32_t *)0x20008000);  // Read
-    *((uint32_t *)0x20008000) = dummy_32;  // Write
-
-    // On-Chip Data Retention RAM   Page 3 of bank 0
-    dummy_32 = *((uint32_t *)0x20010000);  // Read
-    *((uint32_t *)0x20010000) = dummy_32;  // Write
+    if ((src->rramkp & 0x01) != 0) {
+        // On-Chip Data Retention RAM   Page 0 of bank 0
+        dummy_32 = *((uint32_t *)0x20000000);  // Read
+        *((uint32_t *)0x20000000) = dummy_32;  // Write
+    }
+    if ((src->rramkp & 0x02) != 0) {
+        // On-Chip Data Retention RAM   Page 1 of bank 0
+        dummy_32 = *((uint32_t *)0x20004000);  // Read
+        *((uint32_t *)0x20004000) = dummy_32;  // Write
+    }
+    if ((src->rramkp & 0x04) != 0) {
+        // On-Chip Data Retention RAM   Page 2 of bank 0
+        dummy_32 = *((uint32_t *)0x20008000);  // Read
+        *((uint32_t *)0x20008000) = dummy_32;  // Write
+    }
+    if ((src->rramkp & 0x08) != 0) {
+        // On-Chip Data Retention RAM   Page 3 of bank 0
+        dummy_32 = *((uint32_t *)0x20010000);  // Read
+        *((uint32_t *)0x20010000) = dummy_32;  // Write
+    }
 
     L1C_CleanDCacheAll();  // Clean the whole data cache.
 
+#if(0)
+    // type (a)
     // 6. Set the STBY and DEEP bits in the STBCR1 register to 1, and then read this register.
     CPG.STBCR1 = CPG_STBCR1_DEEP | CPG_STBCR1_STBY; // deep standby mode
     dummy_8 = CPG.STBCR1;
@@ -126,6 +137,22 @@ void DeepStandby::SetDeepStandbyDirect(cancel_src_direct_t *src)
     //    is not notified of interrupts other than NMIs. Then, read the ICCICR register.
     INTC.ICCICR = 0;
     dummy_32 = INTC.ICCICR;
+#else
+    // type (b)
+    // 6. Clear the flag in the DSFR register.
+    dummy_16 = CPG.DSFR;
+    CPG.DSFR = 0;
+    dummy_16 = CPG.DSFR;
+
+    // 7. Set the CPU interface control register (ICCICR) of the interrupt controller to 0 so that the CPU
+    //    is not notified of interrupts other than NMIs. Then, read the ICCICR register.
+    INTC.ICCICR = 0;
+    dummy_32 = INTC.ICCICR;
+
+    // 8. Set the STBY and DEEP bits in the STBCR1 register to 1, and then read this register.
+    CPG.STBCR1 = CPG_STBCR1_DEEP | CPG_STBCR1_STBY; // deep standby mode
+    dummy_8 = CPG.STBCR1;
+#endif
 
     // Compiler warning measures
     (void)dummy_32;

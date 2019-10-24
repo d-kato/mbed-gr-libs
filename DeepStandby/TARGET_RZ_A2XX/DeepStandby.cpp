@@ -43,7 +43,7 @@ void DeepStandby::SetDeepStandbySimple(cancel_src_simple_t *src)
         return;
     }
 
-    src_direct.rramkp   = 0x0E;    // RRAMKP1, RRAMKP2, RRAMKP3
+    src_direct.rramkp   = 0x0F;    // RRAMKP0, RRAMKP1, RRAMKP2, RRAMKP3
     src_direct.dsssr    = 0x0000;
     src_direct.dsesr    = 0x0000;
     src_direct.usbdsssr = 0x0000;
@@ -109,17 +109,26 @@ void DeepStandby::SetDeepStandbyDirect(cancel_src_direct_t *src)
     //    this processing after the last write to the on-chip dataretention RAM.
     L1C_CleanInvalidateDCacheAll();  // Clean and invalidate the whole data cache.
 
-    // On-Chip Data Retention RAM   Page 1
-    dummy_32 = *((uint32_t *)0x80004000);  // Read
-    *((uint32_t *)0x80004000) = dummy_32;  // Write
-
-    // On-Chip Data Retention RAM   Page 2
-    dummy_32 = *((uint32_t *)0x80008000);  // Read
-    *((uint32_t *)0x80008000) = dummy_32;  // Write
-
-    // On-Chip Data Retention RAM   Page 3
-    dummy_32 = *((uint32_t *)0x80010000);  // Read
-    *((uint32_t *)0x80010000) = dummy_32;  // Write
+    if ((src->rramkp & 0x01) != 0) {
+        // On-Chip Data Retention RAM   Page 1
+        dummy_32 = *((uint32_t *)0x80000000);  // Read
+        *((uint32_t *)0x80000000) = dummy_32;  // Write
+    }
+    if ((src->rramkp & 0x02) != 0) {
+        // On-Chip Data Retention RAM   Page 1
+        dummy_32 = *((uint32_t *)0x80004000);  // Read
+        *((uint32_t *)0x80004000) = dummy_32;  // Write
+    }
+    if ((src->rramkp & 0x04) != 0) {
+        // On-Chip Data Retention RAM   Page 2
+        dummy_32 = *((uint32_t *)0x80008000);  // Read
+        *((uint32_t *)0x80008000) = dummy_32;  // Write
+    }
+    if ((src->rramkp & 0x08) != 0) {
+        // On-Chip Data Retention RAM   Page 3
+        dummy_32 = *((uint32_t *)0x80010000);  // Read
+        *((uint32_t *)0x80010000) = dummy_32;  // Write
+    }
 
     L1C_CleanDCacheAll();  // Clean the whole data cache.
 
