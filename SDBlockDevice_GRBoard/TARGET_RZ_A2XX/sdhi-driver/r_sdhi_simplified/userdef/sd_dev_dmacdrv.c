@@ -42,6 +42,7 @@ Includes   <System Includes> , "Project Includes"
 #include "r_typedefs.h"
 #if(1) // mbed
 #include "cpg_iodefine.h"
+#include "r_mmu_lld.h"
 #else
 #include "r_mmu_lld_rza2m.h"
 #include "r_stb_lld_rza2m.h"
@@ -87,10 +88,7 @@ int32_t sd_DMAC_PeriReqInit(int32_t sd_port, uint32_t buff, int32_t dir)
 {
     st_sdhndl_t *p_hndl;
     uint32_t    paddr;
-#if(1) /* mbed */
-#else
     e_mmu_err_t e_mmu_err;
-#endif
 
     if ((0 != sd_port) && (1 != sd_port))
     {
@@ -121,10 +119,6 @@ int32_t sd_DMAC_PeriReqInit(int32_t sd_port, uint32_t buff, int32_t dir)
     }
 
     /* W (DM_DTRAN_ADDR, "address") */
-#if(1) /* mbed */
-    paddr = buff;
-    SD_OUTP(p_hndl, DM_DTRAN_ADDR, paddr);
-#else
     e_mmu_err = R_MMU_VAtoPA(buff, &paddr);
 
     if (MMU_SUCCESS == e_mmu_err)
@@ -136,7 +130,6 @@ int32_t sd_DMAC_PeriReqInit(int32_t sd_port, uint32_t buff, int32_t dir)
     {
         return SD_ERR;
     }
-#endif
 
     return SD_OK;
 }

@@ -36,6 +36,7 @@ Includes   <System Includes> , "Project Includes"
 #include    <r_jcu_api.h>
 #include    <r_jcu_local.h>
 #include    <r_jcu_user.h>
+#include    "r_mmu_lld.h"
 
 /******************************************************************************
 Typedef definitions
@@ -74,7 +75,13 @@ STATIC_INLINE uint8_t  GET_UPPER_BYTE( uint32_t const  value );
 STATIC_INLINE uint8_t  GET_LOWER_BYTE( uint32_t const  value );
 static void JCU_GetRegisterForGetErrorInfo(jcu_detail_error_t *const errorCode);
 
+static uint32_t jcu_mmu_VAtoPA(uint32_t vaddr)
+{
+    uint32_t paddr = vaddr;
+    R_MMU_VAtoPA(vaddr, &paddr);
 
+    return paddr;
+}
 /**************************************************************************//**
 * Function Name: [GET_UPPER_BYTE]
 * @brief         GET_UPPER_BYTE
@@ -353,11 +360,11 @@ void JCU_SetRegisterForSetDecodePrm(
 
     /* Settings for input jpeg file information */
     /* ->QAC 0306 */
-    JCU.JIFDSA.LONG = (uint32_t)(buffer->source.address);
+    JCU.JIFDSA.LONG = jcu_mmu_VAtoPA((uint32_t)(buffer->source.address));
     /* <-QAC 0306 */
     /* Settings for output image data information */
     /* ->QAC 0306 */
-    JCU.JIFDDA.LONG = (uint32_t)(buffer->destination.address);
+    JCU.JIFDDA.LONG = jcu_mmu_VAtoPA((uint32_t)(buffer->destination.address));
     /* <-QAC 0306 */
     R_SET_REG_BIT_FIELD( JCU.JIFDDOFST.LONG, DDMW, ((uint32_t)buffer->lineOffset * (uint32_t)(byteSize[decode->decodeFormat])) );
     R_SET_REG_BIT_FIELD( JCU.JIFDADT.LONG, ALPHA, (uint32_t)(decode->alpha) );
@@ -528,14 +535,14 @@ void JCU_SetRegisterForSetEncodePrm(
     R_SET_REG_BIT_FIELD( JCU.JIFECNT.LONG, DINSWAP, buffer->source.swapSetting );
 
     /* ->QAC 0306 */
-    JCU.JIFESA.LONG              = (uint32_t)(buffer->source.address);
+    JCU.JIFESA.LONG              = jcu_mmu_VAtoPA((uint32_t)(buffer->source.address));
     /* <-QAC 0306 */
 
     /* Settings for output image data information */
     R_SET_REG_BIT_FIELD( JCU.JIFECNT.LONG, JOUTSWAP, buffer->destination.swapSetting );
 
     /* ->QAC 0306 */
-    JCU.JIFEDA.LONG = (uint32_t)(buffer->destination.address);
+    JCU.JIFEDA.LONG = jcu_mmu_VAtoPA((uint32_t)(buffer->destination.address));
     /* <-QAC 0306 */
 
     encodeFormatTemp = encode->encodeFormat;

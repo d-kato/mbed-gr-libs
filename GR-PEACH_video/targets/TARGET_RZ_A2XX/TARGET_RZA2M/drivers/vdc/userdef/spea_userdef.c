@@ -32,7 +32,7 @@
 Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
 #include    "r_typedefs.h"
-#include    "mmu_init.h"
+#include    "r_mmu_lld.h"
 #include    "r_spea.h"
 #include    "r_spea_user.h"
 
@@ -60,10 +60,15 @@ Private global variables and functions
  *****************************************************************************/
 uint32_t R_SPEA_CPUVAddrToSysPAddr(uint32_t vaddr)
 {
-    uint32_t ret;
+    e_mmu_err_t ret;
+    uint32_t  paddress = 0;
 
-    ret = R_MMU_VAtoPA(vaddr);
-    return ret;
+    ret = R_MMU_VAtoPA(vaddr, &paddress);
+    if( MMU_SUCCESS != ret)
+    {
+        paddress = 0;
+    }
+    return paddress;
 }   /* End of function R_SPEA_CPUVAddrToSysPAddr() */
 
 

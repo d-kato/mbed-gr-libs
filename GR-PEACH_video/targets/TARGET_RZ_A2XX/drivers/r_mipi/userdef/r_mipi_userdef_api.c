@@ -39,7 +39,7 @@ Includes   <System Includes> , "Project Includes"
 #include "pinmap.h"
 #include "r_mipi_api.h"
 #include "r_mipi_user.h"
-#include "mmu_init.h"
+#include "r_mmu_lld.h"
 
 /******************************************************************************
 Macro definitions
@@ -69,10 +69,15 @@ Private global variables and functions
 **********************************************************************/
 uint32_t R_MIPI_CPUVAddrToSysPAddr(uint32_t vaddr)
 {
-    uint32_t ret;
+    e_mmu_err_t ret;
+    uint32_t  paddress = 0;
 
-    ret = R_MMU_VAtoPA(vaddr);
-    return ret;
+    ret = R_MMU_VAtoPA(vaddr, &paddress);
+    if( MMU_SUCCESS != ret)
+    {
+        paddress = 0;
+    }
+    return paddress;
 }   /* End of function R_MIPI_CPUVAddrToSysPAddr() */
 
 /**********************************************************************

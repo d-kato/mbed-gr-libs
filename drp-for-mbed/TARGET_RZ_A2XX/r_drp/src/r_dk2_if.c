@@ -47,6 +47,7 @@ Includes <System Includes> , "Project Includes"
 #include "cmsis.h"
 #include "cmsis_os.h"
 #include "mbed_critical.h"
+#include "r_mmu_lld.h"
 #else
 #include "iodefine.h"
 #include "r_mmu_lld_rza2m.h"
@@ -510,22 +511,14 @@ int32_t R_DK2_Load(const void *const pconfig, const uint8_t top_tiles, const uin
     {
         uint32_t paddr;
 
-#if(1) /* for mbed */
-        paddr = (uint32_t)pu64config;
-#else
         R_MMU_VAtoPA((uint32_t)pu64config, &paddr);
-#endif
         result = R_DK2_CORE_PreLoad(tile_num_dat, top_tiles, paddr, u64config_num * 8, (0 != del_zero_dat), context_dat, state_dat, work_uc, &id);
         if (R_DK2_SUCCESS != result)
         {
             goto func_end;
         }
     
-#if(1) /* for mbed */
-        paddr = (uint32_t)&work_load[tile_pos][0];
-#else
         R_MMU_VAtoPA((uint32_t)&work_load[tile_pos][0], &paddr);
-#endif
         result = R_DK2_CORE_Load(id, top_tiles, tile_pattern, state_dat, paddr, &loaded_id[0]);
         if (R_DK2_SUCCESS != result)
         {
@@ -1130,11 +1123,7 @@ int32_t R_DK2_Start(const uint8_t id, const void *const pparam, const uint32_t s
     {
         uint32_t paddr;
 
-#if(1) /* for mbed */
-        paddr = (uint32_t)pparam;
-#else
         R_MMU_VAtoPA((uint32_t)pparam, &paddr);
-#endif
         result = R_DK2_CORE_PreStart(id, work_uc, paddr, size);
         if (R_DK2_SUCCESS != result)
         {
@@ -1153,11 +1142,7 @@ int32_t R_DK2_Start(const uint8_t id, const void *const pparam, const uint32_t s
     {
         uint32_t paddr;
 
-#if(1) /* for mbed */
-        paddr = (uint32_t)&work_start[tile_pos][0];
-#else
         R_MMU_VAtoPA((uint32_t)&work_start[tile_pos][0], &paddr);
-#endif
         result = R_DK2_CORE_Start(id, paddr);
         if (R_DK2_SUCCESS != result)
         {

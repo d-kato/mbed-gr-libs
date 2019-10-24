@@ -39,18 +39,9 @@
 #define SD_SECTOR_SIZE      (512)
 #define SD_RW_BUFF_SIZE     (1 * 1024)
 
-#if defined(__ICCARM__)
-#pragma data_alignment=32
-static uint8_t sd_work_hndl_buff[SD_SIZE_OF_INIT]@ ".mirrorram";
-#pragma data_alignment=32
-static uint8_t sd_work_rw_buff[SD_RW_BUFF_SIZE]@ ".mirrorram";
-#pragma data_alignment=32
-static uint8_t sd_work_buff[SD_SECTOR_SIZE];
-#else
 static uint8_t sd_work_hndl_buff[SD_SIZE_OF_INIT]__attribute((section("NC_BSS"),aligned(32)));
 static uint8_t sd_work_rw_buff[SD_RW_BUFF_SIZE]__attribute((section("NC_BSS"),aligned(32)));
 static uint8_t sd_work_buff[SD_SECTOR_SIZE]__attribute((aligned(32)));
-#endif
 
 static const uint32_t sd_base_addr[2] = {
      SD_CFG_IP0_BASE

@@ -21,18 +21,37 @@
 * Copyright (C) 2017 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
-* File Name : mmu_init.h
+* File Name : r_mmu_lld.h
 * $Rev: 175 $
 * $Date:: 2017-12-22 19:13:06 +0900#$
 * Description :
 ******************************************************************************/
-#ifndef __MMU_INIT_H
-#define __MMU_INIT_H
+#ifndef __MMU_LIB_H
+#define __MMU_LIB_H
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
+/******************************************************************************
+Typedef definitions
+******************************************************************************/
+typedef enum mmu_err
+{
+    MMU_SUCCESS=0,               /*!< Operation successfully completed */
+    MMU_ERR_OVERFLOW=(-1),       /*!< Address overflow (VA or PA) */
+    MMU_ERR_TRANSLATION=(-2),    /*!< Can not obtain physical address of virtual address */
+} e_mmu_err_t;
 
 /******************************************************************************
 Functions Prototypes
 ******************************************************************************/
-extern uint32_t R_MMU_VAtoPA( uint32_t address );
+extern e_mmu_err_t R_MMU_VAtoPA( uint32_t vaddress, uint32_t * paddress );
 
-#endif /* __MMU_INIT_H */
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* __MMU_LIB_H */
 /* End of File */
