@@ -72,16 +72,27 @@ Exported global variables (to be accessed by other files)
 ******************************************************************************/
 static const PinMap PinMap_DV_INPUT_PIN[] = {
     {P7_2  , 0, 2}, /* DV0_CLK    */
+    {P7_0  , 0, 3}, /* DV0_CLK    */
     {P7_6  , 0, 2}, /* DV0_VSYNC  */
+    {P7_1  , 0, 3}, /* DV0_VSYNC  */
     {P7_7  , 0, 2}, /* DV0_HSYNC  */
+    {P7_3  , 0, 3}, /* DV0_HSYNC  */
     {PA_6  , 0, 2}, /* DV0_DATA7  */
+    {P9_2  , 0, 3}, /* DV0_DATA7  */
     {PA_7  , 0, 2}, /* DV0_DATA6  */
+    {P9_3  , 0, 3}, /* DV0_DATA6  */
     {PB_0  , 0, 2}, /* DV0_DATA5  */
+    {P9_4  , 0, 3}, /* DV0_DATA5  */
     {PB_1  , 0, 2}, /* DV0_DATA4  */
+    {P9_5  , 0, 3}, /* DV0_DATA4  */
     {PB_2  , 0, 2}, /* DV0_DATA3  */
+    {P9_6  , 0, 3}, /* DV0_DATA3  */
     {PB_3  , 0, 2}, /* DV0_DATA2  */
+    {P9_7  , 0, 3}, /* DV0_DATA2  */
     {PB_4  , 0, 2}, /* DV0_DATA1  */
+    {P7_5  , 0, 3}, /* DV0_DATA1  */
     {PB_5  , 0, 2}, /* DV0_DATA0  */
+    {P7_4  , 0, 3}, /* DV0_DATA0  */
     {NC    , NC   , 0}
 };
 
@@ -127,6 +138,8 @@ static const PinMap PinMap_LCD_DISP_PIN[] = {
     {PF_7  , 0, 3}, /* LCD0_DATA0   */
     {PC_3  , 0, 5}, /* LCD0_TCON4   */
     {PC_4  , 0, 5}, /* LCD0_TCON3   */
+    {P7_2  , 0, 3}, /* LCD0_TCON2   */
+    {P7_6  , 0, 3}, /* LCD0_TCON1   */
     {P7_7  , 0, 3}, /* LCD0_TCON0   */
     {PJ_6  , 0, 3}, /* LCD0_CLK     */
     {PJ_7  , 0, 3}, /* LCD0_EXTCLK  */
@@ -621,8 +634,13 @@ drv_graphics_error_t DRV_Graphics_Init( drv_lcd_config_t * drv_lcd_config )
         output.outctrl[VDC_LCD_TCONSIG_POLB]      = NULL;
 
         output.outcnt_lcd_edge  = (vdc_edge_t)drv_lcd_config->lcd_edge;  /* Output phase control of LCD_DATA23 to LCD_DATA0 pin */
+#if defined(TARGET_GR_MANGO)
+        output.out_endian_on    = VDC_ON;                                /* Bit endian change on/off control */
+        output.out_swap_on      = VDC_ON;                                /* B/R signal swap on/off control */
+#else
         output.out_endian_on    = VDC_OFF;                               /* Bit endian change on/off control */
         output.out_swap_on      = VDC_OFF;                               /* B/R signal swap on/off control */
+#endif
         output.out_format       = (vdc_lcd_outformat_t)drv_lcd_config->lcd_outformat;    /* Output format select */
         output.out_frq_sel      = VDC_LCD_PARALLEL_CLKFRQ_1;             /* Clock frequency control */
         output.out_dir_sel      = VDC_LCD_SERIAL_SCAN_FORWARD;           /* Scan direction select */

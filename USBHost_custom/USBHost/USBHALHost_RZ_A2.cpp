@@ -22,7 +22,9 @@
 #include "pinmap.h"
 
 /**** User Selection ****/
-#if defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
+#if defined(TARGET_GR_MANGO)
+#define USB_HOST_CH        0
+#elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
 #define USB_HOST_CH        1
 #elif defined(TARGET_RZ_A2M_SBEV)
 #define USB_HOST_CH        0
@@ -66,8 +68,14 @@ void USBHALHost::init() {
     GIC_DisableIRQ(USBHIX_IRQn);
 
 #if USB_HOST_CH == 0
+#if defined(TARGET_GR_MANGO)
+    pin_function(P1_0, 5); // VBUSEN0
+    pin_function(P1_1, 5); // OVRCUR0
+    pin_function(P5_2, 3); // VBUSIN0
+#else
     pin_function(PC_6, 1); // VBUSEN0
     pin_function(PC_7, 1); // OVRCUR0
+#endif
     CPG.STBCR6.BIT.MSTP61 = 0;
     dummy_8 = CPG.STBCR6.BYTE;
     CPG.STBREQ3.BYTE &= ~0x03;
@@ -83,7 +91,7 @@ void USBHALHost::init() {
 #endif
     (void)dummy_8;
 
-#if defined(TARGET_RZ_A2M_SBEV)
+#if defined(TARGET_GR_MANGO) || defined(TARGET_RZ_A2M_SBEV)
     USBX0.PHYCLK_CTRL.BIT.UCLKSEL = 0;       /* EXTAL */
 #else
     USBX0.PHYCLK_CTRL.BIT.UCLKSEL = 1;       /* USB_X1 */

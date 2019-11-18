@@ -70,6 +70,28 @@ public:
     }
 };
 
+#elif defined(TARGET_GR_MANGO)
+
+#include "mbed.h"
+#include "MAX9867_RBSP.h"
+
+/** AUDIO_GRBoard class
+*
+*/
+class AUDIO_GRBoard : public MAX9867_RBSP {
+public:
+
+    /** Create a audio codec class
+     * 
+     * @param int_level     Interupt priority (SSIF)
+     * @param max_write_num The upper limit of write buffer (SSIF)
+     * @param max_read_num  The upper limit of read buffer (SSIF)
+     */
+    AUDIO_GRBoard(uint8_t int_level = 0x80, int32_t max_write_num = 16, int32_t max_read_num = 16) :
+      MAX9867_RBSP(I2C_SDA, I2C_SCL, PJ_4, PJ_3, PJ_2, PJ_0, int_level, max_write_num, max_read_num) {
+    }
+};
+
 #elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
 
 #include "mbed.h"

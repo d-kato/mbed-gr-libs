@@ -29,7 +29,9 @@ public:
     *
     */
     SDBlockDevice_GRBoard() :
-#if defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
+#if defined(TARGET_GR_MANGO)
+      SDHSBlockDevice(P6_4, NC),
+#elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF)
       SDHSBlockDevice(P5_4, P5_5),
 #elif defined(TARGET_RZ_A2M_SBEV)
       SDHSBlockDevice(P5_4, NC),

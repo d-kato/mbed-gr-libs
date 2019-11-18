@@ -42,7 +42,7 @@ Macro definitions
 
 /***** Audio Clock Source Configurations *****/
 /* AUDIO_X1 :  */
-#define SSIF_AUDIO_X1  (0u)
+#define SSIF_AUDIO_X1  (12000000u)
 
 /* AUDIO_CLK: */
 #define SSIF_AUDIO_CLK (11289600u)

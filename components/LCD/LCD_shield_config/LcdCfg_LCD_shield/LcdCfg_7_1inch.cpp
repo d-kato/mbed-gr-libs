@@ -22,5 +22,3 @@ const DisplayBase::lcd_config_t LcdCfgTbl_7_1inch = {
     , DisplayBase::SIG_POL_NOT_INVERTED                                             /* de_port_polarity     */
 };
 
-
-

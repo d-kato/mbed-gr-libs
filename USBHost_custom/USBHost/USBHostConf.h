@@ -17,7 +17,7 @@
 #ifndef USBHOST_CONF_H
 #define USBHOST_CONF_H
 
-#if defined(TARGET_RZ_A1XX) || defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF) || defined(TARGET_RZ_A2M_SBEV)
+#if defined(TARGET_RZ_A1XX) || defined(TARGET_GR_MANGO) || defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF) || defined(TARGET_RZ_A2M_SBEV)
 
 /*
 * Maximum number of devices that can be connected

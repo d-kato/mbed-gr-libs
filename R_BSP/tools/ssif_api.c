@@ -174,24 +174,60 @@ static void ssif_power_enable(uint32_t ssif_ch) {
 static const PinMap PinMap_SSIF_SCK[] = {
 //   pin      ch     func
     {P9_6   , 0    , 5},
+    {PF_4   , 0    , 5},
+    {PE_3   , 0    , 3},
+    {PB_2   , 1    , 4},
+    {P4_0   , 1    , 4},
+    {PK_0   , 2    , 5},
+    {P9_2   , 2    , 5},
+    {PB_5   , 2    , 4},
+    {P8_7   , 3    , 5},
+    {PJ_4   , 3    , 5},
     {NC     , NC   , 0}
 };
 
 static const PinMap PinMap_SSIF_WS[] = {
 //   pin      ch     func
     {P9_5   , 0    , 5},
+    {PE_4   , 0    , 3},
+    {PF_5   , 0    , 5},
+    {PB_1   , 1    , 4},
+    {P4_3   , 1    , 4},
+    {P9_1   , 2    , 5},
+    {PB_4   , 2    , 4},
+    {PJ_5   , 2    , 5},
+    {P8_6   , 3    , 5},
+    {PJ_3   , 3    , 5},
     {NC     , NC   , 0}
 };
 
 static const PinMap PinMap_SSIF_TxD[] = {
 //   pin      ch     func
     {P9_4   , 0    , 5},
+    {PE_5   , 0    , 3},
+    {PF_6   , 0    , 5},
+    {PB_0   , 1    , 4},
+    {P4_2   , 1    , 4},
+    {PK_1   , 2    , 5},
+    {P9_0   , 2    , 5},
+    {PB_3   , 2    , 4},
+    {P8_5   , 3    , 5},
+    {PJ_2   , 3    , 5},
     {NC     , NC   , 0}
 };
 
 static const PinMap PinMap_SSIF_RxD[] = {
 //   pin      ch     func
     {P9_3   , 0    , 5},
+    {PE_6   , 0    , 3},
+    {PH_2   , 0    , 5},
+    {PA_7   , 1    , 4},
+    {P4_1   , 1    , 4},
+    {PK_1   , 2    , 5},
+    {P9_0   , 2    , 5},
+    {PB_3   , 2    , 4},
+    {P8_4   , 3    , 5},
+    {PJ_0   , 3    , 5},
     {NC     , NC   , 0}
 };
 

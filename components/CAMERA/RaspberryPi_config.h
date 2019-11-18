@@ -21,23 +21,29 @@ public:
         };
         const char RaspberryPi_InitRegTable_2[][3] = {
             {0x01, 0x14, 0x01}, {0x01, 0x28, 0x01}, {0x01, 0x2A, 0x0C}, {0x01, 0x2B, 0x00},
-            {0x01, 0x60, 0x0A}, {0x01, 0x61, 0x28}, {0x01, 0x64, 0x02}, {0x01, 0x65, 0xA8},
-            {0x01, 0x66, 0x0A}, {0x01, 0x67, 0x27}, {0x01, 0x68, 0x02}, {0x01, 0x69, 0xB4},
-            {0x01, 0x6A, 0x06}, {0x01, 0x6B, 0xEB}, {0x01, 0x6C, 0x05}, {0x01, 0x6D, 0x00},
+            {0x01, 0x60, 0x0A}, {0x01, 0x61, 0x28}, {0x01, 0x64, 0x01}, {0x01, 0x65, 0x80},
+            {0x01, 0x66, 0x0B}, {0x01, 0x67, 0xFF}, {0x01, 0x68, 0x02}, {0x01, 0x69, 0x44},
+            {0x01, 0x6A, 0x07}, {0x01, 0x6B, 0xE3}, {0x01, 0x6C, 0x05}, {0x01, 0x6D, 0x40},
             {0x01, 0x6E, 0x04}, {0x01, 0x6F, 0x38}, {0x01, 0x8C, 0x08}, {0x01, 0x8D, 0x08},
             {0x01, 0x74, 0x01}, {0x01, 0x75, 0x01}, {0x01, 0x76, 0x01}, {0x01, 0x77, 0x01},
-            {0x01, 0x57, 0x00}, {0x01, 0x58, 0x01}, {0x01, 0x59, 0xC0}, {0x01, 0x5A, 0x0A},
-            {0x01, 0x5B, 0x8C}, {0x01, 0x1C, 0x01}, {0x01, 0x1D, 0xFF}, {0x01, 0x24, 0x00},
-            {0x01, 0x25, 0xFF}, {0x03, 0x01, 0x05}, {0x03, 0x04, 0x02}, {0x03, 0x05, 0x02},
-            {0x03, 0x06, 0x00}, {0x03, 0x07, 0x3A}, {0x03, 0x09, 0x08}, {0x03, 0x0C, 0x00},
-            {0x03, 0x0D, 0x2A}, {0x01, 0x00, 0x01}
+            {0x01, 0x57, 0x00}, {0x01, 0x5A, 0x0A}, {0x01, 0x5B, 0x28}, {0x01, 0x1C, 0x00},
+            {0x01, 0x1D, 0x57}, {0x01, 0x24, 0x00}, {0x01, 0x25, 0xBF}, {0x03, 0x01, 0x05},
+            {0x03, 0x04, 0x02}, {0x03, 0x05, 0x02}, {0x03, 0x06, 0x00}, {0x03, 0x07, 0x2B},
+            {0x03, 0x09, 0x08}, {0x03, 0x0C, 0x00}, {0x03, 0x0D, 0x2E}, {0x01, 0x00, 0x01}
         };
         int ret;
-#if defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
-        I2C mI2c_(PD_5, PD_4);
-#else
+#if defined(TARGET_GR_MANGO)
         I2C mI2c_(I2C_SDA, I2C_SCL);
+        DigitalOut cam_gpio0(P6_6);
+        DigitalIn  cam_gpio1(P6_7);
+#elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
+        I2C mI2c_(PD_5, PD_4);
+        DigitalOut cam_gpio0(PD_2);
+        DigitalIn  cam_gpio1(PD_3);
 #endif
+        cam_gpio0 = 1;
+        ThisThread::sleep_for(10);
+
         mI2c_.frequency(150000);
 
         for (uint32_t i = 0; i < (sizeof(RaspberryPi_InitRegTable_1) / 3) ; i++) {
@@ -74,16 +80,16 @@ public:
     #define     CAM_MIPI_T_INIT_SLAVE    (0x0000338Fu)  /* Minimum duration of the INIT state */
 
     /* VIN capture setting */
-    #define     CAM_VIN_PRECLIP_START_Y  ( 24u)                 /* Start line  of pre clip area */
-    #define     CAM_VIN_PRECLIP_WIDTH_Y  (480u)                 /* Line width of pre clip area */
-    #define     CAM_VIN_PRECLIP_START_X  (100u)                 /* Start pixel of pre clip area */
-    #define     CAM_VIN_PRECLIP_WIDTH_X  (640u)                 /* Pixel width of pre clip area */
+    #define     CAM_VIN_PRECLIP_START_Y  (  0u)                 /* Start line  of pre clip area */
+    #define     CAM_VIN_PRECLIP_WIDTH_Y  (720u)                 /* Line width of pre clip area */
+    #define     CAM_VIN_PRECLIP_START_X  (  0u)                 /* Start pixel of pre clip area */
+    #define     CAM_VIN_PRECLIP_WIDTH_X  (1280u)                /* Pixel width of pre clip area */
     #define     CAM_VIN_INPUT_YCAL       (DisplayBase::VIN_Y_UPPER)          /* YCbCr422 data alignment */
     #define     CAM_VIN_INPUT_FORMAT     (VIN_INPUT_RAW8)       /* Input image format */
     #define     CAM_VIN_OUTPUT_FORMAT    (VIN_OUTPUT_RAW8)      /* Output image format */
     #define     CAM_VIN_OUTPUT_ENDIAN    (VIN_OUTPUT_EN_LITTLE) /* Output data endian */
     #define     CAM_VIN_OUTPUT_BPSM      (DisplayBase::VIN_SWAP_OFF)         /* Output data byte swap mode */
-    #define     CAM_VIN_OUTPUT_IS        (640u)                 /* Image Stride size */
+    #define     CAM_VIN_OUTPUT_IS        (1280u)                 /* Image Stride size */
 
     void SetMipiConfig(DisplayBase::video_mipi_param_t * p_cfg) {
         memset(p_cfg, 0, sizeof(DisplayBase::video_mipi_param_t));
