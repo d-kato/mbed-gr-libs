@@ -90,14 +90,14 @@
   // lcd-type
   #define GR_PEACH_4_3INCH_SHIELD     (0x0000|LCD_LVDS)
   #define GR_PEACH_7_1INCH_SHIELD     (0x0001|LCD_LVDS)
-  #define RSK_TFT                     (0x0002)
-  #define TFP410PAP                   (0x0003) /* HDMI and DVI */
-  #define TF043HV001A0                (0x0004)
-  #define ATM0430D25                  (0x0005)
-  #define FG040346DSSWBG03            (0x0006)
+  #define GR_PEACH_DISPLAY_SHIELD     (0x0002)
+  #define RSK_TFT                     (0x0003)
+  #define TFP410PAP                   (0x0004) /* HDMI and DVI */
+  #define TF043HV001A0                (0x0005)
+  #define ATM0430D25                  (0x0006)
+  #define FG040346DSSWBG03            (0x0007)
 
   #define GR_PEACH_RSK_TFT            (RSK_TFT|LCD_LVDS)
-  #define GR_PEACH_DISPLAY_SHIELD     (TFP410PAP|LCD_LVDS)
   #define LVDS_TO_HDMI                (TFP410PAP|LCD_LVDS)
   #define DVI_STICK                   (TFP410PAP)
   #define RGB_TO_HDMI                 (TFP410PAP)

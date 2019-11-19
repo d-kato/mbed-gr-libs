@@ -67,7 +67,7 @@ Add the following to your ``mbed_app.json`` file:
 | ATM0430D25                 | ATM0430D25 (40-pin connector)      |
 | FG040346DSSWBG03           | FG040346DSSWBG03 (40-pin connector)|
 | LVDS_TO_HDMI               | RZ/A2M LVDS To HDMI Board          |
-| RZ_A2M_EVB_RSK_TFT         | RZ/A2M RSK TFT APP BOARD           |
+| RSK_TFT                    | RSK TFT APP BOARD                  |
 | DVI_STICK                  | Display Output Board (Included in RZ/A2M Evaluation Board Kit ) |
 | RGB_TO_HDMI                | TFP410PAP (Included in GR-MANGO)   |
 

@@ -94,7 +94,9 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     Display.Graphics_Lcd_Port_Init(lcd_pin, 28);
 #endif
 
-#if ((MBED_CONF_APP_LCD_TYPE & 0x00FF) == TFP410PAP)
+#if (MBED_CONF_APP_LCD_TYPE == GR_PEACH_DISPLAY_SHIELD)
+    /* do nothing */
+#elif ((MBED_CONF_APP_LCD_TYPE & 0x00FF) == TFP410PAP)
     const char send_cmd[3] = {0x08u, 0xbfu, 0x70u};
    #if defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
     I2C mI2c_(PD_5, PD_4);
@@ -112,7 +114,7 @@ static const DisplayBase::lcd_config_t * lcd_port_init(DisplayBase& Display) {
     ThisThread::sleep_for(100);
     lcd_pwon = 1;
     lcd_blon = 1;
-#elif (MBED_CONF_APP_LCD_TYPE == RZ_A2M_EVB_RSK_TFT)
+#elif (MBED_CONF_APP_LCD_TYPE == RSK_TFT)
     lcd_cntrst.period_us(500);
 #else
     DigitalOut lcd_pwon(LCD_PWON_PIN);
