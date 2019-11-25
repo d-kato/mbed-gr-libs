@@ -38,7 +38,7 @@ MAX9867_RBSP::MAX9867_RBSP(PinName sda, PinName scl, PinName sck, PinName ws, Pi
     ssif_cfg.clk_select             = SSIF_CFG_CKS_AUDIO_X1;
     ssif_cfg.multi_ch               = SSIF_CFG_MULTI_CH_1;
     ssif_cfg.data_word              = SSIF_CFG_DATA_WORD_16;
-    ssif_cfg.system_word            = SSIF_CFG_SYSTEM_WORD_32;
+    ssif_cfg.system_word            = SSIF_CFG_SYSTEM_WORD_24;
     ssif_cfg.bclk_pol               = SSIF_CFG_FALLING;
     ssif_cfg.ws_pol                 = SSIF_CFG_WS_LOW;
     ssif_cfg.padding_pol            = SSIF_CFG_PADDING_LOW;

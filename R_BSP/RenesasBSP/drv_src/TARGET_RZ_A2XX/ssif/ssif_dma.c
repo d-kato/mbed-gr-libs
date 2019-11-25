@@ -174,8 +174,21 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
 
                 dma_ch_setup.resource = gb_ssif_dma_tx_resource[ssif_ch];
                 dma_ch_setup.direction = DMA_REQ_DES;
-                dma_ch_setup.dst_width = DMA_UNIT_4;
-                dma_ch_setup.src_width = DMA_UNIT_4;
+                if (p_info_ch->data_word == SSIF_CFG_DATA_WORD_8)
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_1;
+                    dma_ch_setup.src_width = DMA_UNIT_1;
+                }
+                else if (p_info_ch->data_word == SSIF_CFG_DATA_WORD_16)
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_2;
+                    dma_ch_setup.src_width = DMA_UNIT_2;
+                }
+                else
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_4;
+                    dma_ch_setup.src_width = DMA_UNIT_4;
+                }
                 dma_ch_setup.dst_cnt = DMA_ADDR_FIX;
                 dma_ch_setup.src_cnt = DMA_ADDR_INCREMENT;
                 dma_ch_setup.p_aio = p_tx_aio;
@@ -204,8 +217,21 @@ int_t SSIF_InitDMA(ssif_info_ch_t* const p_info_ch)
 
                 dma_ch_setup.resource = gb_ssif_dma_rx_resource[ssif_ch];
                 dma_ch_setup.direction = DMA_REQ_SRC;
-                dma_ch_setup.dst_width = DMA_UNIT_4;
-                dma_ch_setup.src_width = DMA_UNIT_4;
+                if (p_info_ch->data_word == SSIF_CFG_DATA_WORD_8)
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_1;
+                    dma_ch_setup.src_width = DMA_UNIT_1;
+                }
+                else if (p_info_ch->data_word == SSIF_CFG_DATA_WORD_16)
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_2;
+                    dma_ch_setup.src_width = DMA_UNIT_2;
+                }
+                else
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_4;
+                    dma_ch_setup.src_width = DMA_UNIT_4;
+                }
                 dma_ch_setup.src_cnt = DMA_ADDR_FIX;
                 dma_ch_setup.p_aio = p_rx_aio;
                 dma_ch_setup.dst_cnt = DMA_ADDR_INCREMENT;
@@ -453,8 +479,21 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
 
                 dma_ch_setup.resource = gb_ssif_dma_tx_resource[ssif_ch];
                 dma_ch_setup.direction = DMA_REQ_DES;
-                dma_ch_setup.dst_width = DMA_UNIT_4;
-                dma_ch_setup.src_width = DMA_UNIT_4;
+                if (p_info_ch->data_word == SSIF_CFG_DATA_WORD_8)
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_1;
+                    dma_ch_setup.src_width = DMA_UNIT_1;
+                }
+                else if (p_info_ch->data_word == SSIF_CFG_DATA_WORD_16)
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_2;
+                    dma_ch_setup.src_width = DMA_UNIT_2;
+                }
+                else
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_4;
+                    dma_ch_setup.src_width = DMA_UNIT_4;
+                }
                 dma_ch_setup.dst_cnt = DMA_ADDR_FIX;
                 dma_ch_setup.src_cnt = DMA_ADDR_INCREMENT;
                 dma_ch_setup.p_aio = p_tx_aio;
@@ -483,8 +522,21 @@ int_t SSIF_RestartDMA(ssif_info_ch_t* const p_info_ch)
 
                 dma_ch_setup.resource = gb_ssif_dma_rx_resource[ssif_ch];
                 dma_ch_setup.direction = DMA_REQ_SRC;
-                dma_ch_setup.dst_width = DMA_UNIT_4;
-                dma_ch_setup.src_width = DMA_UNIT_4;
+                if (p_info_ch->data_word == SSIF_CFG_DATA_WORD_8)
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_1;
+                    dma_ch_setup.src_width = DMA_UNIT_1;
+                }
+                else if (p_info_ch->data_word == SSIF_CFG_DATA_WORD_16)
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_2;
+                    dma_ch_setup.src_width = DMA_UNIT_2;
+                }
+                else
+                {
+                    dma_ch_setup.dst_width = DMA_UNIT_4;
+                    dma_ch_setup.src_width = DMA_UNIT_4;
+                }
                 dma_ch_setup.dst_cnt = DMA_ADDR_INCREMENT;
                 dma_ch_setup.src_cnt = DMA_ADDR_FIX;
                 dma_ch_setup.p_aio = p_rx_aio;
