@@ -239,6 +239,8 @@ static DisplayBase::graphics_error_t camera_init(DisplayBase& Display, uint16_t 
     OV5642_config camera_cfg;
   #elif MBED_CONF_APP_CAMERA_TYPE == CAMERA_RASPBERRY_PI
     RaspberryPi_config camera_cfg;
+  #elif MBED_CONF_APP_CAMERA_TYPE == CAMERA_RASPBERRY_PI_FISHEYE
+    RaspberryPi_fisheye_config camera_cfg;
   #else
     #error "No camera chosen. Please add 'config.camera-type.value' to your mbed_app.json (see README.md for more information)."
   #endif
