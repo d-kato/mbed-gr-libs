@@ -1,13 +1,13 @@
 
-#ifndef RASPBERRY_PI_FISHEYE_CONFIG_H
-#define RASPBERRY_PI_FISHEYE_CONFIG_H
+#ifndef RASPBERRY_PI_WIDE_ANGLE_CONFIG_H
+#define RASPBERRY_PI_WIDE_ANGLE_CONFIG_H
 
 #include "mbed.h"
 #include "DisplayBace.h"
 #include "r_mipi_api.h"
 
 
-class RaspberryPi_fisheye_config {
+class RaspberryPi_wide_angle_config {
 
 public:
 

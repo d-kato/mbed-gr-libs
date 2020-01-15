@@ -48,15 +48,15 @@ Add the following to your ``mbed_app.json`` file:
 }
 ```
 
-| camera-type "value"        | Description                        |
-|:---------------------------|:-----------------------------------|
-| CAMERA_CVBS                | NTSC signal (only GR-PEACH)        |
-| CAMERA_MT9V111             | MT9V111                            |
-| CAMERA_OV7725              | GR-LYHCEE included camera          |
-| CAMERA_OV5642              | OV5642                             |
-| CAMERA_WIRELESS_CAMERA     | GR-PEACH Wireless/Camera shield (OV7725) |
-| CAMERA_RASPBERRY_PI        | Raspberry Pi camera                |
-| CAMERA_RASPBERRY_PI_FISHEYE| Raspberry Pi camera (fisheye setting) |
+| camera-type "value"           | Description                        |
+|:------------------------------|:-----------------------------------|
+| CAMERA_CVBS                   | NTSC signal (only GR-PEACH)        |
+| CAMERA_MT9V111                | MT9V111                            |
+| CAMERA_OV7725                 | GR-LYHCEE included camera          |
+| CAMERA_OV5642                 | OV5642                             |
+| CAMERA_WIRELESS_CAMERA        | GR-PEACH Wireless/Camera shield (OV7725) |
+| CAMERA_RASPBERRY_PI           | Raspberry Pi camera                |
+| CAMERA_RASPBERRY_PI_WIDE_ANGLE| Raspberry Pi camera (wide-angle)   |
 
 | lcd-type "value"           | Description                        |
 |:---------------------------|:-----------------------------------|
