@@ -58,7 +58,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_resize_nearest[303456];
+extern const uint8_t g_drp_lib_resize_nearest[303456];
 
 #endif /* R_DRP_RESIZE_NEAREST_H */
 

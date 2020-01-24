@@ -64,7 +64,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_affine[589792];
+extern const uint8_t g_drp_lib_affine[589792];
 
 #endif /* R_DRP_AFFINE_H */
 

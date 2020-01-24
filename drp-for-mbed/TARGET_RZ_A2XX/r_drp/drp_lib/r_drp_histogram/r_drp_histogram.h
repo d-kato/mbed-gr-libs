@@ -55,7 +55,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_histogram[79072];
+extern const uint8_t g_drp_lib_histogram[79072];
 
 #endif /* R_DRP_HISTOGRAM_H */
 

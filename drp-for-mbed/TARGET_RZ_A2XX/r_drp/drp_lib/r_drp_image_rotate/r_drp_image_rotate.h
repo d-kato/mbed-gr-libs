@@ -58,7 +58,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_image_rotate[56896];
+extern const uint8_t g_drp_lib_image_rotate[56896];
 
 #endif /* R_DRP_IMAGE_ROTATE_H */
 

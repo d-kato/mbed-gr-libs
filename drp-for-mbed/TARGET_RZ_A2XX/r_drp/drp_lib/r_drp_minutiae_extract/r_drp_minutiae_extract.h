@@ -63,7 +63,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_minutiae_extract[135424];
+extern const uint8_t g_drp_lib_minutiae_extract[135424];
 
 #endif /* R_DRP_MINUTIAE_EXTRACT_H */
 

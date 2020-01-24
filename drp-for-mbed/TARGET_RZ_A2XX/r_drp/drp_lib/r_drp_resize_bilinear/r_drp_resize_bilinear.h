@@ -58,7 +58,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_resize_bilinear[379744];
+extern const uint8_t g_drp_lib_resize_bilinear[379744];
 
 #endif /* R_DRP_RESIZE_BILINEAR_H */
 

@@ -58,7 +58,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_bayer2rgb[92288];
+extern const uint8_t g_drp_lib_bayer2rgb[92288];
 
 #endif /* R_DRP_BAYER2RGB_H */
 

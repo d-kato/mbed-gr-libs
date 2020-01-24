@@ -60,7 +60,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_canny_calculate[126080];
+extern const uint8_t g_drp_lib_canny_calculate[126080];
 
 #endif /* R_DRP_CANNY_CALCULATE_H */
 

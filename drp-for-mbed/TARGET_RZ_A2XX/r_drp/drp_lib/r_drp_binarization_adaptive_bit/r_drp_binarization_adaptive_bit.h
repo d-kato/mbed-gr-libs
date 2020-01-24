@@ -58,7 +58,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_binarization_adaptive_bit[155968];
+extern const uint8_t g_drp_lib_binarization_adaptive_bit[155968];
 
 #endif /* R_DRP_BINARIZATION_ADAPTIVE_BIT_H */
 

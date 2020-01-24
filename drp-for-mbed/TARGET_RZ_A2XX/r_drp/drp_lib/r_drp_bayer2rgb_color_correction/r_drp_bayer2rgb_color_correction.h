@@ -61,7 +61,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_bayer2rgb_color_correction[209408];
+extern const uint8_t g_drp_lib_bayer2rgb_color_correction[209408];
 
 #endif /* R_DRP_BAYER2RGB_COLOR_CORRECTION */
 

@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_sobel[40352];
+extern const uint8_t g_drp_lib_sobel[40352];
 
 #endif /* R_DRP_SOBEL_H */
 

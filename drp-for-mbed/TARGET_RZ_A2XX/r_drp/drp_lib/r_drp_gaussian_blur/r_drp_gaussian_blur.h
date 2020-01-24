@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_gaussian_blur[60992];
+extern const uint8_t g_drp_lib_gaussian_blur[60992];
 
 #endif /* R_DRP_GAUSSIAN_BLUR_H */
 

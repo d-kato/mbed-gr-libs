@@ -58,7 +58,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_unsharp_masking[156512];
+extern const uint8_t g_drp_lib_unsharp_masking[156512];
 
 #endif /* R_DRP_UNSHARP_MASKING_H */
 

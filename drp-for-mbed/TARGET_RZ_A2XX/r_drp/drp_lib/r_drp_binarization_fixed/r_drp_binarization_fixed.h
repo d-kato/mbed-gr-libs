@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_binarization_fixed[16960];
+extern const uint8_t g_drp_lib_binarization_fixed[16960];
 
 #endif /* R_DRP_BINARIZATION_FIXED_H */
 

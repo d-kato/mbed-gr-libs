@@ -55,7 +55,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_argb2grayscale[14368];
+extern const uint8_t g_drp_lib_argb2grayscale[14368];
 
 #endif /* R_DRP_ARGB2GRAYSCALE_H */
 

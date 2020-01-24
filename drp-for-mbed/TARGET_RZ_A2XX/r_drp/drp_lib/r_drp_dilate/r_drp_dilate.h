@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_dilate[56800];
+extern const uint8_t g_drp_lib_dilate[56800];
 
 #endif /* R_DRP_DILATE_H */
 

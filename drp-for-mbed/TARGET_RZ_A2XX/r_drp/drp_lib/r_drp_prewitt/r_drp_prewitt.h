@@ -58,7 +58,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_prewitt[40256];
+extern const uint8_t g_drp_lib_prewitt[40256];
 
 #endif /* R_DRP_PREWITT_H */
 

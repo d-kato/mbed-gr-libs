@@ -55,7 +55,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_gamma_correction[13120];
+extern const uint8_t g_drp_lib_gamma_correction[13120];
 
 #endif /* R_DRP_GAMMA_CORRECTION_H */
 

@@ -81,7 +81,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_find_contours[206688];
+extern const uint8_t g_drp_lib_find_contours[206688];
 
 #endif /* R_DRP_FIND_CONTOURS_H */
 

@@ -88,10 +88,10 @@ r_drp_simple_isp_t;
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_simple_isp_bayer2grayscale_3[201824];
-extern uint8_t g_drp_lib_simple_isp_bayer2grayscale_6[369088];
-extern uint8_t g_drp_lib_simple_isp_bayer2yuv_3[235328];
-extern uint8_t g_drp_lib_simple_isp_bayer2yuv_6[427424];
+extern const uint8_t g_drp_lib_simple_isp_bayer2grayscale_3[201824];
+extern const uint8_t g_drp_lib_simple_isp_bayer2grayscale_6[369088];
+extern const uint8_t g_drp_lib_simple_isp_bayer2yuv_3[235328];
+extern const uint8_t g_drp_lib_simple_isp_bayer2yuv_6[427424];
 
 #endif /* R_DRP_SIMPLE_ISP_H */
 

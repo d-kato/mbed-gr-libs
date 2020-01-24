@@ -59,7 +59,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_cropping[14688];
+extern const uint8_t g_drp_lib_cropping[14688];
 
 #endif /* R_DRP_CROPPING_H */
 

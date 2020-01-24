@@ -59,7 +59,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_laplacian[36544];
+extern const uint8_t g_drp_lib_laplacian[36544];
 
 #endif /* R_DRP_LAPLACIAN_H */
 

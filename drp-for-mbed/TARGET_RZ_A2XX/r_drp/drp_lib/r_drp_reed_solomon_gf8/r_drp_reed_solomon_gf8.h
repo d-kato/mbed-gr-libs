@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_reed_solomon_gf8[120352];
+extern const uint8_t g_drp_lib_reed_solomon_gf8[120352];
 
 #endif /* R_DRP_REED_SOLOMON_GF8_H */
 

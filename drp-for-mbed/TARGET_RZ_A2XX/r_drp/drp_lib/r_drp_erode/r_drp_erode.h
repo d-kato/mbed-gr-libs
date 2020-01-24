@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_erode[60480];
+extern const uint8_t g_drp_lib_erode[60480];
 
 #endif /* R_DRP_ERODE_H */
 

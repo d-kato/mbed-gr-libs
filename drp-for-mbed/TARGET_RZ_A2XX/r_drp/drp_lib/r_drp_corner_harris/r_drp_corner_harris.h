@@ -56,7 +56,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_corner_harris[353088];
+extern const uint8_t g_drp_lib_corner_harris[353088];
 
 #endif /* R_DRP_CORNER_HARRIS_H */
 

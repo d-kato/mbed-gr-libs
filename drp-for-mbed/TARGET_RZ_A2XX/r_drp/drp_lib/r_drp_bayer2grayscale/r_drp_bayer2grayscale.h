@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_bayer2grayscale[62912];
+extern const uint8_t g_drp_lib_bayer2grayscale[62912];
 
 #endif /* R_DRP_BAYER2GRAYSCALE_H */
 

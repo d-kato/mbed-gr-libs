@@ -59,7 +59,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_resize_bilinear_fixed_rgb[202176];
+extern const uint8_t g_drp_lib_resize_bilinear_fixed_rgb[202176];
 
 #endif /* R_DRP_RESIZE_BILINEAR_FIXED_RGB_H */
 

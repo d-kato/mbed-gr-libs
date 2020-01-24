@@ -71,7 +71,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_minutiae_delete[113024];
+extern const uint8_t g_drp_lib_minutiae_delete[113024];
 
 #endif /* R_DRP_MINUTIAE_DELETE_H */
 

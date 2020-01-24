@@ -57,7 +57,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_median_blur[57536];
+extern const uint8_t g_drp_lib_median_blur[57536];
 
 #endif /* R_DRP_MEDIAN_BLUR_H */
 

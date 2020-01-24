@@ -64,7 +64,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_circle_fitting[160160];
+extern const uint8_t g_drp_lib_circle_fitting[160160];
 
 #endif /* R_DRP_CIRCLE_FITTING_H */
 

@@ -60,7 +60,7 @@ typedef struct
 /*******************************************************************************
 Global Tables
 *******************************************************************************/
-extern uint8_t g_drp_lib_thinning[119872];
+extern const uint8_t g_drp_lib_thinning[119872];
 
 #endif /* R_DRP_THINNING_H */
 
