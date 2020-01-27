@@ -72,12 +72,12 @@ public:
     #define     CAM_MIPI_TRANSFER_RATE   (80u)          /* Data transfer rate (Mbit per sec) */
 
     /* PHY timing */
-    #define     CAM_MIPI_THS_PREPARE     (0x00000012u)  /* Setting of the duration of the LP-00 state (immediately before entry to the HS-0 state) */ /* @suppress("Line length formatting") */
-    #define     CAM_MIPI_THS_SETTLE      (0x00000019u)  /* Setting of the period in which a transition to the HS state is ignored after the TTHS_PREPARE period begins */ /* @suppress("Line length formatting") */
-    #define     CAM_MIPI_TCLK_PREPARE    (0x0000000Fu)  /* Setting of the duration of the LP-00 state (immediately before entry to the HS-0) */ /* @suppress("Line length formatting") */
-    #define     CAM_MIPI_TCLK_SETTLE     (0x0000001Eu)  /* Setting of the period in which a transition to the HS state is ignored after the TCLK_PREPARE period begins */ /* @suppress("Line length formatting") */
-    #define     CAM_MIPI_TCLK_MISS       (0x00000008u)  /* Setting of the period in which the absence of the clock is detected, and the HS-RX is disabled */ /* @suppress("Line length formatting") */
-    #define     CAM_MIPI_T_INIT_SLAVE    (0x0000338Fu)  /* Minimum duration of the INIT state */
+    #define     CAM_MIPI_THS_PREPARE     (0x00000009u)  /* Setting of the duration of the LP-00 state (immediately before entry to the HS-0 state) */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_THS_SETTLE      (0x00000014u)  /* Setting of the period in which a transition to the HS state is ignored after the TTHS_PREPARE period begins */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_TCLK_PREPARE    (0x0000000Au)  /* Setting of the duration of the LP-00 state (immediately before entry to the HS-0) */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_TCLK_SETTLE     (0x00000014u)  /* Setting of the period in which a transition to the HS state is ignored after the TCLK_PREPARE period begins */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_TCLK_MISS       (0x00000003u)  /* Setting of the period in which the absence of the clock is detected, and the HS-RX is disabled */ /* @suppress("Line length formatting") */
+    #define     CAM_MIPI_T_INIT_SLAVE    (0x000033F3u)  /* Minimum duration of the INIT state */
 
     /* VIN capture setting */
     #define     CAM_VIN_PRECLIP_START_Y  (  0u)                 /* Start line  of pre clip area */
