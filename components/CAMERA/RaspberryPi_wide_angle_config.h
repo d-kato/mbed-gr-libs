@@ -32,14 +32,14 @@ public:
             {0x03, 0x09, 0x08}, {0x03, 0x0C, 0x00}, {0x03, 0x0D, 0x2A}, {0x01, 0x00, 0x01},
         };
         int ret;
-#if defined(TARGET_GR_MANGO)
-        I2C mI2c_(I2C_SDA, I2C_SCL);
-        DigitalOut cam_gpio0(P6_6);
-        DigitalIn  cam_gpio1(P6_7);
-#elif defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
+#if defined(TARGET_RZ_A2M_EVB) || defined(TARGET_RZ_A2M_EVB_HF) || defined(TARGET_RZ_A2M_SBEV) || defined(TARGET_SEMB1402)
         I2C mI2c_(PD_5, PD_4);
         DigitalOut cam_gpio0(PD_2);
         DigitalIn  cam_gpio1(PD_3);
+#else
+        I2C mI2c_(I2C_SDA, I2C_SCL);
+        DigitalOut cam_gpio0(P6_6);
+        DigitalIn  cam_gpio1(P6_7);
 #endif
         cam_gpio0 = 1;
         ThisThread::sleep_for(10);
