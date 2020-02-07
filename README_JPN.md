@@ -144,6 +144,7 @@ https://os.mbed.com/handbook/USBSerial
 PC用アプリは以下よりダウンロードできます。  
 * [For Windows](http://gadget.renesas.com/software/displayapp.zip)  
 * [For Mac](http://gadget.renesas.com/software/DisplayApp.app.zip)  
+* [For Linux](https://github.com/takjn/GRDisplayApp)  
 
 使用例
 ```cpp

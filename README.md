@@ -1,5 +1,6 @@
 # **Mbed Library for GR-Boards**  mbed-gr-libs
-**Please see [here](README_JPN.md) for Japanese version.**  
+**日本語版については[こちら](README_JPN.md)をご覧ください。**  
+
 GR-PEACH, GR-LYCHEE and RZ/A2M board library group. The library includes the following functions.  
 * Connect camera and LCD
 * Connect USB memory and SD card
@@ -146,6 +147,7 @@ Unfortunately, since that is "Unsigned driver", you cannot install as is dependi
 Applications for PC can be downloaded from the following.  
 * [For Windows](http://gadget.renesas.com/software/displayapp.zip)  
 * [For Mac](http://gadget.renesas.com/software/DisplayApp.app.zip)  
+* [For Linux](https://github.com/takjn/GRDisplayApp)  
 
 Example  
 ```cpp
