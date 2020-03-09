@@ -69,7 +69,7 @@ Macro definitions
 /* ==== configuration ===== */
 /* 16bits width */
 #define SD_REG_SHIFT            (0u)
-#define SD_BYTE_OFFSET          (0x1000u)   /* Change the base address from SCC to SDHI/MMCHI. */
+#define SD_BYTE_OFFSET          (0u)   /* Change the base address from SCC to SDHI/MMCHI. */
 
 /* ==== number of ports ==== */
 #define NUM_PORT                (2)

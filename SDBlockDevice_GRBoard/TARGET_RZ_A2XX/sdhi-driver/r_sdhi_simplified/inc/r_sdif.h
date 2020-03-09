@@ -50,8 +50,8 @@ extern "C" {
 Macro definitions
 ******************************************************************************/
 /* ==== define  ==== */
-#define SD_SCC_IP0_BASE_ADDR      (0xE8227000uL)        /* Set the base address of SCC ch0. */
-#define SD_SCC_IP1_BASE_ADDR      (0xE8229000uL)        /* Set the base address of SCC ch1. */
+#define SD_SCC_IP0_BASE_ADDR      (0xE8228000uL)        /* Set the base address of SCC ch0. */
+#define SD_SCC_IP1_BASE_ADDR      (0xE822A000uL)        /* Set the base address of SCC ch1. */
 
 /* ---- SD Driver work buffer ---- */
 #define SD_SIZE_OF_INIT           (240)
